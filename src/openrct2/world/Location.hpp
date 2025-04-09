@@ -545,7 +545,7 @@ struct TileCoordsXYRangedZ : public TileCoordsXY
  */
 using Direction = uint8_t;
 
-const Direction INVALID_DIRECTION = 0xFF;
+const Direction kInvalidDirection = 0xFF;
 
 /**
  * Array of all valid cardinal directions, to make it easy to write range-based for loops like:
@@ -745,7 +745,7 @@ struct TileCoordsXYZD : public TileCoordsXYZ
     constexpr void SetNull()
     {
         TileCoordsXYZ::SetNull();
-        direction = INVALID_DIRECTION;
+        direction = kInvalidDirection;
     }
 };
 

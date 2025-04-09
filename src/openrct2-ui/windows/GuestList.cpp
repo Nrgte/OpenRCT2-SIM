@@ -20,6 +20,7 @@
 #include <openrct2/core/Numerics.hpp>
 #include <openrct2/core/String.hpp>
 #include <openrct2/drawing/Drawing.h>
+#include <openrct2/entity/EntityList.h>
 #include <openrct2/entity/EntityRegistry.h>
 #include <openrct2/entity/Guest.h>
 #include <openrct2/localisation/Formatter.h>
@@ -27,7 +28,6 @@
 #include <openrct2/object/PeepAnimationsObject.h>
 #include <openrct2/peep/PeepThoughts.h>
 #include <openrct2/ride/RideData.h>
-#include <openrct2/scenario/Scenario.h>
 #include <openrct2/ui/WindowManager.h>
 #include <openrct2/world/Park.h>
 #include <vector>
@@ -173,10 +173,9 @@ namespace OpenRCT2::Ui::Windows
             widgets[WIDX_FILTER_BY_NAME].type = WindowWidgetType::FlatBtn;
             widgets[WIDX_PAGE_DROPDOWN].type = WindowWidgetType::Empty;
             widgets[WIDX_PAGE_DROPDOWN_BUTTON].type = WindowWidgetType::Empty;
-            min_width = 350;
-            min_height = 330;
-            max_width = 500;
-            max_height = 450;
+
+            WindowSetResize(*this, { 350, 330 }, { 500, 450 });
+
             RefreshList();
         }
 
@@ -191,14 +190,14 @@ namespace OpenRCT2::Ui::Windows
 
             switch (type)
             {
-                case GuestListFilterType::GuestsOnRide:
+                case GuestListFilterType::guestsOnRide:
                 {
                     auto guestRide = GetRide(RideId::FromUnderlying(index));
                     if (guestRide != nullptr)
                     {
                         ft.Add<StringId>(
-                            guestRide->GetRideTypeDescriptor().HasFlag(RtdFlag::describeAsInside) ? STR_IN_RIDE : STR_ON_RIDE);
-                        guestRide->FormatNameTo(ft);
+                            guestRide->getRideTypeDescriptor().HasFlag(RtdFlag::describeAsInside) ? STR_IN_RIDE : STR_ON_RIDE);
+                        guestRide->formatNameTo(ft);
 
                         _selectedFilter = GuestFilterType::Guests;
                         _highlightedIndex = {};
@@ -207,13 +206,13 @@ namespace OpenRCT2::Ui::Windows
                     }
                     break;
                 }
-                case GuestListFilterType::GuestsInQueue:
+                case GuestListFilterType::guestsInQueue:
                 {
                     auto guestRide = GetRide(RideId::FromUnderlying(index));
                     if (guestRide != nullptr)
                     {
                         ft.Add<StringId>(STR_QUEUING_FOR);
-                        guestRide->FormatNameTo(ft);
+                        guestRide->formatNameTo(ft);
 
                         _selectedFilter = GuestFilterType::Guests;
                         _highlightedIndex = {};
@@ -222,13 +221,13 @@ namespace OpenRCT2::Ui::Windows
                     }
                     break;
                 }
-                case GuestListFilterType::GuestsThinkingAboutRide:
+                case GuestListFilterType::guestsThinkingAboutRide:
                 {
                     auto guestRide = GetRide(RideId::FromUnderlying(index));
                     if (guestRide != nullptr)
                     {
                         ft.Add<StringId>(kStringIdNone);
-                        guestRide->FormatNameTo(ft);
+                        guestRide->formatNameTo(ft);
 
                         _selectedFilter = GuestFilterType::GuestsThinking;
                         _highlightedIndex = {};
@@ -237,7 +236,7 @@ namespace OpenRCT2::Ui::Windows
                     }
                     break;
                 }
-                case GuestListFilterType::GuestsThinkingX:
+                case GuestListFilterType::guestsThinkingX:
                 {
                     ft.Add<StringId>(kPeepThoughtIds[index & 0xFF]);
 
@@ -250,22 +249,6 @@ namespace OpenRCT2::Ui::Windows
             }
 
             RefreshList();
-        }
-
-        void OnResize() override
-        {
-            min_width = 350;
-            min_height = 330;
-            if (width < min_width)
-            {
-                Invalidate();
-                width = min_width;
-            }
-            if (height < min_height)
-            {
-                Invalidate();
-                height = min_height;
-            }
         }
 
         void OnUpdate() override
@@ -821,7 +804,7 @@ namespace OpenRCT2::Ui::Windows
 
         bool IsRefreshOfGroupsRequired()
         {
-            uint32_t tick256 = floor2(GetGameState().CurrentTicks, 256);
+            uint32_t tick256 = floor2(getGameState().currentTicks, 256);
             if (_selectedView == _lastFindGroupsSelectedView)
             {
                 if (_lastFindGroupsWait != 0 || _lastFindGroupsTick == tick256)
@@ -849,7 +832,7 @@ namespace OpenRCT2::Ui::Windows
 
         void RefreshGroups()
         {
-            _lastFindGroupsTick = floor2(GetGameState().CurrentTicks, 256);
+            _lastFindGroupsTick = floor2(getGameState().currentTicks, 256);
             _lastFindGroupsSelectedView = _selectedView;
             _lastFindGroupsWait = 320;
             _groups.clear();
@@ -931,8 +914,8 @@ namespace OpenRCT2::Ui::Windows
                     OpenRCT2::FormatStringLegacy(buffer, sizeof(buffer), format, ft.Data());
 
                     std::pair<Ride*, const RideStation*> proxyRide = peep.AGS->proxyRides[0];
-                    StationIndex index = proxyRide.first->GetStationIndex(proxyRide.second);
-                    std::string toRideStationString = ride->GetName()
+                    StationIndex index = proxyRide.first->getStationIndex(proxyRide.second);
+                    std::string toRideStationString = ride->getName()
                         + " to Station: " + std::to_string(index.ToUnderlying() + 1);
 
                     std::string_view argsView(reinterpret_cast<char*>(result.args), sizeof(result.args));
@@ -1005,7 +988,7 @@ namespace OpenRCT2::Ui::Windows
 
         static GuestItem::CompareFunc GetGuestCompareFunc()
         {
-            return GetGameState().Park.Flags & PARK_FLAGS_SHOW_REAL_GUEST_NAMES ? CompareGuestItem<true>
+            return getGameState().park.Flags & PARK_FLAGS_SHOW_REAL_GUEST_NAMES ? CompareGuestItem<true>
                                                                                 : CompareGuestItem<false>;
         }
     };

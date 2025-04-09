@@ -18,7 +18,6 @@
 #include "../ride/RideData.h"
 #include "../ride/Station.h"
 #include "../ride/Track.h"
-#include "../scenario/Scenario.h"
 #include "../world/Entrance.h"
 #include "../world/Footpath.h"
 #include "../world/tile_element/BannerElement.h"
@@ -437,7 +436,7 @@ namespace OpenRCT2::PathFinding
                         continue;
                     RideId rideIndex = tileElement->AsTrack()->GetRideIndex();
                     auto ride = GetRide(rideIndex);
-                    if (ride != nullptr && ride->GetRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+                    if (ride != nullptr && ride->getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
                     {
                         *outRideIndex = rideIndex;
                         return PathSearchResult::ShopEntrance;
@@ -811,7 +810,7 @@ namespace OpenRCT2::PathFinding
                      * tile. */
                     rideIndex = tileElement->AsTrack()->GetRideIndex();
                     auto ride = GetRide(rideIndex);
-                    if (ride == nullptr || !ride->GetRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+                    if (ride == nullptr || !ride->getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
                         continue;
 
                     found = true;
@@ -1317,7 +1316,7 @@ namespace OpenRCT2::PathFinding
         } while (!(destTileElement++)->IsLastForTile());
         // Peep is not on a path.
         if (!found)
-            return INVALID_DIRECTION;
+            return kInvalidDirection;
 
         permittedEdges &= 0xF;
         uint32_t edges = permittedEdges;
@@ -1393,7 +1392,7 @@ namespace OpenRCT2::PathFinding
 
         // Peep has tried all edges.
         if (edges == 0)
-            return INVALID_DIRECTION;
+            return kInvalidDirection;
 
         int32_t chosenEdge = Numerics::bitScanForward(edges);
 
@@ -1437,7 +1436,7 @@ namespace OpenRCT2::PathFinding
                 for (auto& entry : state.history)
                 {
                     entry.location.SetNull();
-                    entry.direction = INVALID_DIRECTION;
+                    entry.direction = kInvalidDirection;
                 }
 
                 /* The pathfinding will only use elements
@@ -1526,7 +1525,7 @@ namespace OpenRCT2::PathFinding
             if (bestScore == 0xFFFF)
             {
                 LogPathfinding(&peep, "Pathfind heuristic search failed.");
-                return INVALID_DIRECTION;
+                return kInvalidDirection;
             }
 
             if constexpr (kLogPathfinding)
@@ -1592,7 +1591,7 @@ namespace OpenRCT2::PathFinding
     {
         std::optional<CoordsXYZ> chosenEntrance = std::nullopt;
         uint16_t nearestDist = 0xFFFF;
-        for (const auto& parkEntrance : GetGameState().Park.Entrances)
+        for (const auto& parkEntrance : getGameState().park.Entrances)
         {
             auto dist = abs(parkEntrance.x - loc.x) + abs(parkEntrance.y - loc.y);
             if (dist < nearestDist)
@@ -1642,7 +1641,7 @@ namespace OpenRCT2::PathFinding
         else
             chosenDirection = peep.getNextPathfindingDirection();
 
-        if (chosenDirection == INVALID_DIRECTION)
+        if (chosenDirection == kInvalidDirection)
             return GuestPathfindAimless(peep, edges);
 
         return PeepMoveOneTile(chosenDirection, peep);
@@ -1652,14 +1651,14 @@ namespace OpenRCT2::PathFinding
      * Gets the nearest peep spawn relative to point, by using Manhattan distance.
      * @param x x coordinate of location
      * @param y y coordinate of location
-     * @return Index of gameState.PeepSpawns (or 0xFF if no peep spawns exist).
+     * @return Index of gameState.peepSpawns (or 0xFF if no peep spawns exist).
      */
     static uint8_t GetNearestPeepSpawnIndex(uint16_t x, uint16_t y)
     {
         uint8_t chosenSpawn = 0xFF;
         uint16_t nearestDist = 0xFFFF;
         uint8_t i = 0;
-        for (const auto& spawn : GetGameState().PeepSpawns)
+        for (const auto& spawn : getGameState().peepSpawns)
         {
             uint16_t dist = abs(spawn.x - x) + abs(spawn.y - y);
             if (dist < nearestDist)
@@ -1685,7 +1684,7 @@ namespace OpenRCT2::PathFinding
         if (chosenSpawn == 0xFF)
             return GuestPathfindAimless(peep, edges);
 
-        const auto peepSpawnLoc = GetGameState().PeepSpawns[chosenSpawn].ToTileStart();
+        const auto peepSpawnLoc = getGameState().peepSpawns[chosenSpawn].ToTileStart();
         Direction direction = peepSpawnLoc.direction;
 
         if (peepSpawnLoc.x == peep.NextLoc.x && peepSpawnLoc.y == peep.NextLoc.y)
@@ -1695,7 +1694,7 @@ namespace OpenRCT2::PathFinding
 
         const auto goalPos = TileCoordsXYZ(peepSpawnLoc);
         direction = ChooseDirection(TileCoordsXYZ{ peep.NextLoc }, goalPos, peep, true, RideId::GetNull());
-        if (direction == INVALID_DIRECTION)
+        if (direction == kInvalidDirection)
             return GuestPathfindAimless(peep, edges);
 
         return PeepMoveOneTile(direction, peep);
@@ -1753,7 +1752,7 @@ namespace OpenRCT2::PathFinding
         else
             chosenDirection = peep.getNextPathfindingDirection();
 
-        if (chosenDirection == INVALID_DIRECTION)
+        if (chosenDirection == kInvalidDirection)
             return GuestPathfindAimless(peep, edges);
 
         return PeepMoveOneTile(chosenDirection, peep);
@@ -1874,7 +1873,7 @@ namespace OpenRCT2::PathFinding
                 InitializePathFinding(peep);
 
             Direction newDirection = peep.getNextPathfindingDirection();
-            if (!(newDirection == INVALID_DIRECTION))
+            if (!(newDirection == kInvalidDirection))
                 direction = newDirection;
 
             // peep.updatePathFinding();
@@ -1969,7 +1968,7 @@ namespace OpenRCT2::PathFinding
         // Peep is heading for a ride.
         RideId rideIndex = peep.GuestHeadingToRideId;
         auto ride = GetRide(rideIndex);
-        if (ride == nullptr || ride->status != RideStatus::Open)
+        if (ride == nullptr || ride->status != RideStatus::open)
         {
             LogPathfinding(&peep, "Completed CalculateNextDestination - peep is heading to closed ride == aimless.");
 
@@ -2041,7 +2040,7 @@ namespace OpenRCT2::PathFinding
         else
             direction = peep.getNextPathfindingDirection();
 
-        if (direction == INVALID_DIRECTION)
+        if (direction == kInvalidDirection)
         {
             /* Heuristic search failed for all directions.
              * Reset the PathfindGoal - this means that the PathfindHistory
@@ -2283,9 +2282,9 @@ namespace AdvancedPathfinding
         {
             for (Ride& ride : GetRideManager())
             {
-                if (ride.status != RideStatus::Open || (ride.lifecycle_flags & RIDE_LIFECYCLE_BROKEN_DOWN)
-                    || ride.GetRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility)
-                    || ride.GetRideTypeDescriptor().HasFlag(RtdFlag::isFlatRide))
+                if (ride.status != RideStatus::open || (ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN)
+                    || ride.getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility)
+                    || ride.getRideTypeDescriptor().HasFlag(RtdFlag::isFlatRide))
                     continue;
 
                 // Don't use this ride as proxy ride to get to itself.
@@ -2299,7 +2298,7 @@ namespace AdvancedPathfinding
                 std::unordered_map<TileCoordsXYZ, std::pair<const RideStation*, TileCoordsXYZ>, TileCoordsXYZ::Hasher>
                     entranceExitMappings;
                 uint8_t stationCount = 0;
-                for (const auto& station : ride.GetStations())
+                for (const auto& station : ride.getStations())
                 {
                     if (station.Entrance.IsNull() || station.Exit.IsNull())
                         continue;
@@ -2461,13 +2460,13 @@ namespace AdvancedPathfinding
         // int numEntranceStations = 0;
         //  std::array<bool, MAX_STATIONS> entranceStations = { false };
 
-        for (const auto& station : ride->GetStations())
+        for (const auto& station : ride->getStations())
         {
             // Skip stations without entrances
             if (station.Entrance.IsNull())
                 continue;
 
-            const auto stationIndex = ride->GetStationIndex(&station);
+            const auto stationIndex = ride->getStationIndex(&station);
             // numEntranceStations++;
             //  entranceStations[stationIndex.ToUnderlying()] = true;
 
@@ -2503,7 +2502,7 @@ namespace AdvancedPathfinding
                 if (sortedStations.empty())
                 {
                     // closestStationNum is always 0 here.
-                    const auto& closestStation = ride->GetStation(StationIndex::FromUnderlying(0));
+                    const auto& closestStation = ride->getStation(StationIndex::FromUnderlying(0));
                     auto entranceXY = TileCoordsXY(closestStation.Start);
                     loc.x = entranceXY.x;
                     loc.y = entranceXY.y;
@@ -2511,7 +2510,7 @@ namespace AdvancedPathfinding
                 }
                 else
                 {
-                    RideStation& station = ride->GetStation(sortedStations.front());
+                    RideStation& station = ride->getStation(sortedStations.front());
                     sortedStations.pop_front();
 
                     TileCoordsXYZD entranceXYZD = station.Entrance;
@@ -2564,7 +2563,7 @@ namespace AdvancedPathfinding
                             std::string peepLocationStr = std::format("({}, {}, {})", peepLoc.x, peepLoc.y, peepLoc.z);
                             std::string stationLocationStr = std::format("({}, {}, {})", loc.x, loc.y, loc.z);
                             std::string debugPF = "Pathfinding: " + peep.GetName()
-                                + " can't find entrance to: " + ride->GetName() + " guest Location = " + peepLocationStr
+                                + " can't find entrance to: " + ride->getName() + " guest Location = " + peepLocationStr
                                 + " ; Target Location = " + stationLocationStr + "\n";
                             OutputDebugStringA(debugPF.c_str());
                             OutputDebugStringA(searchedTiles.c_str());
