@@ -174,6 +174,13 @@ namespace OpenRCT2
 
             // Initial cash will eventually be removed
             gameState.initialCash = gameState.cash;
+
+            for (auto* guest : EntityList<Guest>())
+            {
+                std::vector<RideId>* rideList = OpenRCT2::RideUse::GetHistory().GetAll(guest->Id);
+                if (rideList)
+                    guest->initAGS(*rideList);
+            }
         }
 
         void Save(GameState_t& gameState, IStream& stream)
@@ -2399,7 +2406,6 @@ namespace OpenRCT2
                 std::vector<ObjectEntryIndex> rideTypeUse;
                 cs.ReadWriteVector(rideTypeUse, [&cs](ObjectEntryIndex& rideType) { cs.ReadWrite(rideType); });
                 OpenRCT2::RideUse::GetTypeHistory().Set(guest.Id, std::move(rideTypeUse));
-                guest.initAGS(rideUse);
             }
             else
             {
