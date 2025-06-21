@@ -4145,6 +4145,7 @@ void Guest::UpdateRideAdvanceThroughEntrance()
         return;
     }
 
+
     rideEntry = vehicle->GetRideEntry();
     if (rideEntry == nullptr)
     {
@@ -4448,6 +4449,13 @@ void Guest::UpdateRideFreeVehicleCheck()
     {
         return;
     }
+    /*
+    if (vehicle->status != Vehicle::Status::WaitingForPassengers)
+    {
+        // If the vehicle is not waiting for guests, don't enter.
+        PeepUpdateRideNoFreeVehicleRejoinQueue(*this, *ride);
+        return;
+    }*/
 
     if (rideEntry->Cars[0].flags & CAR_ENTRY_FLAG_MINI_GOLF)
     {
@@ -4694,10 +4702,20 @@ void Guest::UpdateRideLeaveVehicle()
     }
 
     // Check if ride is NOT Ferris Wheel.
-    if (ride->mode != RideMode::forwardRotation && ride->mode != RideMode::backwardRotation)
+    if (ride->mode != RideMode::forwardRotation && ride->mode != RideMode::backwardRotation
+        && RideSubState == PeepRideSubState::LeaveVehicle)
     {
         if (vehicle->num_peeps - 1 != CurrentSeat)
             return;
+    }
+
+    if (RideSubState == PeepRideSubState::LeaveVehicle)
+    {
+        vehicle->num_peeps--;
+        vehicle->ApplyMass(-Mass);
+        vehicle->Invalidate();
+        RideSubState = PeepRideSubState::LeaveVehicleFinishAnimation;
+        return;
     }
 
     AnimationImageIdOffset++;
@@ -4706,9 +4724,6 @@ void Guest::UpdateRideLeaveVehicle()
 
     AnimationImageIdOffset = 0;
 
-    vehicle->num_peeps--;
-    vehicle->ApplyMass(-Mass);
-    vehicle->Invalidate();
 
     if (ride_station.ToUnderlying() >= OpenRCT2::Limits::kMaxStationsPerRide)
     {
@@ -5950,6 +5965,7 @@ void Guest::UpdateRide()
             // No action, on ride.
             break;
         case PeepRideSubState::LeaveVehicle:
+        case PeepRideSubState::LeaveVehicleFinishAnimation:
             UpdateRideLeaveVehicle();
             break;
         case PeepRideSubState::ApproachExit:

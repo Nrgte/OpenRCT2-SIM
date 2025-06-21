@@ -1278,6 +1278,11 @@ void Vehicle::Update()
         }
     }
 
+    std::string rideName = curRide->getName();
+    int test = 0;
+    if (rideName == "Moon View")
+        test++;
+
     switch (status)
     {
         case Vehicle::Status::MovingToEndOfStation:
@@ -1411,7 +1416,8 @@ void Vehicle::UpdateMovingToEndOfStation()
             current_station = StationIndex::FromUnderlying(0);
             velocity = 0;
             acceleration = 0;
-            SetState(Vehicle::Status::WaitingForPassengers);
+            SetState(Vehicle::Status::ConfirmUnloadingDone);
+            //SetState(Vehicle::Status::WaitingForPassengers);
             break;
         default:
         {
