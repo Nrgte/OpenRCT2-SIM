@@ -440,12 +440,14 @@ static constexpr OpenRCT2::Audio::SoundId kDoorOpenSoundIds[] = {
     OpenRCT2::Audio::SoundId::DoorOpen,   // DoorSoundType::door
     OpenRCT2::Audio::SoundId::Portcullis, // DoorSoundType::portcullis
 };
+static_assert(std::size(kDoorOpenSoundIds) == OpenRCT2::Audio::kDoorSoundTypeCount);
 
 static constexpr OpenRCT2::Audio::SoundId kDoorCloseSoundIds[] = {
     OpenRCT2::Audio::SoundId::Null,       // DoorSoundType::none
     OpenRCT2::Audio::SoundId::DoorClose,  // DoorSoundType::door
     OpenRCT2::Audio::SoundId::Portcullis, // DoorSoundType::portcullis
 };
+static_assert(std::size(kDoorCloseSoundIds) == OpenRCT2::Audio::kDoorSoundTypeCount);
 
 template<>
 bool EntityBase::Is<Vehicle>() const
@@ -3957,7 +3959,7 @@ void Vehicle::UpdateMotionBoatHire()
         int32_t curMass = mass == 0 ? 1 : mass;
 
         int32_t eax = ((velocity >> 1) + edx) / curMass;
-        int32_t ecx = -eax;
+        int32_t newAcceleration = -eax;
         if (carEntry->flags & CAR_ENTRY_FLAG_POWERED)
         {
             eax = speed << 14;
@@ -3968,9 +3970,12 @@ void Vehicle::UpdateMotionBoatHire()
             }
             eax -= velocity;
             edx = powered_acceleration * 2;
-            ecx += (eax * edx) / ebx;
+            if (ebx != 0)
+            {
+                newAcceleration += (eax * edx) / ebx;
+            }
         }
-        acceleration = ecx;
+        acceleration = newAcceleration;
     }
     // eax = _vehicleMotionTrackFlags;
     // ebx = _vehicleStationIndex;
@@ -6361,15 +6366,20 @@ static void AnimateSceneryDoor(const CoordsXYZD& doorLocation, const CoordsXYZ& 
     {
         door->SetAnimationIsBackwards(isBackwards);
         door->SetAnimationFrame(1);
-        MapAnimationCreate(MAP_ANIMATION_TYPE_WALL_DOOR, doorLocation);
+        door->SetIsAnimating(true);
         play_scenery_door_open_sound(trackLocation, door);
+
+        MapAnimations::MarkTileForUpdate(TileCoordsXY(doorLocation));
     }
 
     if (isLastVehicle)
     {
         door->SetAnimationIsBackwards(isBackwards);
         door->SetAnimationFrame(6);
+        door->SetIsAnimating(true);
         play_scenery_door_close_sound(trackLocation, door);
+
+        MapAnimations::MarkTileForUpdate(TileCoordsXY(doorLocation));
     }
 }
 
@@ -6390,29 +6400,46 @@ void Vehicle::UpdateSceneryDoor() const
 }
 
 template<bool isBackwards>
-static void AnimateLandscapeDoor(TrackElement* trackElement, bool isLastVehicle)
+static void AnimateLandscapeDoor(
+    const CoordsXYZ& doorLocation, TrackElement& trackElement, const bool isLastVehicle,
+    const OpenRCT2::Audio::DoorSoundType doorSound, const CoordsXYZ& soundLocation)
 {
-    auto doorState = isBackwards ? trackElement->GetDoorAState() : trackElement->GetDoorBState();
-    if (!isLastVehicle && doorState == LANDSCAPE_DOOR_CLOSED)
+    const auto doorState = isBackwards ? trackElement.GetDoorAState() : trackElement.GetDoorBState();
+    if (!isLastVehicle && doorState == kLandEdgeDoorFrameClosed)
     {
         if (isBackwards)
-            trackElement->SetDoorAState(LANDSCAPE_DOOR_OPEN);
+            trackElement.SetDoorAState(kLandEdgeDoorFrameOpening);
         else
-            trackElement->SetDoorBState(LANDSCAPE_DOOR_OPEN);
-        // TODO: play door open sound
+            trackElement.SetDoorBState(kLandEdgeDoorFrameOpening);
+
+        MapAnimations::CreateTemporary(doorLocation, MapAnimations::TemporaryType::landEdgeDoor);
+        OpenRCT2::Audio::Play3D(kDoorOpenSoundIds[EnumValue(doorSound)], soundLocation);
     }
 
     if (isLastVehicle)
     {
         if (isBackwards)
-            trackElement->SetDoorAState(LANDSCAPE_DOOR_CLOSED);
+            trackElement.SetDoorAState(kLandEdgeDoorFrameClosing);
         else
-            trackElement->SetDoorBState(LANDSCAPE_DOOR_CLOSED);
-        // TODO: play door close sound
+            trackElement.SetDoorBState(kLandEdgeDoorFrameClosing);
+
+        MapAnimations::CreateTemporary(doorLocation, MapAnimations::TemporaryType::landEdgeDoor);
+        OpenRCT2::Audio::Play3D(kDoorCloseSoundIds[EnumValue(doorSound)], soundLocation);
     }
 }
 
-void Vehicle::UpdateLandscapeDoor() const
+static const SurfaceElement* GetSurfaceElementAfterElement(const TileElement* tileElement)
+{
+    while (tileElement->GetType() != TileElementType::Surface)
+    {
+        if (tileElement->IsLastForTile())
+            return nullptr;
+        tileElement++;
+    }
+    return tileElement->AsSurface();
+}
+
+void Vehicle::UpdateLandscapeDoors(const int32_t previousTrackHeight) const
 {
     const auto* currentRide = GetRide();
     if (currentRide == nullptr || !currentRide->getRideTypeDescriptor().HasFlag(RtdFlag::hasLandscapeDoors))
@@ -6420,11 +6447,36 @@ void Vehicle::UpdateLandscapeDoor() const
         return;
     }
 
-    auto coords = CoordsXYZ{ x, y, TrackLocation.z }.ToTileStart();
-    auto* tileElement = MapGetTrackElementAtFromRide(coords, ride);
-    if (tileElement != nullptr && tileElement->GetType() == TileElementType::Track)
+    const CoordsXYZ previousTrackLocation = CoordsXYZ(x, y, previousTrackHeight).ToTileStart();
+    auto* const previousTrackElement = MapGetTrackElementAtBeforeSurfaceFromRide(previousTrackLocation, ride);
+    auto* const currentTrackElement = MapGetTrackElementAtBeforeSurfaceFromRide(TrackLocation, ride);
+    if (previousTrackElement != nullptr && currentTrackElement == nullptr)
     {
-        AnimateLandscapeDoor<false>(tileElement->AsTrack(), next_vehicle_on_train.IsNull());
+        const auto* const surfaceElement = GetSurfaceElementAfterElement(previousTrackElement);
+        if (surfaceElement != nullptr && surfaceElement->GetBaseZ() > previousTrackLocation.z)
+        {
+            const auto* const edgeObject = surfaceElement->GetEdgeObject();
+            if (edgeObject != nullptr && edgeObject->HasDoors)
+            {
+                AnimateLandscapeDoor<false>(
+                    previousTrackLocation, *previousTrackElement->AsTrack(), next_vehicle_on_train.IsNull(),
+                    edgeObject->doorSound, TrackLocation);
+            }
+        }
+    }
+    else if (previousTrackElement == nullptr && currentTrackElement != nullptr)
+    {
+        const auto* const surfaceElement = GetSurfaceElementAfterElement(currentTrackElement);
+        if (surfaceElement != nullptr && surfaceElement->GetBaseZ() > TrackLocation.z)
+        {
+            const auto* const edgeObject = surfaceElement->GetEdgeObject();
+            if (edgeObject != nullptr && edgeObject->HasDoors)
+            {
+                AnimateLandscapeDoor<true>(
+                    TrackLocation, *currentTrackElement->AsTrack(), next_vehicle_on_train.IsNull(), edgeObject->doorSound,
+                    previousTrackLocation);
+            }
+        }
     }
 }
 
@@ -6459,17 +6511,6 @@ void Vehicle::UpdateGoKartAttemptSwitchLanes()
 
 /**
  *
- *  rct2: 0x006DB545
- */
-static void trigger_on_ride_photo(const CoordsXYZ& loc, TileElement* tileElement)
-{
-    tileElement->AsTrack()->SetPhotoTimeout();
-
-    MapAnimationCreate(MAP_ANIMATION_TYPE_TRACK_ONRIDEPHOTO, { loc, tileElement->GetBaseZ() });
-}
-
-/**
- *
  *  rct2: 0x006DEDE8
  */
 void Vehicle::UpdateSceneryDoorBackwards() const
@@ -6482,22 +6523,6 @@ void Vehicle::UpdateSceneryDoorBackwards() const
     direction = DirectionReverse(direction);
 
     AnimateSceneryDoor<true>({ wallCoords, static_cast<Direction>(direction) }, TrackLocation, next_vehicle_on_train.IsNull());
-}
-
-void Vehicle::UpdateLandscapeDoorBackwards() const
-{
-    const auto* currentRide = GetRide();
-    if (currentRide == nullptr || !currentRide->getRideTypeDescriptor().HasFlag(RtdFlag::hasLandscapeDoors))
-    {
-        return;
-    }
-
-    auto coords = CoordsXYZ{ TrackLocation, TrackLocation.z };
-    auto* tileElement = MapGetTrackElementAtFromRide(coords, ride);
-    if (tileElement != nullptr && tileElement->GetType() == TileElementType::Track)
-    {
-        AnimateLandscapeDoor<true>(tileElement->AsTrack(), next_vehicle_on_train.IsNull());
-    }
 }
 
 static void vehicle_update_play_water_splash_sound()
@@ -7012,7 +7037,6 @@ bool Vehicle::UpdateTrackMotionForwardsGetNewTrack(
 
     // Change from original: this used to check if the vehicle allowed doors.
     UpdateSceneryDoor();
-    UpdateLandscapeDoor();
 
     bool isGoingBack = false;
     switch (TrackSubposition)
@@ -7093,6 +7117,7 @@ bool Vehicle::UpdateTrackMotionForwardsGetNewTrack(
         }
     }
 
+    const int32_t previousTrackHeight = TrackLocation.z;
     TrackLocation = location;
 
     // TODO check if getting the vehicle entry again is necessary
@@ -7153,7 +7178,8 @@ bool Vehicle::UpdateTrackMotionForwardsGetNewTrack(
     }
     if (trackType == TrackElemType::OnRidePhoto)
     {
-        trigger_on_ride_photo(TrackLocation, tileElement);
+        tileElement->AsTrack()->SetPhotoTimeout();
+        MapAnimations::CreateTemporary(TrackLocation, MapAnimations::TemporaryType::onRidePhoto);
     }
     if (trackType == TrackElemType::RotationControlToggle)
     {
@@ -7161,7 +7187,7 @@ bool Vehicle::UpdateTrackMotionForwardsGetNewTrack(
     }
     // Change from original: this used to check if the vehicle allowed doors.
     UpdateSceneryDoorBackwards();
-    UpdateLandscapeDoorBackwards();
+    UpdateLandscapeDoors(previousTrackHeight);
 
     return true;
 }
