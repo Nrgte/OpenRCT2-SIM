@@ -44,6 +44,7 @@
 #include "../object/ObjectManager.h"
 #include "../object/ObjectRepository.h"
 #include "../peep/RideUseSystem.h"
+#include "../rct2/RCT2.h"
 #include "../ride/RideManager.hpp"
 #include "../ride/ShopItem.h"
 #include "../ride/Vehicle.h"
@@ -183,9 +184,9 @@ namespace OpenRCT2
             }
         }
 
-        void Save(GameState_t& gameState, IStream& stream)
+        void Save(GameState_t& gameState, IStream& stream, int16_t compressionLevel)
         {
-            OrcaStream os(stream, OrcaStream::Mode::WRITING);
+            OrcaStream os(stream, OrcaStream::Mode::WRITING, compressionLevel);
 
             auto& header = os.GetHeader();
             header.Magic = kParkFileMagic;
@@ -212,10 +213,10 @@ namespace OpenRCT2
             ReadWritePackedObjectsChunk(os);
         }
 
-        void Save(GameState_t& gameState, const std::string_view path)
+        void Save(GameState_t& gameState, const std::string_view path, int16_t compressionLevel)
         {
             FileStream fs(path, FileMode::write);
-            Save(gameState, fs);
+            Save(gameState, fs, compressionLevel);
         }
 
         ScenarioIndexEntry ReadScenarioChunk()
@@ -320,12 +321,14 @@ namespace OpenRCT2
                 const auto version = os.GetHeader().TargetVersion;
 
                 ObjectList requiredObjects;
+                struct LegacyFootpathMapping
+                {
+                    ObjectEntryIndex originalEntryIndex;
+                    const RCT2::FootpathMapping& mapping;
+                };
+                std::vector<LegacyFootpathMapping> legacyPathMappings;
                 os.ReadWriteChunk(
-                    ParkFileChunkType::OBJECTS,
-                    [&requiredObjects, pathToSurfaceMap, pathToQueueSurfaceMap, pathToRailingsMap,
-                     version](OrcaStream::ChunkStream& cs) {
-                        ObjectEntryIndex surfaceCount = 0;
-                        ObjectEntryIndex railingsCount = 0;
+                    ParkFileChunkType::OBJECTS, [&requiredObjects, version, &legacyPathMappings](OrcaStream::ChunkStream& cs) {
                         auto numSubLists = cs.Read<uint16_t>();
                         for (size_t i = 0; i < numSubLists; i++)
                         {
@@ -344,15 +347,12 @@ namespace OpenRCT2
                                         RCTObjectEntry datEntry;
                                         cs.Read(&datEntry, sizeof(datEntry));
                                         ObjectEntryDescriptor desc(datEntry);
-                                        if (version <= 2 && datEntry.GetType() == ObjectType::paths)
+                                        if (version < kFixedObsoleteFootpathsVersion && datEntry.GetType() == ObjectType::paths)
                                         {
                                             auto footpathMapping = GetFootpathMapping(desc);
                                             if (footpathMapping != nullptr)
                                             {
-                                                UpdateFootpathsFromMapping(
-                                                    pathToSurfaceMap, pathToQueueSurfaceMap, pathToRailingsMap, requiredObjects,
-                                                    surfaceCount, railingsCount, j, footpathMapping);
-
+                                                legacyPathMappings.push_back(LegacyFootpathMapping{ j, *footpathMapping });
                                                 continue;
                                             }
                                         }
@@ -399,10 +399,7 @@ namespace OpenRCT2
                                             auto footpathMapping = GetFootpathMapping(desc);
                                             if (footpathMapping != nullptr)
                                             {
-                                                // We have surface objects for this footpath
-                                                UpdateFootpathsFromMapping(
-                                                    pathToSurfaceMap, pathToQueueSurfaceMap, pathToRailingsMap, requiredObjects,
-                                                    surfaceCount, railingsCount, j, footpathMapping);
+                                                legacyPathMappings.push_back(LegacyFootpathMapping{ j, *footpathMapping });
 
                                                 continue;
                                             }
@@ -417,6 +414,13 @@ namespace OpenRCT2
                             }
                         }
                     });
+
+                for (const auto& mapping : legacyPathMappings)
+                {
+                    UpdateFootpathsFromMapping(
+                        pathToSurfaceMap, pathToQueueSurfaceMap, pathToRailingsMap, requiredObjects, mapping.originalEntryIndex,
+                        &mapping.mapping);
+                }
 
                 if (version < kPeepNamesObjectsVersion)
                 {
@@ -950,7 +954,7 @@ namespace OpenRCT2
                     cs.ReadWriteVector(gameState.marketingCampaigns, [&cs](MarketingCampaign& campaign) {
                         cs.ReadWrite(campaign.Type);
                         cs.ReadWrite(campaign.WeeksLeft);
-                        cs.ReadWrite(campaign.Flags);
+                        cs.ReadWrite(campaign.flags.holder);
                         cs.ReadWrite(campaign.RideId);
                     });
 
@@ -2711,20 +2715,20 @@ namespace OpenRCT2
             }
         });
     }
+
+    void ParkFileExporter::Export(GameState_t& gameState, std::string_view path, int16_t compressionLevel)
+    {
+        auto parkFile = std::make_unique<OpenRCT2::ParkFile>();
+        parkFile->Save(gameState, path, compressionLevel);
+    }
+
+    void ParkFileExporter::Export(GameState_t& gameState, IStream& stream, int16_t compressionLevel)
+    {
+        auto parkFile = std::make_unique<OpenRCT2::ParkFile>();
+        parkFile->ExportObjectsList = ExportObjectsList;
+        parkFile->Save(gameState, stream, compressionLevel);
+    }
 } // namespace OpenRCT2
-
-void ParkFileExporter::Export(GameState_t& gameState, std::string_view path)
-{
-    auto parkFile = std::make_unique<OpenRCT2::ParkFile>();
-    parkFile->Save(gameState, path);
-}
-
-void ParkFileExporter::Export(GameState_t& gameState, IStream& stream)
-{
-    auto parkFile = std::make_unique<OpenRCT2::ParkFile>();
-    parkFile->ExportObjectsList = ExportObjectsList;
-    parkFile->Save(gameState, stream);
-}
 
 enum : uint32_t
 {
@@ -2771,7 +2775,7 @@ int32_t ScenarioSave(GameState_t& gameState, u8string_view path, int32_t flags)
         {
             // s6exporter->SaveGame(path);
         }
-        parkFile->Save(gameState, path);
+        parkFile->Save(gameState, path, Compression::kZlibDefaultCompressionLevel);
         result = true;
     }
     catch (const std::exception& e)
