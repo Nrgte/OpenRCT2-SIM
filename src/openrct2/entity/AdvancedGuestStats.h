@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../ride/Ride.h"
+#include "../ride/RideRatings.h"
+#include "../core/FixedPoint.hpp"
 //#include "../core/DataSerialiser.h"
 
 #include <iostream>
@@ -9,15 +11,17 @@
 #include <deque>
 #include <memory>
 
+using namespace OpenRCT2;
+
 struct GuestRideRating
 {
 public:
     RideId ID;
     uint8_t Rating;
-    ride_rating MeasuredRideValue;
+    RideRating_t MeasuredRideValue;
 
 //public:
-    GuestRideRating(RideId id, uint8_t rating, ride_rating measuredRideValue)
+    GuestRideRating(RideId id, uint8_t rating, RideRating_t measuredRideValue)
         : ID(id)
         , Rating(rating)
         , MeasuredRideValue (measuredRideValue){}
@@ -38,7 +42,7 @@ public:
     {
         return GetRide(this->ID);
     }
-    ride_rating getMeasuredValue()
+    RideRating_t getMeasuredValue()
     {
         return this->MeasuredRideValue;
     }
@@ -69,14 +73,14 @@ public:
     mutable std::mutex pathfindingQueueMutex;
 
     AdvancedGuestStats();
-    void InsertRideIntensityRating(RideId id, uint8_t rating, ride_rating rideRating);
-    float GetMedianIntensityRating(RideId id, ride_rating currentIntensity);
-    std::string GetMedianIntensityRatingString(RideId id, ride_rating currentIntensity);
+    void InsertRideIntensityRating(RideId id, uint8_t rating, RideRating_t rideRating);
+    float GetMedianIntensityRating(RideId id, RideRating_t currentIntensity);
+    std::string GetMedianIntensityRatingString(RideId id, RideRating_t currentIntensity);
     uint8_t GetQueueTimeThreshold();
     uint8_t GetQueueTimeCancelChance();
     std::vector<GuestRideRating> FindRidesByRideId(std::vector<GuestRideRating>& ratings, RideId targetId);
     std::vector<GuestRideRating> FindRideIntensityRatingsByRideId(RideId targetId);
-    void DeleteOldIntensityRatings(RideId id, ride_rating currentIntensity);
+    void DeleteOldIntensityRatings(RideId id, RideRating_t currentIntensity);
     //void Serialise(DataSerialiser& stream);
    
 

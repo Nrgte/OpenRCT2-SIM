@@ -14,7 +14,7 @@ AdvancedGuestStats::AdvancedGuestStats()
 {
 }
 
-void AdvancedGuestStats::InsertRideIntensityRating(RideId id, uint8_t rating, ride_rating rideRating)
+void AdvancedGuestStats::InsertRideIntensityRating(RideId id, uint8_t rating, RideRating_t rideRating)
 {
     GuestRideRating temp(id, rating, rideRating);
     int test = 1;
@@ -23,7 +23,7 @@ void AdvancedGuestStats::InsertRideIntensityRating(RideId id, uint8_t rating, ri
     this->RideIntensitySatisfaction.push_back(temp);
 }
 
-float AdvancedGuestStats::GetMedianIntensityRating(RideId id, ride_rating currentIntensity)
+float AdvancedGuestStats::GetMedianIntensityRating(RideId id, RideRating_t currentIntensity)
 {
     // Delete old intensityRatings in case the ride has changed.
     this->DeleteOldIntensityRatings(id, currentIntensity);
@@ -62,7 +62,7 @@ float AdvancedGuestStats::GetMedianIntensityRating(RideId id, ride_rating curren
     */
 }
 
-std::string AdvancedGuestStats::GetMedianIntensityRatingString(RideId id, ride_rating currentIntensity)
+std::string AdvancedGuestStats::GetMedianIntensityRatingString(RideId id, RideRating_t currentIntensity)
 {
     float medianIntensity = GetMedianIntensityRating(id, currentIntensity);
     std::stringstream ss;
@@ -86,7 +86,7 @@ std::vector<GuestRideRating> AdvancedGuestStats::FindRideIntensityRatingsByRideI
     return this->FindRidesByRideId(this->RideIntensitySatisfaction, id);
 }
 
-void AdvancedGuestStats::DeleteOldIntensityRatings(RideId id, ride_rating currentIntensity)
+void AdvancedGuestStats::DeleteOldIntensityRatings(RideId id, RideRating_t currentIntensity)
 {
     this->RideIntensitySatisfaction.erase(
         std::remove_if(

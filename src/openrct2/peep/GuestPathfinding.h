@@ -20,7 +20,11 @@
 
 struct Peep;
 struct Guest;
-struct TileElement;
+
+namespace OpenRCT2
+{
+    struct TileElement;
+}
 
 namespace OpenRCT2::PathFinding
 {
