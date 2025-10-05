@@ -375,6 +375,7 @@ public:
     void ChoseNotToGoOnRide(const Ride& ride, bool peepAtRide, bool updateLastRide);
     void OnEnterRide(Ride& ride);
     void OnExitRide(Ride& ride);
+    void ThrowUp();
 
     void initAGS(std::vector<RideId> rides);
     Ride* getNextProxyRide();
@@ -490,7 +491,7 @@ enum
     EASTEREGG_PEEP_NAME_DAVID_ELLIS
 };
 
-void PeepThoughtSetFormatArgs(const PeepThought* thought, Formatter& ft);
+void PeepThoughtSetFormatArgs(const PeepThought* thought, OpenRCT2::Formatter& ft);
 
 void IncrementGuestsInPark();
 void IncrementGuestsHeadingForPark();

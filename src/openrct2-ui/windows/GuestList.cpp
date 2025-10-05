@@ -160,9 +160,9 @@ namespace OpenRCT2::Ui::Windows
         uint32_t _tabAnimationIndex{};
 
     public:
-        void OnOpen() override
+        void onOpen() override
         {
-            SetWidgets(window_guest_list_widgets);
+            setWidgets(window_guest_list_widgets);
             WindowInitScrollWidgets(*this);
 
             _selectedTab = TabId::Summarised;
@@ -178,7 +178,7 @@ namespace OpenRCT2::Ui::Windows
             RefreshList();
         }
 
-        void SetFilter(GuestListFilterType type, int32_t index)
+        void setFilter(GuestListFilterType type, int32_t index)
         {
             _selectedPage = 0;
             _numPages = 1;
@@ -250,7 +250,7 @@ namespace OpenRCT2::Ui::Windows
             RefreshList();
         }
 
-        void OnUpdate() override
+        void onUpdate() override
         {
             if (_lastFindGroupsWait != 0)
             {
@@ -261,23 +261,23 @@ namespace OpenRCT2::Ui::Windows
             _tabAnimationIndex++;
             if (_tabAnimationIndex >= (_selectedTab == TabId::Individual ? 24uL : 32uL))
                 _tabAnimationIndex = 0;
-            InvalidateWidget(WIDX_TAB_1 + static_cast<int32_t>(_selectedTab));
+            invalidateWidget(WIDX_TAB_1 + static_cast<int32_t>(_selectedTab));
         }
 
-        void OnMouseUp(WidgetIndex widgetIndex) override
+        void onMouseUp(WidgetIndex widgetIndex) override
         {
             switch (widgetIndex)
             {
                 case WIDX_CLOSE:
-                    Close();
+                    close();
                     break;
                 case WIDX_MAP:
-                    ContextOpenWindow(WindowClass::Map);
+                    ContextOpenWindow(WindowClass::map);
                     break;
                 case WIDX_TRACKING:
                     _trackingOnly = !_trackingOnly;
-                    SetWidgetPressed(WIDX_TRACKING, _trackingOnly);
-                    Invalidate();
+                    setWidgetPressed(WIDX_TRACKING, _trackingOnly);
+                    invalidate();
                     scrolls[0].contentOffsetY = 0;
                     RefreshList();
                     break;
@@ -286,7 +286,7 @@ namespace OpenRCT2::Ui::Windows
                     {
                         // Unset the search filter.
                         _filterName.clear();
-                        SetWidgetPressed(WIDX_FILTER_BY_NAME, false);
+                        setWidgetPressed(WIDX_FILTER_BY_NAME, false);
                         RefreshList();
                     }
                     else
@@ -299,7 +299,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void OnMouseDown(WidgetIndex widgetIndex) override
+        void onMouseDown(WidgetIndex widgetIndex) override
         {
             switch (widgetIndex)
             {
@@ -315,7 +315,7 @@ namespace OpenRCT2::Ui::Windows
                     if (_selectedTab == TabId::Summarised)
                     {
                         widgets[WIDX_FILTER_BY_NAME].type = WidgetType::empty;
-                        SetWidgetPressed(WIDX_FILTER_BY_NAME, false);
+                        setWidgetPressed(WIDX_FILTER_BY_NAME, false);
                         _filterName.clear();
                     }
                     else if (_selectedTab == TabId::Individual)
@@ -327,7 +327,7 @@ namespace OpenRCT2::Ui::Windows
                     widgets[WIDX_PAGE_DROPDOWN_BUTTON].type = WidgetType::empty;
                     _tabAnimationIndex = 0;
                     _selectedFilter = {};
-                    Invalidate();
+                    invalidate();
                     scrolls[0].contentOffsetY = 0;
                     RefreshList();
                     break;
@@ -342,10 +342,9 @@ namespace OpenRCT2::Ui::Windows
 
                     for (size_t i = 0; i < _numPages; i++)
                     {
-                        gDropdown.items[i].format = STR_DROPDOWN_MENU_LABEL;
-                        uint16_t* args = reinterpret_cast<uint16_t*>(&gDropdown.items[i].args.generic);
-                        args[0] = STR_PAGE_X;
-                        args[1] = static_cast<uint16_t>(i + 1);
+                        Formatter ft;
+                        ft.Add<uint16_t>(i + 1);
+                        gDropdown.items[i] = Dropdown::MenuLabel(STR_PAGE_X, ft);
                     }
                     gDropdown.items[static_cast<int32_t>(_selectedPage)].setChecked(true);
                     break;
@@ -366,7 +365,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void OnDropdown(WidgetIndex widgetIndex, int32_t dropdownIndex) override
+        void onDropdown(WidgetIndex widgetIndex, int32_t dropdownIndex) override
         {
             if (dropdownIndex == -1)
             {
@@ -376,30 +375,30 @@ namespace OpenRCT2::Ui::Windows
             {
                 case WIDX_PAGE_DROPDOWN_BUTTON:
                     _selectedPage = dropdownIndex;
-                    Invalidate();
+                    invalidate();
                     break;
                 case WIDX_INFO_TYPE_DROPDOWN_BUTTON:
                     _selectedView = static_cast<GuestViewType>(dropdownIndex);
-                    Invalidate();
+                    invalidate();
                     break;
             }
         }
 
-        void OnTextInput(WidgetIndex widgetIndex, std::string_view text) override
+        void onTextInput(WidgetIndex widgetIndex, std::string_view text) override
         {
             if (!text.empty())
             {
                 _filterName = text;
-                SetWidgetPressed(WIDX_FILTER_BY_NAME, true);
+                setWidgetPressed(WIDX_FILTER_BY_NAME, true);
                 RefreshList();
             }
         }
 
-        void OnPrepareDraw() override
+        void onPrepareDraw() override
         {
-            SetWidgetPressed(WIDX_TAB_1, false);
-            SetWidgetPressed(WIDX_TAB_2, false);
-            SetWidgetPressed(WIDX_TAB_1 + static_cast<int32_t>(_selectedTab), true);
+            setWidgetPressed(WIDX_TAB_1, false);
+            setWidgetPressed(WIDX_TAB_2, false);
+            setWidgetPressed(WIDX_TAB_1 + static_cast<int32_t>(_selectedTab), true);
 
             widgets[WIDX_INFO_TYPE_DROPDOWN].text = GetViewName(_selectedView);
             widgets[WIDX_MAP].type = WidgetType::empty;
@@ -430,9 +429,9 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void OnDraw(RenderTarget& rt) override
+        void onDraw(RenderTarget& rt) override
         {
-            DrawWidgets(rt);
+            drawWidgets(rt);
             DrawTabImages(rt);
 
             // Filter description
@@ -478,7 +477,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        ScreenSize OnScrollGetSize(int32_t scrollIndex) override
+        ScreenSize onScrollGetSize(int32_t scrollIndex) override
         {
             int32_t y = 0;
             switch (_selectedTab)
@@ -509,31 +508,31 @@ namespace OpenRCT2::Ui::Windows
             if (_highlightedIndex)
             {
                 _highlightedIndex = {};
-                Invalidate();
+                invalidate();
             }
 
             auto i = std::max(0, y - widgets[WIDX_GUEST_LIST].bottom + widgets[WIDX_GUEST_LIST].top + 21);
             if (i < scrolls[0].contentOffsetY)
             {
                 scrolls[0].contentOffsetY = i;
-                Invalidate();
+                invalidate();
             }
 
             return { 447, y };
         }
 
-        void OnScrollMouseOver(int32_t scrollIndex, const ScreenCoordsXY& screenCoords) override
+        void onScrollMouseOver(int32_t scrollIndex, const ScreenCoordsXY& screenCoords) override
         {
             auto i = screenCoords.y / (_selectedTab == TabId::Individual ? kScrollableRowHeight : kSummarisedGuestsRowHeight);
             i += static_cast<int32_t>(_selectedPage * kGuestsPerPage);
             if (static_cast<size_t>(i) != _highlightedIndex)
             {
                 _highlightedIndex = i;
-                Invalidate();
+                invalidate();
             }
         }
 
-        void OnScrollMouseDown(int32_t scrollIndex, const ScreenCoordsXY& screenCoords) override
+        void onScrollMouseDown(int32_t scrollIndex, const ScreenCoordsXY& screenCoords) override
         {
             switch (_selectedTab)
             {
@@ -545,7 +544,7 @@ namespace OpenRCT2::Ui::Windows
                     {
                         if (i == 0)
                         {
-                            auto guest = GetEntity<Guest>(guestItem.Id);
+                            auto guest = getGameState().entities.GetEntity<Guest>(guestItem.Id);
                             if (guest != nullptr)
                             {
                                 GuestOpen(guest);
@@ -566,7 +565,7 @@ namespace OpenRCT2::Ui::Windows
                                                                                   : GuestFilterType::GuestsThinking;
                         _selectedTab = TabId::Individual;
                         widgets[WIDX_TRACKING].type = WidgetType::flatBtn;
-                        Invalidate();
+                        invalidate();
                         widgets[WIDX_FILTER_BY_NAME].type = WidgetType::flatBtn;
                         scrolls[0].contentOffsetY = 0;
                         RefreshList();
@@ -576,7 +575,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void OnScrollDraw(int32_t scrollIndex, RenderTarget& rt) override
+        void onScrollDraw(int32_t scrollIndex, RenderTarget& rt) override
         {
             GfxFillRect(
                 rt, { { rt.x, rt.y }, { rt.x + rt.width - 1, rt.y + rt.height - 1 } }, ColourMapA[colours[1].colour].mid_light);
@@ -593,7 +592,7 @@ namespace OpenRCT2::Ui::Windows
 
         void RefreshList()
         {
-            // Only the individual tab uses the GuestList so no point calculating it
+            // only the individual tab uses the GuestList so no point calculating it
             if (_selectedTab != TabId::Individual)
             {
                 RefreshGroups();
@@ -604,14 +603,14 @@ namespace OpenRCT2::Ui::Windows
 
                 for (auto peep : EntityList<Guest>())
                 {
-                    EntitySetFlashing(peep, false);
+                    getGameState().entities.EntitySetFlashing(peep, false);
                     if (peep->OutsideOfPark)
                         continue;
                     if (_selectedFilter)
                     {
                         if (!IsPeepInFilter(*peep))
                             continue;
-                        EntitySetFlashing(peep, true);
+                        getGameState().entities.EntitySetFlashing(peep, true);
                     }
                     if (!GuestShouldBeVisible(*peep))
                         continue;
@@ -660,12 +659,12 @@ namespace OpenRCT2::Ui::Windows
                     StringId format = STR_BLACK_STRING;
                     if (index == _highlightedIndex)
                     {
-                        GfxFilterRect(rt, { 0, y, 800, y + kScrollableRowHeight - 1 }, FilterPaletteID::PaletteDarken1);
+                        GfxFilterRect(rt, { 0, y, 800, y + kScrollableRowHeight - 1 }, FilterPaletteID::paletteDarken1);
                         format = STR_WINDOW_COLOUR_2_STRINGID;
                     }
 
                     // Guest name
-                    auto peep = GetEntity<Guest>(guestItem.Id);
+                    auto peep = getGameState().entities.GetEntity<Guest>(guestItem.Id);
                     if (peep == nullptr)
                     {
                         continue;
@@ -730,7 +729,7 @@ namespace OpenRCT2::Ui::Windows
                     StringId format = STR_BLACK_STRING;
                     if (index == _highlightedIndex)
                     {
-                        GfxFilterRect(rt, { 0, y, 800, y + kSummarisedGuestsRowHeight }, FilterPaletteID::PaletteDarken1);
+                        GfxFilterRect(rt, { 0, y, 800, y + kSummarisedGuestsRowHeight }, FilterPaletteID::paletteDarken1);
                         format = STR_WINDOW_COLOUR_2_STRINGID;
                     }
 
@@ -958,8 +957,8 @@ namespace OpenRCT2::Ui::Windows
         template<bool TRealNames>
         static bool CompareGuestItem(const GuestItem& a, const GuestItem& b)
         {
-            const auto* peepA = GetEntity<Peep>(a.Id);
-            const auto* peepB = GetEntity<Peep>(b.Id);
+            const auto* peepA = getGameState().entities.GetEntity<Peep>(a.Id);
+            const auto* peepB = getGameState().entities.GetEntity<Peep>(b.Id);
             if (peepA != nullptr && peepB != nullptr)
             {
                 // Compare types
@@ -991,10 +990,11 @@ namespace OpenRCT2::Ui::Windows
     WindowBase* GuestListOpen()
     {
         auto* windowMgr = GetWindowManager();
-        auto* window = windowMgr->BringToFrontByClass(WindowClass::GuestList);
+        auto* window = windowMgr->BringToFrontByClass(WindowClass::guestList);
         if (window == nullptr)
         {
-            window = windowMgr->Create<GuestListWindow>(WindowClass::GuestList, kWindowSize, WF_10 | WF_RESIZABLE);
+            window = windowMgr->Create<GuestListWindow>(
+                WindowClass::guestList, kWindowSize, { WindowFlag::higherContrastOnPress, WindowFlag::resizable });
         }
         return window;
     }
@@ -1007,7 +1007,7 @@ namespace OpenRCT2::Ui::Windows
         auto* w = static_cast<GuestListWindow*>(GuestListOpen());
         if (w != nullptr)
         {
-            w->SetFilter(type, index);
+            w->setFilter(type, index);
         }
         return w;
     }
@@ -1015,7 +1015,7 @@ namespace OpenRCT2::Ui::Windows
     void WindowGuestListRefreshList()
     {
         auto* windowMgr = GetWindowManager();
-        auto* w = windowMgr->FindByClass(WindowClass::GuestList);
+        auto* w = windowMgr->FindByClass(WindowClass::guestList);
         if (w != nullptr)
         {
             static_cast<GuestListWindow*>(w)->RefreshList();

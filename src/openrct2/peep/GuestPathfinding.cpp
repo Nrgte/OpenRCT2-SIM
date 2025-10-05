@@ -21,6 +21,8 @@
 #include "../scenario/Scenario.h"
 #include "../world/Entrance.h"
 #include "../world/Footpath.h"
+#include "../world/Map.h"
+#include "../world/Wall.h"
 #include "../world/tile_element/BannerElement.h"
 #include "../world/tile_element/EntranceElement.h"
 #include "../world/tile_element/PathElement.h"
@@ -157,7 +159,8 @@ namespace OpenRCT2::PathFinding
 
     static const TileElement* GetBannerOnPath(const TileElement* pathElement)
     {
-        RideManager manager = GetRideManager();
+        auto& gameState = getGameState();
+        RideManager manager = RideManager(gameState);
         // This is an improved version of original.
         // That only checked for one fence in the way.
         if (pathElement->IsLastForTile())
@@ -580,12 +583,12 @@ namespace OpenRCT2::PathFinding
      */
     static uint8_t PeepPathfindGetMaxNumberJunctions(Peep& peep)
     {
-        if (peep.Is<Staff>())
-            return kMaxJunctionsStaff;
-
         auto* guest = peep.As<Guest>();
         if (guest == nullptr)
+        {
+            // Peep can be only Staff and Guest, so when not a Guest it means its Staff.
             return kMaxJunctionsStaff;
+        }
 
         bool isLeavingPark = (guest->PeepFlags & PEEP_FLAGS_LEAVING_PARK) != 0;
         if (isLeavingPark && guest->GuestIsLostCountdown < 90)
@@ -2282,7 +2285,8 @@ namespace AdvancedPathfinding
             proxyRideEntranceExitMappings;
         if (useProxyRides)
         {
-            for (Ride& ride : GetRideManager())
+            auto& gameState = getGameState();
+            for (Ride& ride : RideManager(gameState))
             {
                 if (ride.status != RideStatus::open || (ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN)
                     || ride.getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility)
