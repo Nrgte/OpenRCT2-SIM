@@ -223,7 +223,7 @@ namespace OpenRCT2::PathFinding
         }
 
         peep.PeepDirection = direction;
-        if (peep.State != PeepState::Queuing)
+        if (peep.State != PeepState::queuing)
         {
             // When peeps are walking along a path, we would like them to be spread out across the width of the path,
             // instead of all walking along the exact centre line of the path.
@@ -599,7 +599,7 @@ namespace OpenRCT2::PathFinding
         if (isLeavingPark)
             return kMaxJunctionsGuestLeavingPark;
 
-        if (guest->HasItem(ShopItem::Map))
+        if (guest->HasItem(ShopItem::map))
             return kMaxJunctionsGuestWithMap;
 
         return kMaxJunctionsGuest;
@@ -1895,9 +1895,9 @@ namespace OpenRCT2::PathFinding
 
             switch (peep.State)
             {
-                case PeepState::EnteringPark:
+                case PeepState::enteringPark:
                     return GuestPathFindParkEntranceEntering(peep, edges);
-                case PeepState::LeavingPark:
+                case PeepState::leavingPark:
                     return GuestPathFindPeepSpawn(peep, edges);
                 default:
                     return GuestPathfindAimless(peep, edges);
@@ -1939,7 +1939,7 @@ namespace OpenRCT2::PathFinding
         /* If there are still multiple directions to choose from,
          * peeps with maps will randomly read the map: probability of doing so
          * is much higher when heading for a ride or the park exit. */
-        if (peep.HasItem(ShopItem::Map))
+        if (peep.HasItem(ShopItem::map))
         {
             // If at least 2 directions consult map
             if (std::popcount(edges) >= 2)
