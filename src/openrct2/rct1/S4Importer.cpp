@@ -278,7 +278,7 @@ namespace OpenRCT2::RCT1
                 auto& objManager = GetContext()->GetObjectManager();
 
                 // Load the one specified
-                if (auto obj = objManager.LoadTempObject(desc.textObjectId); obj != nullptr)
+                if (auto obj = objManager.LoadTempObject(desc.textObjectId, false); obj != nullptr)
                 {
                     auto& textObject = reinterpret_cast<ScenarioMetaObject&>(*obj);
                     name = textObject.GetScenarioName();
@@ -2429,7 +2429,7 @@ namespace OpenRCT2::RCT1
                 {
                     auto& objManager = GetContext()->GetObjectManager();
 
-                    if (auto obj = objManager.LoadTempObject(desc.textObjectId); obj != nullptr)
+                    if (auto obj = objManager.LoadTempObject(desc.textObjectId, false); obj != nullptr)
                     {
                         auto& textObject = reinterpret_cast<ScenarioMetaObject&>(*obj);
                         name = textObject.GetScenarioName();

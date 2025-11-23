@@ -562,7 +562,7 @@ namespace OpenRCT2::Ui::Windows
                 return;
 
             const auto& widget = widgets[WIDX_TAB_1];
-            int32_t widgWidth = widget.width() - 1;
+            int32_t widgWidth = widget.width() - 2;
             int32_t widgHeight = widget.height() - 1;
             auto screenCoords = windowPos + ScreenCoordsXY{ widget.left + 1, widget.top + 1 };
             if (page == WINDOW_GUEST_OVERVIEW)
@@ -637,7 +637,7 @@ namespace OpenRCT2::Ui::Windows
             if (viewport != nullptr)
             {
                 const auto& widget = widgets[WIDX_VIEWPORT];
-                const auto reqViewportWidth = widget.width() - 1;
+                const auto reqViewportWidth = widget.width() - 2;
                 const auto reqViewportHeight = widget.height() - 1;
                 viewport->pos = windowPos + ScreenCoordsXY{ widget.left + 1, widget.top + 1 };
                 if (viewport->width != reqViewportWidth || viewport->height != reqViewportHeight)
@@ -779,7 +779,7 @@ namespace OpenRCT2::Ui::Windows
             {
                 const auto& viewWidget = widgets[WIDX_VIEWPORT];
                 auto screenPos = ScreenCoordsXY{ viewWidget.left + 1 + windowPos.x, viewWidget.top + 1 + windowPos.y };
-                int32_t widgWidth = viewWidget.width() - 1;
+                int32_t widgWidth = viewWidget.width() - 2;
                 int32_t widgHeight = viewWidget.height() - 1;
 
                 ViewportCreate(*this, screenPos, widgWidth, widgHeight, focus.value());
@@ -828,12 +828,12 @@ namespace OpenRCT2::Ui::Windows
                 auto ft = Formatter();
                 peep->FormatActionTo(ft, true);
                 int32_t textWidth = actionLabelWidget.width();
-                DrawTextEllipsised(rt, screenPos, textWidth, STR_BLACK_STRING, ft, { TextAlignment::CENTRE });
+                DrawTextEllipsised(rt, screenPos, textWidth, STR_BLACK_STRING, ft, { TextAlignment::centre });
             }
 
             // Draw the marquee thought
             const auto& marqueeWidget = widgets[WIDX_MARQUEE];
-            auto marqWidth = marqueeWidget.width() - 3;
+            auto marqWidth = marqueeWidget.width() - 4;
             int32_t left = marqueeWidget.left + 2 + windowPos.x;
             int32_t top = marqueeWidget.top + windowPos.y;
             int32_t marqHeight = marqueeWidget.height();
@@ -862,11 +862,11 @@ namespace OpenRCT2::Ui::Windows
                 return;
             }
 
-            screenPos.x = marqueeWidget.width() - _marqueePosition;
+            screenPos.x = marqueeWidget.width() - 1 - _marqueePosition;
             {
                 auto ft = Formatter();
                 PeepThoughtSetFormatArgs(&peep->Thoughts[i], ft);
-                DrawTextBasic(rtMarquee, { screenPos.x, 0 }, STR_WINDOW_COLOUR_2_STRINGID, ft, { FontStyle::Small });
+                DrawTextBasic(rtMarquee, { screenPos.x, 0 }, STR_WINDOW_COLOUR_2_STRINGID, ft, { FontStyle::small });
             }
         }
 
@@ -1611,7 +1611,7 @@ namespace OpenRCT2::Ui::Windows
 
                 auto ft = Formatter();
                 PeepThoughtSetFormatArgs(&thought, ft);
-                screenCoords.y += DrawTextWrapped(rt, screenCoords, widgWidth, STR_BLACK_STRING, ft, { FontStyle::Small });
+                screenCoords.y += DrawTextWrapped(rt, screenCoords, widgWidth, STR_BLACK_STRING, ft, { FontStyle::small });
 
                 // If this is the last visible line end drawing.
                 if (screenCoords.y > windowPos.y + widgets[WIDX_PAGE_BACKGROUND].bottom - 32)
@@ -1780,7 +1780,7 @@ namespace OpenRCT2::Ui::Windows
 
             auto& widget = widgets[WIDX_PAGE_BACKGROUND];
             auto screenCoords = windowPos + ScreenCoordsXY{ widget.left + 4, widget.top + 12 };
-            int32_t itemNameWidth = widget.width() - 24;
+            int32_t itemNameWidth = widget.width() - 25;
 
             int32_t maxY = windowPos.y + height - 22;
             int32_t numItems = 0;
