@@ -337,7 +337,7 @@ namespace OpenRCT2::Ui::Windows
                     auto* widget = &widgets[widgetIndex - 1];
 
                     WindowDropdownShowTextCustomWidth(
-                        { windowPos.x + widget->left, windowPos.y + widget->top }, widget->height() + 1, colours[1], 0,
+                        { windowPos.x + widget->left, windowPos.y + widget->top }, widget->height(), colours[1], 0,
                         Dropdown::Flag::StayOpen, _numPages, widget->width() - 4);
 
                     for (size_t i = 0; i < _numPages; i++)
@@ -356,7 +356,7 @@ namespace OpenRCT2::Ui::Windows
 
                     auto* widget = &widgets[widgetIndex - 1];
                     WindowDropdownShowTextCustomWidth(
-                        { windowPos.x + widget->left, windowPos.y + widget->top }, widget->height() + 1, colours[1], 0,
+                        { windowPos.x + widget->left, windowPos.y + widget->top }, widget->height(), colours[1], 0,
                         Dropdown::Flag::StayOpen, 2, widget->width() - 4);
 
                     gDropdown.items[static_cast<int32_t>(_selectedView)].setChecked(true);
@@ -429,7 +429,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void onDraw(RenderTarget& rt) override
+        void onDraw(Drawing::RenderTarget& rt) override
         {
             drawWidgets(rt);
             DrawTabImages(rt);
@@ -575,7 +575,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void onScrollDraw(int32_t scrollIndex, RenderTarget& rt) override
+        void onScrollDraw(int32_t scrollIndex, Drawing::RenderTarget& rt) override
         {
             Rectangle::fill(
                 rt, { { rt.x, rt.y }, { rt.x + rt.width - 1, rt.y + rt.height - 1 } }, ColourMapA[colours[1].colour].mid_light);
@@ -628,7 +628,7 @@ namespace OpenRCT2::Ui::Windows
         }
 
     private:
-        void DrawTabImages(RenderTarget& rt)
+        void DrawTabImages(Drawing::RenderTarget& rt)
         {
             // Tab 1 image
             auto i = (_selectedTab == TabId::Individual ? _tabAnimationIndex & ~3 : 0);
@@ -645,7 +645,7 @@ namespace OpenRCT2::Ui::Windows
                 windowPos + ScreenCoordsXY{ widgets[WIDX_TAB_2].left, widgets[WIDX_TAB_2].top });
         }
 
-        void DrawScrollIndividual(RenderTarget& rt)
+        void DrawScrollIndividual(Drawing::RenderTarget& rt)
         {
             size_t index = 0;
             auto y = static_cast<int32_t>(_selectedPage) * -kGuestPageHeight;
@@ -712,7 +712,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void DrawScrollSummarised(RenderTarget& rt)
+        void DrawScrollSummarised(Drawing::RenderTarget& rt)
         {
             size_t index = 0;
             auto y = 0;
