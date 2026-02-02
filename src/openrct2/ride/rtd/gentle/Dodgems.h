@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -50,11 +50,11 @@ constexpr RideTypeDescriptor DodgemsRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 35,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BRIGHT_RED, COLOUR_SATURATED_BROWN, COLOUR_SATURATED_BROWN },
-        { COLOUR_LIGHT_BLUE, COLOUR_GREY, COLOUR_GREY },
-        { COLOUR_DARK_GREEN, COLOUR_BLACK, COLOUR_DARK_GREEN },
-        { COLOUR_YELLOW, COLOUR_LIGHT_BROWN, COLOUR_DARK_YELLOW },
-        { COLOUR_SATURATED_GREEN, COLOUR_SATURATED_BROWN, COLOUR_SATURATED_BROWN },
+        { Drawing::Colour::brightRed, Drawing::Colour::saturatedBrown, Drawing::Colour::saturatedBrown },
+        { Drawing::Colour::lightBlue, Drawing::Colour::grey, Drawing::Colour::grey },
+        { Drawing::Colour::darkGreen, Drawing::Colour::black, Drawing::Colour::darkGreen },
+        { Drawing::Colour::yellow, Drawing::Colour::lightBrown, Drawing::Colour::darkYellow },
+        { Drawing::Colour::saturatedGreen, Drawing::Colour::saturatedBrown, Drawing::Colour::saturatedBrown },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_DODGEMS_TRACK, SPR_RIDE_DESIGN_PREVIEW_DODGEMS_SUPPORTS },
     .ColourKey = RideColourKey::Ride,

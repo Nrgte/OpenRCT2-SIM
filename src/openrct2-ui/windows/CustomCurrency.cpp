@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -15,7 +15,6 @@
 #include <openrct2/core/EnumUtils.hpp>
 #include <openrct2/core/String.hpp>
 #include <openrct2/drawing/Text.h>
-#include <openrct2/interface/Colour.h>
 #include <openrct2/localisation/Currency.h>
 #include <openrct2/localisation/Formatter.h>
 #include <openrct2/ui/WindowManager.h>
@@ -56,15 +55,15 @@ namespace OpenRCT2::Ui::Windows
             setWidgets(window_custom_currency_widgets);
             holdDownWidgets = (1uLL << WIDX_RATE_UP) | (1uLL << WIDX_RATE_DOWN);
             WindowInitScrollWidgets(*this);
-            colours[0] = COLOUR_LIGHT_BROWN;
-            colours[1] = COLOUR_LIGHT_BROWN;
-            colours[2] = COLOUR_LIGHT_BROWN;
+            colours[0] = Drawing::Colour::lightBrown;
+            colours[1] = Drawing::Colour::lightBrown;
+            colours[2] = Drawing::Colour::lightBrown;
         }
 
         void onMouseDown(WidgetIndex widgetIndex) override
         {
             auto* widget = &widgets[widgetIndex - 1];
-            auto* windowMgr = Ui::GetWindowManager();
+            auto* windowMgr = GetWindowManager();
 
             switch (widgetIndex)
             {
@@ -146,7 +145,7 @@ namespace OpenRCT2::Ui::Windows
                 Config::Get().general.customCurrencyAffix = CurrencyDescriptors[EnumValue(CurrencyType::custom)].affix_unicode;
                 Config::Save();
 
-                auto* windowMgr = Ui::GetWindowManager();
+                auto* windowMgr = GetWindowManager();
                 windowMgr->InvalidateAll();
             }
         }
@@ -156,7 +155,7 @@ namespace OpenRCT2::Ui::Windows
             if (text.empty())
                 return;
 
-            auto* windowMgr = Ui::GetWindowManager();
+            auto* windowMgr = GetWindowManager();
 
             switch (widgetIndex)
             {

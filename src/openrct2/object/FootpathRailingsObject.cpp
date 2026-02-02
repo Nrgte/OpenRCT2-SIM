@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -12,6 +12,7 @@
 #include "../core/Guard.hpp"
 #include "../core/IStream.hpp"
 #include "../core/Json.hpp"
+#include "../drawing/Drawing.h"
 
 namespace OpenRCT2
 {
@@ -28,14 +29,14 @@ namespace OpenRCT2
             RailingsImageId = PreviewImageId + 1;
         }
 
-        _descriptor.Name = NameStringId;
-        _descriptor.BridgeImage = BridgeImageId;
-        _descriptor.PreviewImage = PreviewImageId;
-        _descriptor.Flags = Flags;
-        _descriptor.ScrollingMode = ScrollingMode;
-        _descriptor.SupportType = SupportType;
-        _descriptor.SupportColour = Colour;
-        _descriptor.RailingsImage = RailingsImageId;
+        _descriptor.name = NameStringId;
+        _descriptor.bridgeImage = BridgeImageId;
+        _descriptor.previewImage = PreviewImageId;
+        _descriptor.flags = Flags;
+        _descriptor.scrollingMode = ScrollingMode;
+        _descriptor.supportType = SupportType;
+        _descriptor.supportColour = Colour;
+        _descriptor.railingsImage = RailingsImageId;
     }
 
     void FootpathRailingsObject::Unload()
@@ -54,10 +55,10 @@ namespace OpenRCT2
         auto x = width / 2;
         auto y = height / 2;
         auto helper = ImageId(kImageIndexUndefined);
-        if (Colour != COLOUR_NULL)
+        if (Colour != Drawing::kColourNull)
             helper = helper.WithPrimary(Colour);
 
-        if (SupportType == RailingEntrySupportType::Pole)
+        if (SupportType == RailingEntrySupportType::pole)
         {
             auto img = helper.WithIndex(BridgeImageId + 20 + 15);
             for (int i = 0; i < 2; i++)
@@ -89,7 +90,7 @@ namespace OpenRCT2
         {
             SupportType = ParseSupportType(Json::GetString(properties["supportType"]));
             ScrollingMode = Json::GetNumber<uint8_t>(properties["scrollingMode"]);
-            Colour = Colour::FromString(Json::GetString(properties["colour"]), COLOUR_NULL);
+            Colour = Drawing::colourFromString(Json::GetString(properties["colour"]), Drawing::kColourNull);
             Flags = Json::GetFlags<uint8_t>(
                 properties,
                 {
@@ -105,8 +106,8 @@ namespace OpenRCT2
     RailingEntrySupportType FootpathRailingsObject::ParseSupportType(std::string_view s)
     {
         if (s == "pole")
-            return RailingEntrySupportType::Pole;
+            return RailingEntrySupportType::pole;
         else /* if (s == "box") */
-            return RailingEntrySupportType::Box;
+            return RailingEntrySupportType::box;
     }
 } // namespace OpenRCT2

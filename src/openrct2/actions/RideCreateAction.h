@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -19,8 +19,8 @@ namespace OpenRCT2::GameActions
         ride_type_t _rideType{ kRideTypeNull };
         ObjectEntryIndex _subType{ kObjectEntryIndexNull };
         ObjectEntryIndex _entranceObjectIndex{ kObjectEntryIndexNull };
-        uint8_t _trackColourPreset{ COLOUR_NULL };
-        uint8_t _vehicleColourPreset{ COLOUR_NULL };
+        uint8_t _trackColourPreset{ std::numeric_limits<uint8_t>::max() };
+        uint8_t _vehicleColourPreset{ std::numeric_limits<uint8_t>::max() };
         RideInspection _inspectionInterval{ RideInspection::every30Minutes };
 
     public:

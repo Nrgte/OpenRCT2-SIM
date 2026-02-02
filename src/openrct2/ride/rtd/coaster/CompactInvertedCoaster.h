@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -48,10 +48,10 @@ constexpr RideTypeDescriptor CompactInvertedCoasterRTD =
     .PhotoItem = ShopItem::photo2,
     .BonusValue = 80,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BRIGHT_YELLOW, COLOUR_BRIGHT_YELLOW, COLOUR_BRIGHT_RED },
-        { COLOUR_ICY_BLUE, COLOUR_ICY_BLUE, COLOUR_DARK_GREEN },
-        { COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_BRIGHT_YELLOW },
-        { COLOUR_WHITE, COLOUR_WHITE, COLOUR_DARK_GREEN },
+        { Drawing::Colour::brightYellow, Drawing::Colour::brightYellow, Drawing::Colour::brightRed },
+        { Drawing::Colour::icyBlue, Drawing::Colour::icyBlue, Drawing::Colour::darkGreen },
+        { Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::brightYellow },
+        { Drawing::Colour::white, Drawing::Colour::white, Drawing::Colour::darkGreen },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_COMPACT_INVERTED_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_COMPACT_INVERTED_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -61,7 +61,7 @@ constexpr RideTypeDescriptor CompactInvertedCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(3, 15), RideRating::make(2, 80), RideRating::make(3, 20) },
         21,
-        -1,
+        kDynamicRideShelterRating,
         true,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

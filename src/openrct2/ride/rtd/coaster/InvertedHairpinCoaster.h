@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -47,9 +47,9 @@ constexpr RideTypeDescriptor InvertedHairpinCoasterRTD =
     .PhotoItem = ShopItem::photo2,
     .BonusValue = 55,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BRIGHT_YELLOW, COLOUR_BRIGHT_YELLOW, COLOUR_BRIGHT_RED },
-        { COLOUR_BLACK, COLOUR_ICY_BLUE, COLOUR_BLACK },
-        { COLOUR_WHITE, COLOUR_WHITE, COLOUR_YELLOW },
+        { Drawing::Colour::brightYellow, Drawing::Colour::brightYellow, Drawing::Colour::brightRed },
+        { Drawing::Colour::black, Drawing::Colour::icyBlue, Drawing::Colour::black },
+        { Drawing::Colour::white, Drawing::Colour::white, Drawing::Colour::yellow },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_INVERTED_HAIRPIN_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_INVERTED_HAIRPIN_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -59,7 +59,7 @@ constexpr RideTypeDescriptor InvertedHairpinCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(3, 00), RideRating::make(2, 65), RideRating::make(2, 25) },
         14,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             873, 0, 0 },

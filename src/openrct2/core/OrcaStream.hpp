@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -346,7 +346,7 @@ namespace OpenRCT2
             template<typename T, std::enable_if_t<std::is_enum<T>::value, bool> = true>
             void readWrite(T& v)
             {
-                using underlying = typename std::underlying_type<T>::type;
+                using underlying = std::underlying_type<T>::type;
                 if (_mode == Mode::reading)
                 {
                     v = static_cast<T>(readInteger<underlying>());

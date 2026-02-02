@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -9,9 +9,9 @@
 
 #include "Rectangle.h"
 
-#include "../interface/Colour.h"
 #include "../interface/ColourWithFlags.h"
 #include "../world/Location.hpp"
+#include "ColourMap.h"
 #include "Drawing.h"
 #include "IDrawingContext.h"
 #include "IDrawingEngine.h"
@@ -20,13 +20,13 @@ using OpenRCT2::Drawing::IDrawingContext;
 
 namespace OpenRCT2::Drawing::Rectangle
 {
-    void fill(RenderTarget& rt, const ScreenRect& rect, int32_t colour)
+    void fill(RenderTarget& rt, const ScreenRect& rect, PaletteIndex paletteIndex, bool crossHatch)
     {
         auto drawingEngine = rt.DrawingEngine;
         if (drawingEngine != nullptr)
         {
             IDrawingContext* dc = drawingEngine->GetDrawingContext();
-            dc->FillRect(rt, colour, rect.GetLeft(), rect.GetTop(), rect.GetRight(), rect.GetBottom());
+            dc->FillRect(rt, paletteIndex, rect.GetLeft(), rect.GetTop(), rect.GetRight(), rect.GetBottom(), crossHatch);
         }
     }
 
@@ -34,7 +34,7 @@ namespace OpenRCT2::Drawing::Rectangle
      * Draw a rectangle, with optional border or fill
      *
      *  rct2: 0x006E6F81
-     * dpi (edi)
+     * rt (edi)
      * left (ax)
      * top (cx)
      * right (bx)
@@ -52,38 +52,37 @@ namespace OpenRCT2::Drawing::Rectangle
         const auto rightBottom = ScreenCoordsXY{ rect.GetRight(), rect.GetBottom() };
         if (colour.flags.has(ColourFlag::translucent))
         {
-            auto palette = kTranslucentWindowPalettes[colour.colour];
+            auto palette = kTranslucentWindowPalettes[EnumValue(colour.colour)];
 
             switch (borderStyle)
             {
                 case BorderStyle::none:
-                    Rectangle::filter(rt, rect, palette.base);
+                    filter(rt, rect, palette.base);
                     break;
 
                 case BorderStyle::inset:
                     // Draw outline of box
-                    Rectangle::filter(rt, { leftTop, leftBottom }, palette.highlight);
-                    Rectangle::filter(rt, { leftTop, rightTop }, palette.highlight);
-                    Rectangle::filter(rt, { rightTop, rightBottom }, palette.shadow);
-                    Rectangle::filter(rt, { leftBottom, rightBottom }, palette.shadow);
+                    filter(rt, { leftTop, leftBottom }, palette.highlight);
+                    filter(rt, { leftTop, rightTop }, palette.highlight);
+                    filter(rt, { rightTop, rightBottom }, palette.shadow);
+                    filter(rt, { leftBottom, rightBottom }, palette.shadow);
 
                     if (fillMode != FillMode::none)
                     {
-                        Rectangle::filter(
-                            rt, { leftTop + ScreenCoordsXY{ 1, 1 }, rightBottom - ScreenCoordsXY{ 1, 1 } }, palette.base);
+                        filter(rt, { leftTop + ScreenCoordsXY{ 1, 1 }, rightBottom - ScreenCoordsXY{ 1, 1 } }, palette.base);
                     }
                     break;
 
                 case BorderStyle::outset:
                     // Draw outline of box
-                    Rectangle::filter(rt, { leftTop, leftBottom }, palette.shadow);
-                    Rectangle::filter(rt, { leftTop, rightTop }, palette.shadow);
-                    Rectangle::filter(rt, { rightTop, rightBottom }, palette.highlight);
-                    Rectangle::filter(rt, { leftBottom, rightBottom }, palette.highlight);
+                    filter(rt, { leftTop, leftBottom }, palette.shadow);
+                    filter(rt, { leftTop, rightTop }, palette.shadow);
+                    filter(rt, { rightTop, rightBottom }, palette.highlight);
+                    filter(rt, { leftBottom, rightBottom }, palette.highlight);
 
                     if (fillMode != FillMode::none)
                     {
-                        Rectangle::filter(
+                        filter(
                             rt, { leftTop + ScreenCoordsXY{ 1, 1 }, { rightBottom - ScreenCoordsXY{ 1, 1 } } }, palette.base);
                     }
                     break;
@@ -91,18 +90,18 @@ namespace OpenRCT2::Drawing::Rectangle
         }
         else
         {
-            uint8_t shadow, fill, hilight;
+            PaletteIndex shadow, fill, hilight;
             if (brightness == FillBrightness::dark)
             {
-                shadow = ColourMapA[colour.colour].dark;
-                fill = ColourMapA[colour.colour].mid_light;
-                hilight = ColourMapA[colour.colour].lighter;
+                shadow = getColourMap(colour.colour).dark;
+                fill = getColourMap(colour.colour).midLight;
+                hilight = getColourMap(colour.colour).lighter;
             }
             else
             {
-                shadow = ColourMapA[colour.colour].mid_dark;
-                fill = ColourMapA[colour.colour].light;
-                hilight = ColourMapA[colour.colour].lighter;
+                shadow = getColourMap(colour.colour).midDark;
+                fill = getColourMap(colour.colour).light;
+                hilight = getColourMap(colour.colour).lighter;
             }
 
             switch (borderStyle)
@@ -122,7 +121,7 @@ namespace OpenRCT2::Drawing::Rectangle
                     {
                         if (fillMode != FillMode::dontLightenWhenInset)
                         {
-                            fill = ColourMapA[colour.colour].lighter;
+                            fill = getColourMap(colour.colour).lighter;
                         }
                         Rectangle::fill(rt, { leftTop + ScreenCoordsXY{ 1, 1 }, rightBottom - ScreenCoordsXY{ 1, 1 } }, fill);
                     }

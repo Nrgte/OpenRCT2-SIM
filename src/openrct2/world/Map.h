@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -34,6 +34,11 @@ namespace OpenRCT2
     enum class TileElementType : uint8_t;
     enum class TrackElemType : uint16_t;
 } // namespace OpenRCT2
+
+namespace OpenRCT2::Drawing
+{
+    enum class Colour : uint8_t;
+}
 
 extern const std::array<CoordsXY, 8> CoordsDirectionDelta;
 extern const TileCoordsXY TileDirectionDelta[];
@@ -131,13 +136,14 @@ void TileElementIteratorRestartForTile(TileElementIterator* it);
 void MapUpdateTiles();
 int32_t MapGetHighestZ(const CoordsXY& loc);
 
-bool TileElementWantsPathConnectionTowards(const TileCoordsXYZD& coords, const OpenRCT2::TileElement* const elementToBeRemoved);
+bool TileElementWantsPathConnectionTowards(const TileCoordsXYZD& coords, const OpenRCT2::TileElement* elementToBeRemoved);
 
 void MapRemoveOutOfRangeElements();
 void MapExtendBoundarySurfaceX();
 void MapExtendBoundarySurfaceY();
 
-bool MapLargeScenerySignSetColour(const CoordsXYZD& signPos, int32_t sequence, uint8_t mainColour, uint8_t textColour);
+bool MapLargeScenerySignSetColour(
+    const CoordsXYZD& signPos, int32_t sequence, OpenRCT2::Drawing::Colour mainColour, OpenRCT2::Drawing::Colour textColour);
 
 void MapInvalidateTile(const CoordsXYRangedZ& tilePos);
 void MapInvalidateTileZoom1(const CoordsXYRangedZ& tilePos);

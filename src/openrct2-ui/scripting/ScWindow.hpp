@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -238,7 +238,7 @@ namespace OpenRCT2::Scripting
                 result.reserve(std::size(w->colours));
                 for (auto c : w->colours)
                 {
-                    auto colour = c.colour;
+                    auto colour = EnumValue(c.colour);
                     if (c.flags.has(ColourFlag::translucent))
                         colour |= kLegacyColourFlagTranslucent;
                     result.push_back(colour);
@@ -253,12 +253,12 @@ namespace OpenRCT2::Scripting
             {
                 for (size_t i = 0; i < std::size(w->colours); i++)
                 {
-                    auto c = ColourWithFlags{ COLOUR_BLACK };
+                    auto c = ColourWithFlags{ Drawing::Colour::black };
                     if (i < colours.size())
                     {
-                        colour_t colour = colours[i] & ~kLegacyColourFlagTranslucent;
+                        auto colour = (colours[i] & ~kLegacyColourFlagTranslucent) % Drawing::kColourNumTotal;
                         bool isTranslucent = (colours[i] & kLegacyColourFlagTranslucent);
-                        c.colour = std::clamp<colour_t>(colour, COLOUR_BLACK, COLOUR_COUNT - 1);
+                        c.colour = static_cast<Drawing::Colour>(colour);
                         c.flags.set(ColourFlag::translucent, isTranslucent);
                     }
                     w->colours[i] = c;

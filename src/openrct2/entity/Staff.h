@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -22,11 +22,14 @@ namespace OpenRCT2
     struct PathElement;
 } // namespace OpenRCT2
 
+namespace OpenRCT2::Drawing
+{
+    enum class Colour : uint8_t;
+}
+
 class DataSerialiser;
 class PatrolArea;
 struct Ride;
-
-using colour_t = uint8_t;
 
 enum class StaffType : uint8_t
 {
@@ -163,9 +166,9 @@ enum class EntertainerCostume : uint8_t
     Count
 };
 
-colour_t StaffGetColour(StaffType staffType);
-OpenRCT2::GameActions::Result StaffSetColour(StaffType staffType, colour_t value);
+OpenRCT2::Drawing::Colour StaffGetColour(StaffType staffType);
+OpenRCT2::GameActions::Result StaffSetColour(StaffType staffType, OpenRCT2::Drawing::Colour value);
 
 money64 GetStaffWage(StaffType type);
 
-const PatrolArea& GetMergedPatrolArea(const StaffType type);
+const PatrolArea& GetMergedPatrolArea(StaffType type);

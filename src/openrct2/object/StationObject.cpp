@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -14,7 +14,7 @@
 #include "../core/Json.hpp"
 #include "../core/String.hpp"
 #include "../drawing/Drawing.h"
-#include "../world/Banner.h"
+#include "../drawing/ScrollingText.h"
 
 namespace OpenRCT2
 {
@@ -50,8 +50,8 @@ namespace OpenRCT2
     {
         auto screenCoords = ScreenCoordsXY{ width / 2, (height / 2) + 16 };
 
-        auto colour0 = COLOUR_LIGHT_BLUE;
-        auto colour1 = COLOUR_BORDEAUX_RED;
+        auto colour0 = Drawing::Colour::lightBlue;
+        auto colour1 = Drawing::Colour::bordeauxRed;
         auto tcolour0 = colour0;
 
         auto imageId = ImageId(BaseImageId);

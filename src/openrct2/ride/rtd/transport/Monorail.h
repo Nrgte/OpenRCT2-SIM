@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -50,11 +50,11 @@ constexpr RideTypeDescriptor MonorailRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 60,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_GREY, COLOUR_GREY, COLOUR_DARK_OLIVE_GREEN },
-        { COLOUR_GREY, COLOUR_GREY, COLOUR_SATURATED_BROWN },
-        { COLOUR_GREY, COLOUR_BORDEAUX_RED, COLOUR_BORDEAUX_RED },
-        { COLOUR_BORDEAUX_RED, COLOUR_BORDEAUX_RED, COLOUR_BLACK },
-        { COLOUR_OLIVE_GREEN, COLOUR_OLIVE_GREEN, COLOUR_WHITE },
+        { Drawing::Colour::grey, Drawing::Colour::grey, Drawing::Colour::darkOliveGreen },
+        { Drawing::Colour::grey, Drawing::Colour::grey, Drawing::Colour::saturatedBrown },
+        { Drawing::Colour::grey, Drawing::Colour::bordeauxRed, Drawing::Colour::bordeauxRed },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::bordeauxRed, Drawing::Colour::black },
+        { Drawing::Colour::oliveGreen, Drawing::Colour::oliveGreen, Drawing::Colour::white },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_MONORAIL_TRACK, SPR_RIDE_DESIGN_PREVIEW_MONORAIL_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -64,7 +64,7 @@ constexpr RideTypeDescriptor MonorailRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 00), RideRating::make(0, 00), RideRating::make(0, 00) },
         14,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,            6000,     764, 0, 0 },

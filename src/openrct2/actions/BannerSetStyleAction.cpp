@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -11,6 +11,7 @@
 
 #include "../Context.h"
 #include "../Diagnostic.h"
+#include "../drawing/Drawing.h"
 #include "../drawing/ScrollingText.h"
 #include "../localisation/StringIdType.h"
 #include "../management/Finance.h"
@@ -92,7 +93,7 @@ namespace OpenRCT2::GameActions
         switch (_type)
         {
             case BannerSetStyleType::PrimaryColour:
-                if (_parameter > COLOUR_COUNT)
+                if (_parameter > Drawing::kColourNumTotal)
                 {
                     LOG_ERROR("Invalid primary colour %u", _parameter);
                     return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_INVALID_COLOUR);
@@ -146,7 +147,7 @@ namespace OpenRCT2::GameActions
         switch (_type)
         {
             case BannerSetStyleType::PrimaryColour:
-                banner->colour = _parameter;
+                banner->colour = static_cast<Drawing::Colour>(_parameter);
                 break;
             case BannerSetStyleType::TextColour:
                 banner->textColour = static_cast<Drawing::TextColour>(_parameter);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -64,8 +64,8 @@ namespace OpenRCT2
         STR_WHITE_STRING = 5139,
 
         // Colour dropdown tooltips
-        STR_COLOUR_AQUAMARINE_TIP = 5526,
-        STR_COLOUR_AQUA_DARK_TIP = 6569,
+        STR_COLOUR_LIGHT_WATER_TIP = 5526,
+        STR_COLOUR_DEEP_WATER_TIP = 6569,
         STR_COLOUR_BLACK_TIP = 5516,
         STR_COLOUR_BORDEAUX_RED_DARK_TIP = 6554,
         STR_COLOUR_BORDEAUX_RED_LIGHT_TIP = 6555,
@@ -116,7 +116,7 @@ namespace OpenRCT2
         STR_COLOUR_SATURATED_RED_TIP = 5543,
         STR_COLOUR_TAN_DARK_TIP = 6561,
         STR_COLOUR_TAN_LIGHT_TIP = 6562,
-        STR_COLOUR_TEAL_TIP = 5525,
+        STR_COLOUR_DARK_WATER_TIP = 5525,
         STR_COLOUR_VOID_TIP = 6574,
         STR_COLOUR_WHITE_TIP = 5518,
         STR_COLOUR_YELLOW_TIP = 5534,
@@ -433,6 +433,10 @@ namespace OpenRCT2
         STR_STAFF_CHEATS_TIP = 6669,
         STR_THIS_FEATURE_IS_CURRENTLY_UNSTABLE = 5563,
         STR_WARNING_IN_CAPS = 5562,
+        STR_WEATHER_CAPTION = 7018,
+        STR_WEATHER_DROPDOWN_ITEM = 7019,
+        STR_WEATHER_DROPDOWN_ITEM_ENLARGED = 7020,
+        STR_WEATHER_DROPDOWN_ITEM_ENLARGED_SELECTED = 7021,
         STR_WEATHER_NATURE_CHEATS_TIP = 6666,
         STR_YEAR = 6196,
         STR_CHEAT_IGNORE_PRICE_TIP = 6660,

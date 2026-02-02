@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -163,7 +163,7 @@ struct Vehicle : EntityBase
     Status status;
     uint8_t sub_state;
     EntityId peep[32];
-    uint8_t peep_tshirt_colours[32];
+    OpenRCT2::Drawing::Colour peep_tshirt_colours[32];
     uint8_t num_seats;
     uint8_t num_peeps;
     uint8_t next_free_seat;
@@ -221,13 +221,13 @@ struct Vehicle : EntityBase
 
     constexpr bool IsHead() const
     {
-        return SubType == Vehicle::Type::head;
+        return SubType == Type::head;
     }
     void Update();
     Vehicle* GetHead();
     const Vehicle* GetHead() const;
     Vehicle* GetCar(size_t carIndex) const;
-    void SetState(Vehicle::Status vehicleStatus, uint8_t subState = 0);
+    void SetState(Status vehicleStatus, uint8_t subState = 0);
     bool IsGhost() const;
     std::optional<EntityId> DodgemsCarWouldCollideAt(const CoordsXY& coords) const;
     int32_t UpdateTrackMotion(int32_t* outStation);
@@ -337,7 +337,7 @@ private:
     void UpdateSound();
     void GetLiftHillSound(const Ride& curRide, SoundIdVolume& curSound);
     OpenRCT2::Audio::SoundId UpdateScreamSound();
-    OpenRCT2::Audio::SoundId ProduceScreamSound(const int32_t totalNumPeeps);
+    OpenRCT2::Audio::SoundId ProduceScreamSound(int32_t totalNumPeeps);
     void UpdateCrashSetup();
     void UpdateCollisionSetup();
     int32_t UpdateMotionDodgems();
@@ -346,8 +346,7 @@ private:
     bool CurrentTowerElementIsTop();
     bool UpdateTrackMotionForwards(const CarEntry* carEntry, const Ride& curRide, const RideObjectEntry& rideEntry);
     bool UpdateTrackMotionBackwards(const CarEntry* carEntry, const Ride& curRide, const RideObjectEntry& rideEntry);
-    int32_t UpdateTrackMotionPoweredRideAcceleration(
-        const CarEntry* carEntry, uint32_t totalMass, const int32_t curAcceleration);
+    int32_t UpdateTrackMotionPoweredRideAcceleration(const CarEntry* carEntry, uint32_t totalMass, int32_t curAcceleration);
     int32_t NumPeepsUntilTrainTail() const;
     void InvalidateWindow();
     void TestReset();
@@ -385,7 +384,7 @@ private:
     void UpdateGoKartAttemptSwitchLanes();
     void UpdateSceneryDoor() const;
     void UpdateSceneryDoorBackwards() const;
-    void UpdateLandscapeDoors(const int32_t previousTrackHeight) const;
+    void UpdateLandscapeDoors(int32_t previousTrackHeight) const;
     int32_t CalculateRiderBraking() const;
     uint8_t ChooseBrakeSpeed() const;
     void PopulateBrakeSpeed(const CoordsXYZ& vehicleTrackLocation, OpenRCT2::TrackElement& brake);
@@ -562,9 +561,9 @@ void VehicleUpdateAll();
 void VehicleSoundsUpdate();
 uint16_t VehicleGetMoveInfoSize(VehicleTrackSubposition trackSubposition, OpenRCT2::TrackElemType type, uint8_t direction);
 
-void RideUpdateMeasurementsSpecialElements_Default(Ride& ride, const OpenRCT2::TrackElemType trackType);
-void RideUpdateMeasurementsSpecialElements_MiniGolf(Ride& ride, const OpenRCT2::TrackElemType trackType);
-void RideUpdateMeasurementsSpecialElements_WaterCoaster(Ride& ride, const OpenRCT2::TrackElemType trackType);
+void RideUpdateMeasurementsSpecialElements_Default(Ride& ride, OpenRCT2::TrackElemType trackType);
+void RideUpdateMeasurementsSpecialElements_MiniGolf(Ride& ride, OpenRCT2::TrackElemType trackType);
+void RideUpdateMeasurementsSpecialElements_WaterCoaster(Ride& ride, OpenRCT2::TrackElemType trackType);
 
 extern Vehicle* gCurrentVehicle;
 extern StationIndex _vehicleStationIndex;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -47,7 +47,7 @@ namespace OpenRCT2::PathFinding
     //std::vector<TileCoordsXYZ> GetTileNeighbours(const TileCoordsXYZ& coords);
     //uint8_t CalculateNeighbourZ(const TileCoordsXYZ& current, const TileCoordsXYZ& neighbor, const PathElement* element);
 
-}; // namespace OpenRCT2::PathFinding
+}
 
 namespace AdvancedPathfinding
 {
@@ -58,3 +58,4 @@ namespace AdvancedPathfinding
     std::deque<StationIndex> GetSortedStationQueue(Peep& peep, Ride* ride);
     void CalculatePathfinding(Guest& peep, Ride* ride, TileCoordsXYZ loc, std::promise<TileCoordsXYZ> promise);
 };
+

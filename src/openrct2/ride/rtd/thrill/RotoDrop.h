@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -48,8 +48,8 @@ constexpr RideTypeDescriptor RotoDropRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 45,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BORDEAUX_RED, COLOUR_YELLOW, COLOUR_GREY },
-        { COLOUR_BLACK, COLOUR_LIGHT_BLUE, COLOUR_GREY },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::yellow, Drawing::Colour::grey },
+        { Drawing::Colour::black, Drawing::Colour::lightBlue, Drawing::Colour::grey },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_ROTO_DROP_TRACK, SPR_RIDE_DESIGN_PREVIEW_ROTO_DROP_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -59,7 +59,7 @@ constexpr RideTypeDescriptor RotoDropRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 80), RideRating::make(3, 50), RideRating::make(3, 50) },
         24,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusProximity,   0, 11183, 0, 0 },

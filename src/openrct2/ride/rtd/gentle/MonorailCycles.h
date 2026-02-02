@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -50,8 +50,8 @@ constexpr RideTypeDescriptor MonorailCyclesRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 45,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_DARK_BROWN, COLOUR_GREY, COLOUR_DARK_BROWN },
-        { COLOUR_GREY, COLOUR_BLACK, COLOUR_GREY },
+        { Drawing::Colour::darkBrown, Drawing::Colour::grey, Drawing::Colour::darkBrown },
+        { Drawing::Colour::grey, Drawing::Colour::black, Drawing::Colour::grey },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_MONORAIL_CYCLES_TRACK, SPR_RIDE_DESIGN_PREVIEW_MONORAIL_CYCLES_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -61,7 +61,7 @@ constexpr RideTypeDescriptor MonorailCyclesRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(1, 40), RideRating::make(0, 20), RideRating::make(0, 00) },
         4,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

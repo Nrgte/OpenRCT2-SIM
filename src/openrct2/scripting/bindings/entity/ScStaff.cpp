@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -16,6 +16,7 @@
     #include "../../../object/ObjectManager.h"
     #include "../../../object/PeepAnimationsObject.h"
     #include "../../../peep/PeepAnimations.h"
+    #include "../../../rct12/RCT12.h"
     #include "../../../world/Map.h"
 
 namespace OpenRCT2::Scripting
@@ -44,7 +45,7 @@ namespace OpenRCT2::Scripting
 
     Staff* ScStaff::GetStaff() const
     {
-        return OpenRCT2::getGameState().entities.GetEntity<Staff>(_id);
+        return getGameState().entities.GetEntity<Staff>(_id);
     }
 
     std::string ScStaff::staffType_get() const
@@ -110,7 +111,7 @@ namespace OpenRCT2::Scripting
     uint8_t ScStaff::colour_get() const
     {
         auto peep = GetStaff();
-        return peep != nullptr ? peep->TshirtColour : 0;
+        return peep != nullptr ? EnumValue(peep->TshirtColour) : 0;
     }
 
     void ScStaff::colour_set(uint8_t value)
@@ -119,8 +120,7 @@ namespace OpenRCT2::Scripting
         auto peep = GetStaff();
         if (peep != nullptr)
         {
-            peep->TshirtColour = value;
-            peep->TrousersColour = value;
+            peep->TshirtColour = static_cast<Drawing::Colour>(value);
             peep->Invalidate();
         }
     }
@@ -421,7 +421,7 @@ namespace OpenRCT2::Scripting
 
     Staff* ScHandyman::GetHandyman() const
     {
-        return OpenRCT2::getGameState().entities.GetEntity<Staff>(_id);
+        return getGameState().entities.GetEntity<Staff>(_id);
     }
 
     DukValue ScHandyman::lawnsMown_get() const
@@ -502,7 +502,7 @@ namespace OpenRCT2::Scripting
 
     Staff* ScMechanic::GetMechanic() const
     {
-        return OpenRCT2::getGameState().entities.GetEntity<Staff>(_id);
+        return getGameState().entities.GetEntity<Staff>(_id);
     }
 
     DukValue ScMechanic::ridesFixed_get() const
@@ -550,7 +550,7 @@ namespace OpenRCT2::Scripting
 
     Staff* ScSecurity::GetSecurity() const
     {
-        return OpenRCT2::getGameState().entities.GetEntity<Staff>(_id);
+        return getGameState().entities.GetEntity<Staff>(_id);
     }
 
     DukValue ScSecurity::vandalsStopped_get() const

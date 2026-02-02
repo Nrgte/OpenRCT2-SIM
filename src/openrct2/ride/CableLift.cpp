@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -55,12 +55,12 @@ Vehicle* CableLiftSegmentCreate(
     current->spin_sprite = 0;
     current->spin_speed = 0;
     current->sound2_flags = 0;
-    current->sound1_id = OpenRCT2::Audio::SoundId::null;
-    current->sound2_id = OpenRCT2::Audio::SoundId::null;
+    current->sound1_id = Audio::SoundId::null;
+    current->sound2_id = Audio::SoundId::null;
     current->CollisionDetectionTimer = 0;
     current->animation_frame = 0;
     current->animationState = 0;
-    current->scream_sound_id = OpenRCT2::Audio::SoundId::null;
+    current->scream_sound_id = Audio::SoundId::null;
     current->pitch = VehiclePitch::flat;
     current->roll = VehicleRoll::unbanked;
     for (auto& peep : current->peep)
@@ -90,22 +90,22 @@ void Vehicle::CableLiftUpdate()
 {
     switch (status)
     {
-        case Vehicle::Status::movingToEndOfStation:
+        case Status::movingToEndOfStation:
             CableLiftUpdateMovingToEndOfStation();
             break;
-        case Vehicle::Status::waitingForPassengers:
+        case Status::waitingForPassengers:
             // Stays in this state until a train puts it into next state
             break;
-        case Vehicle::Status::waitingToDepart:
+        case Status::waitingToDepart:
             CableLiftUpdateWaitingToDepart();
             break;
-        case Vehicle::Status::departing:
+        case Status::departing:
             CableLiftUpdateDeparting();
             break;
-        case Vehicle::Status::travelling:
+        case Status::travelling:
             CableLiftUpdateTravelling();
             break;
-        case Vehicle::Status::arriving:
+        case Status::arriving:
             CableLiftUpdateArriving();
             break;
         default:
@@ -135,7 +135,7 @@ void Vehicle::CableLiftUpdateMovingToEndOfStation()
 
     velocity = 0;
     acceleration = 0;
-    SetState(Vehicle::Status::waitingForPassengers, sub_state);
+    SetState(Status::waitingForPassengers, sub_state);
 }
 
 /**
@@ -175,7 +175,7 @@ void Vehicle::CableLiftUpdateWaitingToDepart()
 
     velocity = 0;
     acceleration = 0;
-    SetState(Vehicle::Status::departing, 0);
+    SetState(Status::departing, 0);
 }
 
 /**
@@ -193,8 +193,8 @@ void Vehicle::CableLiftUpdateDeparting()
     {
         return;
     }
-    SetState(Vehicle::Status::travelling, sub_state);
-    passengerVehicle->SetState(Vehicle::Status::travellingCableLift, passengerVehicle->sub_state);
+    SetState(Status::travelling, sub_state);
+    passengerVehicle->SetState(Status::travellingCableLift, passengerVehicle->sub_state);
 }
 
 /**
@@ -219,7 +219,7 @@ void Vehicle::CableLiftUpdateTravelling()
 
     velocity = 0;
     acceleration = 0;
-    SetState(Vehicle::Status::arriving, 0);
+    SetState(Status::arriving, 0);
 }
 
 /**
@@ -230,7 +230,7 @@ void Vehicle::CableLiftUpdateArriving()
 {
     sub_state++;
     if (sub_state >= 64)
-        SetState(Vehicle::Status::movingToEndOfStation, sub_state);
+        SetState(Status::movingToEndOfStation, sub_state);
 }
 
 bool Vehicle::CableLiftUpdateTrackMotionForwards()

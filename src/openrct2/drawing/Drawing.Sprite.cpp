@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -33,13 +33,15 @@ using namespace OpenRCT2;
 using namespace OpenRCT2::Drawing;
 using namespace OpenRCT2::Ui;
 
+static constexpr uint8_t kPaletteLengthRemap = 12;
+
 /**
  * 12 elements from 0xF3 are the peep top colour, 12 elements from 0xCA are peep trouser colour
  *
  * rct2: 0x0009ABE0C
  */
 // clang-format off
-static thread_local uint8_t secondaryRemapPalette[256] = {
+static thread_local uint8_t kSecondaryRemapPalette[256] = {
     0x00, 0xF3, 0xF4, 0xF5, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
     0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
@@ -59,7 +61,7 @@ static thread_local uint8_t secondaryRemapPalette[256] = {
 };
 
 /** rct2: 0x009ABF0C */
-static thread_local uint8_t tertiaryRemapPalette[256] = {
+static thread_local uint8_t kTertiaryRemapPalette[256] = {
     0x00, 0xF3, 0xF4, 0xF5, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
     0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
@@ -436,9 +438,10 @@ static void MaskMagnify(
 static Gx _g1 = {};
 static Gx _g2 = {};
 static Gx _fonts = {};
+static Gx _palettes = {};
 static Gx _tracks = {};
 static Gx _csg = {};
-static G1Element _scrollingText[Drawing::ScrollingText::kMaxEntries]{};
+static G1Element _scrollingText[ScrollingText::kMaxEntries]{};
 static bool _csgLoaded = false;
 
 static G1Element _g1Temp = {};
@@ -509,14 +512,20 @@ void GfxUnloadG1()
     _g1.elements.shrink_to_fit();
 }
 
-void GfxUnloadG2AndFonts()
+void GfxUnloadG2PalettesFontsTracks()
 {
     _g2.data.reset();
     _g2.elements.clear();
     _g2.elements.shrink_to_fit();
+
+    _palettes.data.reset();
+    _palettes.elements.clear();
+    _palettes.elements.shrink_to_fit();
+
     _fonts.data.reset();
     _fonts.elements.clear();
     _fonts.elements.shrink_to_fit();
+
     _tracks.data.reset();
     _tracks.elements.clear();
     _tracks.elements.shrink_to_fit();
@@ -527,6 +536,7 @@ void GfxUnloadCsg()
     _csg.data.reset();
     _csg.elements.clear();
     _csg.elements.shrink_to_fit();
+    _csgLoaded = false;
 }
 
 static bool GfxLoadOpenRCT2Gx(std::string filename, Gx& target, size_t expectedNumItems)
@@ -596,9 +606,10 @@ static bool GfxLoadOpenRCT2Gx(std::string filename, Gx& target, size_t expectedN
     return false;
 }
 
-void GfxLoadG2FontsAndTracks()
+void GfxLoadG2PalettesFontsTracks()
 {
     GfxLoadOpenRCT2Gx("g2.dat", _g2, kG2SpriteCount);
+    GfxLoadOpenRCT2Gx("palettes.dat", _palettes, kPalettesDatSpriteCount);
     GfxLoadOpenRCT2Gx("fonts.dat", _fonts, kFontsDatSpriteCount);
     GfxLoadOpenRCT2Gx("tracks.dat", _tracks, kTracksDatSpriteCount);
 }
@@ -672,7 +683,7 @@ std::optional<Gx> GfxLoadGx(const std::vector<uint8_t>& buffer)
 {
     try
     {
-        OpenRCT2::MemoryStream istream(buffer.data(), buffer.size());
+        MemoryStream istream(buffer.data(), buffer.size());
         Gx gx;
 
         gx.header = istream.ReadValue<G1Header>();
@@ -702,32 +713,33 @@ static std::optional<PaletteMap> FASTCALL GfxDrawSpriteGetPalette(ImageId imageI
         {
             paletteId &= 0x7F;
         }
-        return GetPaletteMapForColour(paletteId);
+        return GetPaletteMapForColour(static_cast<FilterPaletteID>(paletteId));
     }
 
-    auto paletteMap = PaletteMap(secondaryRemapPalette);
+    auto paletteMap = PaletteMap(std::span(reinterpret_cast<PaletteIndex*>(kSecondaryRemapPalette), 256));
     if (imageId.HasTertiary())
     {
-        paletteMap = PaletteMap(tertiaryRemapPalette);
-        auto tertiaryPaletteMap = GetPaletteMapForColour(imageId.GetTertiary());
+        paletteMap = PaletteMap(std::span(reinterpret_cast<PaletteIndex*>(kTertiaryRemapPalette), 256));
+        auto tertiaryPaletteMap = GetPaletteMapForColour(static_cast<FilterPaletteID>(imageId.GetTertiary()));
         if (tertiaryPaletteMap.has_value())
         {
             paletteMap.Copy(
-                kPaletteOffsetRemapTertiary, tertiaryPaletteMap.value(), kPaletteOffsetRemapPrimary, kPaletteLengthRemap);
+                PaletteIndex::tertiaryRemap0, tertiaryPaletteMap.value(), PaletteIndex::primaryRemap0, kPaletteLengthRemap);
         }
     }
 
-    auto primaryPaletteMap = GetPaletteMapForColour(imageId.GetPrimary());
+    auto primaryPaletteMap = GetPaletteMapForColour(static_cast<FilterPaletteID>(imageId.GetPrimary()));
     if (primaryPaletteMap.has_value())
     {
-        paletteMap.Copy(kPaletteOffsetRemapPrimary, primaryPaletteMap.value(), kPaletteOffsetRemapPrimary, kPaletteLengthRemap);
+        paletteMap.Copy(
+            PaletteIndex::primaryRemap0, primaryPaletteMap.value(), PaletteIndex::primaryRemap0, kPaletteLengthRemap);
     }
 
-    auto secondaryPaletteMap = GetPaletteMapForColour(imageId.GetSecondary());
+    auto secondaryPaletteMap = GetPaletteMapForColour(static_cast<FilterPaletteID>(imageId.GetSecondary()));
     if (secondaryPaletteMap.has_value())
     {
         paletteMap.Copy(
-            kPaletteOffsetRemapSecondary, secondaryPaletteMap.value(), kPaletteOffsetRemapPrimary, kPaletteLengthRemap);
+            PaletteIndex::secondaryRemap0, secondaryPaletteMap.value(), PaletteIndex::primaryRemap0, kPaletteLengthRemap);
     }
 
     return paletteMap;
@@ -751,7 +763,7 @@ void FASTCALL GfxDrawSpriteSoftware(RenderTarget& rt, const ImageId imageId, con
  * image_id (ebx) and also (0x00EDF81C)
  * palette_pointer (0x9ABDA4)
  * unknown_pointer (0x9E3CDC)
- * dpi (edi)
+ * rt (edi)
  * x (cx)
  * y (dx)
  */
@@ -1053,6 +1065,16 @@ const G1Element* GfxGetG1Element(ImageIndex image_id)
 
         LOG_WARNING("Invalid entry in g2.dat requested, idx = %u. You may have to update your g2.dat.", idx);
     }
+    else if (offset < SPR_PALETTE_END)
+    {
+        size_t idx = offset - SPR_PALETTE_START;
+        if (idx < _palettes.header.numEntries)
+        {
+            return &_palettes.elements[idx];
+        }
+
+        LOG_WARNING("Invalid entry in palettes.dat requested, idx = %u. You may have to update your palettes.dat.", idx);
+    }
     else if (offset < SPR_FONTS_END)
     {
         size_t idx = offset - SPR_FONTS_BEGIN;
@@ -1103,6 +1125,15 @@ const G1Element* GfxGetG1Element(ImageIndex image_id)
         }
     }
     return nullptr;
+}
+
+const G1Palette* GfxGetG1Palette(ImageIndex imageId)
+{
+    const auto* element = GfxGetG1Element(imageId);
+    if (element == nullptr)
+        return nullptr;
+
+    return element->asPalette();
 }
 
 void GfxSetG1Element(ImageIndex imageId, const G1Element* g1)
@@ -1161,9 +1192,9 @@ bool IsCsgLoaded()
 
 size_t G1CalculateDataSize(const G1Element* g1)
 {
-    if (g1->flags.has(G1Flag::isPalette))
+    if (const auto* asPalette = g1->asPalette())
     {
-        return g1->numColours * 3;
+        return asPalette->numColours * 3;
     }
 
     if (g1->flags.has(G1Flag::hasRLECompression))

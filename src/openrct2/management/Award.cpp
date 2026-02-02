@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -13,6 +13,7 @@
 #include "../config/Config.h"
 #include "../entity/EntityList.h"
 #include "../entity/Guest.h"
+#include "../localisation/Formatter.h"
 #include "../profiling/Profiling.h"
 #include "../ride/Ride.h"
 #include "../ride/RideData.h"
@@ -490,11 +491,11 @@ static bool AwardIsDeservedBestCustomDesignedRides(GameState_t& gameState, int32
 static bool AwardIsDeservedMostDazzlingRideColours(GameState_t& gameState, int32_t activeAwardTypes)
 {
     /** At least 5 colourful rides and more than half of the rides are colourful. */
-    static constexpr colour_t dazzling_ride_colours[] = {
-        COLOUR_BRIGHT_PURPLE,
-        COLOUR_BRIGHT_GREEN,
-        COLOUR_LIGHT_ORANGE,
-        COLOUR_BRIGHT_PINK,
+    static constexpr OpenRCT2::Drawing::Colour dazzling_ride_colours[] = {
+        OpenRCT2::Drawing::Colour::brightPurple,
+        OpenRCT2::Drawing::Colour::brightGreen,
+        OpenRCT2::Drawing::Colour::lightOrange,
+        OpenRCT2::Drawing::Colour::brightPink,
     };
 
     if (activeAwardTypes & EnumToFlag(AwardType::mostDisappointing))
@@ -652,7 +653,7 @@ void AwardUpdateAll()
         }
 
         // Check if there was a free award entry
-        if (currentAwards.size() < OpenRCT2::Limits::kMaxAwards)
+        if (currentAwards.size() < Limits::kMaxAwards)
         {
             // Get a random award type not already active
             AwardType awardType;
@@ -678,7 +679,7 @@ void AwardGrant(AwardType type)
     std::erase_if(currentAwards, [type](const Award& award) { return award.Type == type; });
 
     // Ensure there is space for the award
-    if (currentAwards.size() >= OpenRCT2::Limits::kMaxAwards)
+    if (currentAwards.size() >= Limits::kMaxAwards)
     {
         currentAwards.erase(currentAwards.begin());
     }

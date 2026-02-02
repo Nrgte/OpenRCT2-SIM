@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -315,9 +315,9 @@ public:
     uint8_t Angriness;
     uint8_t TimeLost; // the time the peep has been lost when it reaches 254 generates the lost thought
     uint8_t DaysInQueue;
-    uint8_t BalloonColour;
-    uint8_t UmbrellaColour;
-    uint8_t HatColour;
+    OpenRCT2::Drawing::Colour BalloonColour;
+    OpenRCT2::Drawing::Colour UmbrellaColour;
+    OpenRCT2::Drawing::Colour HatColour;
     RideId FavouriteRide;
     uint8_t FavouriteRideRating;
     uint64_t ItemFlags;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -52,6 +52,11 @@ std::string Banner::getText() const
 
 void Banner::formatTextWithColourTo(Formatter& ft) const
 {
+    // Use thread_local buffer to avoid race conditions during multithreaded rendering.
+    // Multiple threads can call this on the same Banner simultaneously when rendering
+    // different viewport columns in parallel.
+    thread_local std::string formattedTextBuffer;
+
     auto formatToken = FormatTokenFromTextColour(textColour);
     formattedTextBuffer = FormatTokenToStringWithBraces(formatToken);
     ft.Add<StringId>(STR_STRING_STRINGID);
@@ -441,7 +446,7 @@ Banner* CreateBanner()
         banner->flags = {};
         banner->type = 0;
         banner->text = {};
-        banner->colour = COLOUR_WHITE;
+        banner->colour = OpenRCT2::Drawing::Colour::white;
         banner->textColour = Drawing::TextColour::white;
     }
     return banner;

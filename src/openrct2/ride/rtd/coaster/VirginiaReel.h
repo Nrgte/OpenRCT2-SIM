@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -46,9 +46,9 @@ constexpr RideTypeDescriptor VirginiaReelRTD =
     .PhotoItem = ShopItem::photo3,
     .BonusValue = 50,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_SATURATED_BROWN, COLOUR_GREY, COLOUR_SATURATED_BROWN },
-        { COLOUR_BLACK, COLOUR_DARK_BROWN, COLOUR_DARK_BROWN },
-        { COLOUR_DARK_BROWN, COLOUR_BORDEAUX_RED, COLOUR_DARK_BROWN },
+        { Drawing::Colour::saturatedBrown, Drawing::Colour::grey, Drawing::Colour::saturatedBrown },
+        { Drawing::Colour::black, Drawing::Colour::darkBrown, Drawing::Colour::darkBrown },
+        { Drawing::Colour::darkBrown, Drawing::Colour::bordeauxRed, Drawing::Colour::darkBrown },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_VIRGINIA_REEL_TRACK, SPR_RIDE_DESIGN_PREVIEW_VIRGINIA_REEL_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -58,7 +58,7 @@ constexpr RideTypeDescriptor VirginiaReelRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 10), RideRating::make(1, 90), RideRating::make(3, 70) },
         19,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             873, 0, 0 },

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -74,7 +74,7 @@ namespace OpenRCT2
     {
         auto screenCoords = ScreenCoordsXY{ width / 2, height / 2 };
 
-        const auto imageId = ImageId(_legacyType.image + 1, COLOUR_DARK_GREEN);
+        const auto imageId = ImageId(_legacyType.image + 1, Drawing::Colour::darkGreen);
         GfxDrawSprite(rt, imageId, screenCoords - ScreenCoordsXY{ 15, 14 });
     }
 

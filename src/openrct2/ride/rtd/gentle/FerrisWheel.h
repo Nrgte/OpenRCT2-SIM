@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -49,8 +49,8 @@ constexpr RideTypeDescriptor FerrisWheelRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 45,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BLACK, COLOUR_BLACK, COLOUR_BLACK },
-        { COLOUR_GREY, COLOUR_GREY, COLOUR_GREY },
+        { Drawing::Colour::black, Drawing::Colour::black, Drawing::Colour::black },
+        { Drawing::Colour::grey, Drawing::Colour::grey, Drawing::Colour::grey },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_FERRIS_WHEEL_TRACK, 0 },
     .ColourKey = RideColourKey::Ride,

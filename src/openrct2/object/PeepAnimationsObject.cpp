@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -14,6 +14,7 @@
 #include "../core/EnumMap.hpp"
 #include "../core/Guard.hpp"
 #include "../core/Json.hpp"
+#include "../drawing/Drawing.h"
 #include "../peep/PeepAnimations.h"
 #include "../rct12/RCT12.h"
 #include "ObjectRepository.h"
@@ -213,10 +214,18 @@ namespace OpenRCT2
         GfxDrawSprite(rt, ImageId(_imageOffsetId + 0), centre + ScreenCoordsXY{ -8, -8 });
 
         // Draw four cardinal directions around the inline sprite
-        GfxDrawSprite(rt, ImageId(_imageOffsetId + 4, COLOUR_BRIGHT_RED, COLOUR_TEAL), centre + ScreenCoordsXY{ -32, -24 });
-        GfxDrawSprite(rt, ImageId(_imageOffsetId + 2, COLOUR_BRIGHT_RED, COLOUR_TEAL), centre + ScreenCoordsXY{ +32, +32 });
-        GfxDrawSprite(rt, ImageId(_imageOffsetId + 1, COLOUR_BRIGHT_RED, COLOUR_TEAL), centre + ScreenCoordsXY{ +32, -24 });
-        GfxDrawSprite(rt, ImageId(_imageOffsetId + 3, COLOUR_BRIGHT_RED, COLOUR_TEAL), centre + ScreenCoordsXY{ -32, +32 });
+        GfxDrawSprite(
+            rt, ImageId(_imageOffsetId + 4, Drawing::Colour::brightRed, Drawing::Colour::darkWater),
+            centre + ScreenCoordsXY{ -32, -24 });
+        GfxDrawSprite(
+            rt, ImageId(_imageOffsetId + 2, Drawing::Colour::brightRed, Drawing::Colour::darkWater),
+            centre + ScreenCoordsXY{ +32, +32 });
+        GfxDrawSprite(
+            rt, ImageId(_imageOffsetId + 1, Drawing::Colour::brightRed, Drawing::Colour::darkWater),
+            centre + ScreenCoordsXY{ +32, -24 });
+        GfxDrawSprite(
+            rt, ImageId(_imageOffsetId + 3, Drawing::Colour::brightRed, Drawing::Colour::darkWater),
+            centre + ScreenCoordsXY{ -32, +32 });
     }
 
     void PeepAnimationsObject::SetRepositoryItem(ObjectRepositoryItem* item) const

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -51,9 +51,9 @@ constexpr RideTypeDescriptor SuspendedMonorailRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 60,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BORDEAUX_RED, COLOUR_BLACK, COLOUR_BLACK },
-        { COLOUR_DARK_PURPLE, COLOUR_DARK_PURPLE, COLOUR_BLACK },
-        { COLOUR_DARK_GREEN, COLOUR_DARK_GREEN, COLOUR_BLACK },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::black, Drawing::Colour::black },
+        { Drawing::Colour::darkPurple, Drawing::Colour::darkPurple, Drawing::Colour::black },
+        { Drawing::Colour::darkGreen, Drawing::Colour::darkGreen, Drawing::Colour::black },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_SUSPENDED_MONORAIL_TRACK, SPR_RIDE_DESIGN_PREVIEW_SUSPENDED_MONORAIL_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -63,7 +63,7 @@ constexpr RideTypeDescriptor SuspendedMonorailRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 15), RideRating::make(0, 23), RideRating::make(0, 8) },
         14,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,            6000,             764, 0, 0 },

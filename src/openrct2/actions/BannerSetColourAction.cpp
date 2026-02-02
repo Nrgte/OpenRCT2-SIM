@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -20,7 +20,7 @@
 
 namespace OpenRCT2::GameActions
 {
-    BannerSetColourAction::BannerSetColourAction(const CoordsXYZD& loc, uint8_t primaryColour)
+    BannerSetColourAction::BannerSetColourAction(const CoordsXYZD& loc, Drawing::Colour primaryColour)
         : _loc(loc)
         , _primaryColour(primaryColour)
     {
@@ -69,7 +69,7 @@ namespace OpenRCT2::GameActions
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_OFF_EDGE_OF_MAP);
         }
 
-        if (_primaryColour > 31)
+        if (!Drawing::colourIsValid(_primaryColour))
         {
             LOG_ERROR("Invalid primary colour %u", _primaryColour);
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_INVALID_COLOUR);

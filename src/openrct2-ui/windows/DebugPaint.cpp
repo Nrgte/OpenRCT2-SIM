@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -11,6 +11,7 @@
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/Context.h>
 #include <openrct2/core/Guard.hpp>
+#include <openrct2/drawing/Drawing.h>
 #include <openrct2/interface/ColourWithFlags.h>
 #include <openrct2/localisation/Language.h>
 #include <openrct2/localisation/LocalisationService.h>
@@ -61,8 +62,8 @@ namespace OpenRCT2::Ui::Windows
             initScrollWidgets();
             WindowPushOthersBelow(*this);
 
-            colours[0] = ColourWithFlags{ COLOUR_BLACK }.withFlag(ColourFlag::translucent, true);
-            colours[1] = COLOUR_GREY;
+            colours[0] = ColourWithFlags{ Drawing::Colour::black }.withFlag(ColourFlag::translucent, true);
+            colours[1] = Drawing::Colour::grey;
 
             ResizeLanguage = LANGUAGE_UNDEFINED;
         }
@@ -110,7 +111,7 @@ namespace OpenRCT2::Ui::Windows
 
         void onPrepareDraw() override
         {
-            const auto& ls = OpenRCT2::GetContext()->GetLocalisationService();
+            const auto& ls = GetContext()->GetLocalisationService();
             const auto currentLanguage = ls.GetCurrentLanguage();
             if (ResizeLanguage != currentLanguage)
             {

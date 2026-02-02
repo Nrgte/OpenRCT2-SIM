@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -50,11 +50,11 @@ constexpr RideTypeDescriptor InvertedImpulseCoasterRTD =
     .PhotoItem = ShopItem::photo2,
     .BonusValue = 75,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_GREY },
-        { COLOUR_YELLOW, COLOUR_YELLOW, COLOUR_WHITE },
-        { COLOUR_BRIGHT_PURPLE, COLOUR_BRIGHT_PURPLE, COLOUR_BORDEAUX_RED },
-        { COLOUR_BRIGHT_YELLOW, COLOUR_BRIGHT_YELLOW, COLOUR_BORDEAUX_RED }, // Volcano: The Blast Coaster
-        { COLOUR_BRIGHT_YELLOW, COLOUR_BRIGHT_YELLOW, COLOUR_TEAL }, // Wicked Twister
+        { Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::grey },
+        { Drawing::Colour::yellow, Drawing::Colour::yellow, Drawing::Colour::white },
+        { Drawing::Colour::brightPurple, Drawing::Colour::brightPurple, Drawing::Colour::bordeauxRed },
+        { Drawing::Colour::brightYellow, Drawing::Colour::brightYellow, Drawing::Colour::bordeauxRed }, // Volcano: The Blast Coaster
+        { Drawing::Colour::brightYellow, Drawing::Colour::brightYellow, Drawing::Colour::darkWater }, // Wicked Twister
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_INVERTED_IMPULSE_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_INVERTED_IMPULSE_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -64,7 +64,7 @@ constexpr RideTypeDescriptor InvertedImpulseCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(4, 00), RideRating::make(3, 00), RideRating::make(3, 20) },
         20,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

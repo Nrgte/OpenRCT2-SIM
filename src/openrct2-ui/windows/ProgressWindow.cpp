@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -46,23 +46,23 @@ namespace OpenRCT2::Ui::Windows
 
     static std::array<LoaderVehicleStyle, 4> kVehicleStyles = { {
         {
-            ImageId{SPR_G2_LOADER_HYBRID_SUPPORTS, COLOUR_LIGHT_ORANGE, COLOUR_DARK_BROWN },
-            ImageId{SPR_G2_LOADER_HYBRID_TRACK, COLOUR_LIGHT_ORANGE, COLOUR_LIGHT_ORANGE },
-            ImageId{SPR_G2_LOADER_HYBRID_VEHICLE, COLOUR_OLIVE_GREEN, COLOUR_OLIVE_GREEN, COLOUR_BRIGHT_RED }
+            ImageId{SPR_G2_LOADER_HYBRID_SUPPORTS, Drawing::Colour::lightOrange, Drawing::Colour::darkBrown },
+            ImageId{SPR_G2_LOADER_HYBRID_TRACK, Drawing::Colour::lightOrange, Drawing::Colour::lightOrange },
+            ImageId{SPR_G2_LOADER_HYBRID_VEHICLE, Drawing::Colour::oliveGreen, Drawing::Colour::oliveGreen, Drawing::Colour::brightRed }
         },
         {
-            ImageId{SPR_G2_LOADER_STEEL_SUPPORTS, COLOUR_LIGHT_BROWN, COLOUR_BLACK },
-            ImageId{SPR_G2_LOADER_STEEL_TRACK, COLOUR_LIGHT_BROWN, COLOUR_LIGHT_BROWN },
-            ImageId{SPR_G2_LOADER_STEEL_VEHICLE, COLOUR_LIGHT_BLUE, COLOUR_WHITE, COLOUR_LIGHT_BLUE }
+            ImageId{SPR_G2_LOADER_STEEL_SUPPORTS, Drawing::Colour::lightBrown, Drawing::Colour::black },
+            ImageId{SPR_G2_LOADER_STEEL_TRACK, Drawing::Colour::lightBrown, Drawing::Colour::lightBrown },
+            ImageId{SPR_G2_LOADER_STEEL_VEHICLE, Drawing::Colour::lightBlue, Drawing::Colour::white, Drawing::Colour::lightBlue }
         },
         {
-            ImageId{SPR_G2_LOADER_WOODEN_SUPPORTS, COLOUR_BLACK, COLOUR_WHITE },
-            ImageId{SPR_G2_LOADER_WOODEN_TRACK, COLOUR_BORDEAUX_RED, COLOUR_BLACK },
-            ImageId{SPR_G2_LOADER_WOODEN_VEHICLE, COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_SATURATED_BROWN}
+            ImageId{SPR_G2_LOADER_WOODEN_SUPPORTS, Drawing::Colour::black, Drawing::Colour::white },
+            ImageId{SPR_G2_LOADER_WOODEN_TRACK, Drawing::Colour::bordeauxRed, Drawing::Colour::black },
+            ImageId{SPR_G2_LOADER_WOODEN_VEHICLE, Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::saturatedBrown}
         },
         {
-            ImageId{SPR_G2_LOADER_GO_KARTS_SUPPORTS, COLOUR_DARK_BROWN, COLOUR_DARK_BROWN },
-            ImageId{SPR_G2_LOADER_GO_KARTS_TRACK, COLOUR_BLACK, COLOUR_BLACK },
+            ImageId{SPR_G2_LOADER_GO_KARTS_SUPPORTS, Drawing::Colour::darkBrown, Drawing::Colour::darkBrown },
+            ImageId{SPR_G2_LOADER_GO_KARTS_TRACK, Drawing::Colour::black, Drawing::Colour::black },
             ImageId{SPR_G2_LOADER_GO_KARTS_VEHICLES }
         },
     } };
@@ -178,20 +178,20 @@ namespace OpenRCT2::Ui::Windows
             auto& widget = widgets[WIDX_TITLE];
             auto screenCoords = windowPos + ScreenCoordsXY{ widget.left, widget.bottom + 1 };
 
-            Drawing::RenderTarget clipDPI;
-            if (!ClipDrawPixelInfo(clipDPI, rt, screenCoords, width - 3, height - widget.bottom - 3))
+            Drawing::RenderTarget clipRT;
+            if (!ClipRenderTarget(clipRT, rt, screenCoords, width - 3, height - widget.bottom - 3))
                 return;
 
             auto& variant = kVehicleStyles[style];
 
             // Draw supports sprite -- twice, to fill the window
             auto trackCoords = ScreenCoordsXY{ widget.left, widget.bottom + 1 };
-            GfxDrawSprite(clipDPI, variant.supports, trackCoords);
-            GfxDrawSprite(clipDPI, variant.supports, trackCoords + ScreenCoordsXY(256, 0));
+            GfxDrawSprite(clipRT, variant.supports, trackCoords);
+            GfxDrawSprite(clipRT, variant.supports, trackCoords + ScreenCoordsXY(256, 0));
 
             // Draw track sprite -- twice, to fill the window
-            GfxDrawSprite(clipDPI, variant.track, trackCoords);
-            GfxDrawSprite(clipDPI, variant.track, trackCoords + ScreenCoordsXY(256, 0));
+            GfxDrawSprite(clipRT, variant.track, trackCoords);
+            GfxDrawSprite(clipRT, variant.track, trackCoords + ScreenCoordsXY(256, 0));
 
             // Figure out where to position the vehicle to indicate progress
             auto* vehicle = GfxGetG1Element(variant.vehicle);
@@ -207,7 +207,7 @@ namespace OpenRCT2::Ui::Windows
                 position = (vehicleWidth + width) / 2;
             }
 
-            GfxDrawSprite(clipDPI, variant.vehicle, ScreenCoordsXY(position, widget.bottom + 1));
+            GfxDrawSprite(clipRT, variant.vehicle, ScreenCoordsXY(position, widget.bottom + 1));
         }
 
         void setCaption(const std::string& text)

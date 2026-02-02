@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -227,7 +227,7 @@ private:
 
         try
         {
-            auto& objRepository = OpenRCT2::GetContext()->GetObjectRepository();
+            auto& objRepository = GetContext()->GetObjectRepository();
             std::unique_ptr<IParkImporter> importer;
             std::string extension = Path::GetExtension(path);
 
@@ -245,7 +245,8 @@ private:
             {
                 importer = ParkImporter::CreateS6(objRepository);
                 auto stream = GetStreamFromRCT2Scenario(path);
-                importer->LoadFromStream(stream.get(), true);
+                // Skip packed object extraction during scanning - they'll be extracted when actually loading
+                importer->LoadFromStream(stream.get(), true, true);
             }
 
             if (importer)

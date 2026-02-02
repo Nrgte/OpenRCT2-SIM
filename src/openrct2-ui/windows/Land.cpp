@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -127,11 +127,11 @@ namespace OpenRCT2::Ui::Windows
                     break;
                 case WIDX_MOUNTAINMODE:
                     _landToolMountainMode ^= 1;
-                    _landToolPaintMode = 0;
+                    _landToolPaintMode = false;
                     invalidate();
                     break;
                 case WIDX_PAINTMODE:
-                    _landToolMountainMode = 0;
+                    _landToolMountainMode = false;
                     _landToolPaintMode ^= 1;
                     invalidate();
                     break;
@@ -335,6 +335,21 @@ namespace OpenRCT2::Ui::Windows
         }
 
     private:
+        static money64 executeGameAction(GameState_t& gameState, GameActions::GameAction* action, SelectionMode mode)
+        {
+            GameActions::Result res;
+            if (mode == SelectionMode::apply)
+            {
+                res = GameActions::Execute(action, gameState);
+            }
+            else
+            {
+                action->SetFlags({ CommandFlag::allowDuringPaused });
+                res = GameActions::Query(action, gameState);
+            }
+            return res.error == GameActions::Status::ok ? res.cost : kMoney64Undefined;
+        }
+
         /**
          *
          *  rct2: 0x006644DD
@@ -354,18 +369,14 @@ namespace OpenRCT2::Ui::Windows
                     { centreX, centreY },
                     { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y },
                     gMapSelectType, false);
-                auto res = (mode == SelectionMode::apply) ? GameActions::Execute(&landSmoothAction, gameState)
-                                                          : GameActions::Query(&landSmoothAction, gameState);
-                return res.error == GameActions::Status::ok ? res.cost : kMoney64Undefined;
+                return executeGameAction(gameState, &landSmoothAction, mode);
             }
 
             auto landRaiseAction = GameActions::LandRaiseAction(
                 { centreX, centreY },
                 { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y }, gMapSelectType);
-            auto res = (mode == SelectionMode::apply) ? GameActions::Execute(&landRaiseAction, gameState)
-                                                      : GameActions::Query(&landRaiseAction, gameState);
 
-            return res.error == GameActions::Status::ok ? res.cost : kMoney64Undefined;
+            return executeGameAction(gameState, &landRaiseAction, mode);
         }
 
         /**
@@ -387,18 +398,14 @@ namespace OpenRCT2::Ui::Windows
                     { centreX, centreY },
                     { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y },
                     gMapSelectType, true);
-                auto res = (mode == SelectionMode::apply) ? GameActions::Execute(&landSmoothAction, gameState)
-                                                          : GameActions::Query(&landSmoothAction, gameState);
-                return res.error == GameActions::Status::ok ? res.cost : kMoney64Undefined;
+                return executeGameAction(gameState, &landSmoothAction, mode);
             }
 
             auto landLowerAction = GameActions::LandLowerAction(
                 { centreX, centreY },
                 { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y }, gMapSelectType);
-            auto res = (mode == SelectionMode::apply) ? GameActions::Execute(&landLowerAction, gameState)
-                                                      : GameActions::Query(&landLowerAction, gameState);
 
-            return res.error == GameActions::Status::ok ? res.cost : kMoney64Undefined;
+            return executeGameAction(gameState, &landLowerAction, mode);
         }
 
         /**
@@ -612,7 +619,7 @@ namespace OpenRCT2::Ui::Windows
         void ToolUpdateLand(const ScreenCoordsXY& screenPos)
         {
             const bool mapCtrlPressed = GetInputManager().isModifierKeyPressed(ModifierKey::ctrl);
-            auto* windowMgr = Ui::GetWindowManager();
+            auto* windowMgr = GetWindowManager();
 
             if (gCurrentToolId == Tool::upDownArrow)
             {
@@ -851,7 +858,7 @@ namespace OpenRCT2::Ui::Windows
             if (surfaceObj != nullptr)
             {
                 surfaceImage = ImageId(surfaceObj->IconImageId);
-                if (surfaceObj->Colour != TerrainSurfaceObject::kNoValue)
+                if (surfaceObj->Colour != Drawing::kColourNull)
                     surfaceImage = surfaceImage.WithPrimary(surfaceObj->Colour);
             }
 

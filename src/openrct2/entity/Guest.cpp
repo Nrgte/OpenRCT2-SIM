@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -85,7 +85,6 @@
 #include <windows.h>
 
 using namespace OpenRCT2;
-using namespace OpenRCT2::Numerics;
 
 static const uint8_t kTicksToGoUpSpiralSlide = 30;
 
@@ -455,7 +454,7 @@ static void GuestRideIsTooIntense(Guest& guest, Ride& ride, bool peepAtRide);
 static void GuestResetRideHeading(Guest& guest);
 static void GuestTriedToEnterFullQueue(Guest& guest, Ride& ride);
 static int16_t GuestCalculateRideSatisfaction(Guest& guest, const Ride& ride);
-static void GuestUpdateFavouriteRide(Guest& guest, const Ride& ride, const uint8_t satisfaction);
+static void GuestUpdateFavouriteRide(Guest& guest, const Ride& ride, uint8_t satisfaction);
 static int16_t GuestCalculateRideValueSatisfaction(Guest& guest, const Ride& ride);
 static int16_t GuestCalculateRideIntensityNauseaSatisfaction(Guest& guest, const Ride& ride);
 static void GuestUpdateRideNauseaGrowth(Guest& guest, const Ride& ride);
@@ -523,8 +522,8 @@ static void ApplyEasterEggToNearbyGuests(Guest& guest)
 
 void Guest::GivePassingGuestPurpleClothes(Guest& passingPeep)
 {
-    passingPeep.TshirtColour = COLOUR_BRIGHT_PURPLE;
-    passingPeep.TrousersColour = COLOUR_BRIGHT_PURPLE;
+    passingPeep.TshirtColour = Drawing::Colour::brightPurple;
+    passingPeep.TrousersColour = Drawing::Colour::brightPurple;
     passingPeep.Invalidate();
 }
 
@@ -785,22 +784,22 @@ void Guest::UpdateMotivesIdle()
 
     if (Energy <= 50)
     {
-        Energy = std::max(Energy - 2, 0);
+        HappinessTarget = std::max(HappinessTarget - 2, 0);
     }
 
     if (Hunger < 10)
     {
-        Hunger = std::max(Hunger - 1, 0);
+        HappinessTarget = std::max(HappinessTarget - 1, 0);
     }
 
     if (Thirst < 10)
     {
-        Thirst = std::max(Thirst - 1, 0);
+        HappinessTarget = std::max(HappinessTarget - 1, 0);
     }
 
     if (Toilet >= 195)
     {
-        Toilet--;
+        HappinessTarget = std::max(HappinessTarget - 1, 0);
     }
 
     if (State == PeepState::walking && NauseaTarget >= 128)
@@ -958,7 +957,7 @@ void Guest::Tick128UpdateGuest(uint32_t index)
     {
         if (State == PeepState::walking || State == PeepState::sitting)
         {
-            OpenRCT2::Audio::Play3D(OpenRCT2::Audio::SoundId::crash, GetLocation());
+            Audio::Play3D(Audio::SoundId::crash, GetLocation());
 
             ExplosionCloud::Create({ x, y, z + 16 });
             ExplosionFlare::Create({ x, y, z + 16 });
@@ -1023,7 +1022,7 @@ void Guest::Tick128UpdateGuest(uint32_t index)
 
     if (State == PeepState::onRide || State == PeepState::enteringRide)
     {
-        GuestTimeOnRide = std::min(255, GuestTimeOnRide + 1);
+        GuestTimeOnRide = AddClamp<uint8_t>(GuestTimeOnRide, 1);
 
         if (PeepFlags & PEEP_FLAGS_WOW)
         {
@@ -1255,6 +1254,8 @@ void Guest::Tick128UpdateGuest(uint32_t index)
                     if (HappinessTarget < 90)
                         HappinessTarget = 90;
 
+                    // This is +2 as UpdateMotivesIdle (that is called later in the function)
+                    // will -1. We want to gradually increase happiness to 165
                     if (HappinessTarget < 165)
                         HappinessTarget += 2;
                 }
@@ -1403,7 +1404,6 @@ void Guest::UpdateSitting()
         AnimationFrameNum = 0;
         AnimationImageIdOffset = 0;
         UpdateCurrentAnimationType();
-        return;
     }
 }
 
@@ -1694,32 +1694,43 @@ static bool GuestDecideAndBuyItem(Guest& guest, Ride& ride, const ShopItem shopI
     guest.GiveItem(shopItem);
     const auto hasRandomShopColour = ride.hasLifecycleFlag(RIDE_LIFECYCLE_RANDOM_SHOP_COLOURS);
 
-    if (shopItem == ShopItem::tShirt)
-        guest.TshirtColour = hasRandomShopColour ? ScenarioRandMax(kColourNumNormal) : ride.trackColours[0].main;
-
-    if (shopItem == ShopItem::hat)
-        guest.HatColour = hasRandomShopColour ? ScenarioRandMax(kColourNumNormal) : ride.trackColours[0].main;
-
-    if (shopItem == ShopItem::balloon)
-        guest.BalloonColour = hasRandomShopColour ? ScenarioRandMax(kColourNumNormal) : ride.trackColours[0].main;
-
-    if (shopItem == ShopItem::umbrella)
-        guest.UmbrellaColour = hasRandomShopColour ? ScenarioRandMax(kColourNumNormal) : ride.trackColours[0].main;
-
-    if (shopItem == ShopItem::map)
-        guest.ResetPathfindGoal();
-
-    if (shopItem == ShopItem::photo)
-        guest.Photo1RideRef = ride.id;
-
-    if (shopItem == ShopItem::photo2)
-        guest.Photo2RideRef = ride.id;
-
-    if (shopItem == ShopItem::photo3)
-        guest.Photo3RideRef = ride.id;
-
-    if (shopItem == ShopItem::photo4)
-        guest.Photo4RideRef = ride.id;
+    switch (shopItem)
+    {
+        case ShopItem::tShirt:
+            guest.TshirtColour = hasRandomShopColour ? static_cast<Drawing::Colour>(ScenarioRandMax(Drawing::kColourNumNormal))
+                                                     : ride.trackColours[0].main;
+            break;
+        case ShopItem::hat:
+            guest.HatColour = hasRandomShopColour ? static_cast<Drawing::Colour>(ScenarioRandMax(Drawing::kColourNumNormal))
+                                                  : ride.trackColours[0].main;
+            break;
+        case ShopItem::balloon:
+            guest.BalloonColour = hasRandomShopColour ? static_cast<Drawing::Colour>(ScenarioRandMax(Drawing::kColourNumNormal))
+                                                      : ride.trackColours[0].main;
+            break;
+        case ShopItem::umbrella:
+            guest.UmbrellaColour = hasRandomShopColour
+                ? static_cast<Drawing::Colour>(ScenarioRandMax(Drawing::kColourNumNormal))
+                : ride.trackColours[0].main;
+            break;
+        case ShopItem::map:
+            guest.ResetPathfindGoal();
+            break;
+        case ShopItem::photo:
+            guest.Photo1RideRef = ride.id;
+            break;
+        case ShopItem::photo2:
+            guest.Photo2RideRef = ride.id;
+            break;
+        case ShopItem::photo3:
+            guest.Photo3RideRef = ride.id;
+            break;
+        case ShopItem::photo4:
+            guest.Photo4RideRef = ride.id;
+            break;
+        default:
+            break;
+    }
 
     guest.WindowInvalidateFlags |= PEEP_INVALIDATE_PEEP_INVENTORY;
     guest.UpdateAnimationGroup();
@@ -1734,28 +1745,24 @@ static bool GuestDecideAndBuyItem(Guest& guest, Ride& ride, const ShopItem shopI
         }
     }
 
-    if (shopItemDescriptor.IsFood())
-        guest.AmountOfFood++;
-
-    if (shopItemDescriptor.IsDrink())
-        guest.AmountOfDrinks++;
-
-    if (shopItemDescriptor.IsSouvenir())
-        guest.AmountOfSouvenirs++;
-
     money64* expend_type = &guest.PaidOnSouvenirs;
     ExpenditureType expenditure = ExpenditureType::shopStock;
 
     if (shopItemDescriptor.IsFood())
     {
+        guest.AmountOfFood++;
         expend_type = &guest.PaidOnFood;
         expenditure = ExpenditureType::foodDrinkStock;
     }
-
-    if (shopItemDescriptor.IsDrink())
+    else if (shopItemDescriptor.IsDrink())
     {
+        guest.AmountOfDrinks++;
         expend_type = &guest.PaidOnDrink;
         expenditure = ExpenditureType::foodDrinkStock;
+    }
+    else if (shopItemDescriptor.IsSouvenir())
+    {
+        guest.AmountOfSouvenirs++;
     }
 
     if (!(gameState.park.flags & PARK_FLAGS_NO_MONEY))
@@ -1773,10 +1780,10 @@ static bool GuestDecideAndBuyItem(Guest& guest, Ride& ride, const ShopItem shopI
         guest.SpendMoney(*expend_type, price, expenditure);
     }
     ride.totalProfit = AddClamp(ride.totalProfit, price - shopItemDescriptor.Cost);
-    ride.windowInvalidateFlags |= RIDE_INVALIDATE_RIDE_INCOME;
+    ride.windowInvalidateFlags.set(RideInvalidateFlag::income);
     ride.curNumCustomers++;
     ride.totalCustomers = AddClamp(ride.totalCustomers, 1u);
-    ride.windowInvalidateFlags |= RIDE_INVALIDATE_RIDE_CUSTOMER;
+    ride.windowInvalidateFlags.set(RideInvalidateFlag::customers);
 
     return true;
 }
@@ -1859,15 +1866,15 @@ void Guest::OnExitRide(Ride& ride)
     {
         InsertNewThought(PeepThoughtType::WasGreat, ride.id);
 
-        static constexpr OpenRCT2::Audio::SoundId laughs[3] = {
-            OpenRCT2::Audio::SoundId::laugh1,
-            OpenRCT2::Audio::SoundId::laugh2,
-            OpenRCT2::Audio::SoundId::laugh3,
+        static constexpr Audio::SoundId laughs[3] = {
+            Audio::SoundId::laugh1,
+            Audio::SoundId::laugh2,
+            Audio::SoundId::laugh3,
         };
         int32_t laughType = ScenarioRand() & 7;
         if (laughType < 3)
         {
-            OpenRCT2::Audio::Play3D(laughs[laughType], GetLocation());
+            Audio::Play3D(laughs[laughType], GetLocation());
         }
     }
 
@@ -1880,7 +1887,7 @@ void Guest::OnExitRide(Ride& ride)
         this->AGS->proxyRides.erase(this->AGS->proxyRides.begin());
 
     ride.totalCustomers = AddClamp(ride.totalCustomers, 1u);
-    ride.windowInvalidateFlags |= RIDE_INVALIDATE_RIDE_CUSTOMER;
+    ride.windowInvalidateFlags.set(RideInvalidateFlag::customers);
 }
 
 /**
@@ -2149,8 +2156,8 @@ static OpenRCT2::BitSet<OpenRCT2::Limits::kMaxRidesInPark> GuestFindRidesToGoOn(
 
     // Take nearby rides into consideration
     constexpr auto radius = 10 * 32;
-    int32_t cx = floor2(guest.x, 32);
-    int32_t cy = floor2(guest.y, 32);
+    int32_t cx = Numerics::floor2(guest.x, 32);
+    int32_t cy = Numerics::floor2(guest.y, 32);
     for (int32_t tileX = cx - radius; tileX <= cx + radius; tileX += kCoordsXYStep)
     {
         for (int32_t tileY = cy - radius; tileY <= cy + radius; tileY += kCoordsXYStep)
@@ -2663,10 +2670,10 @@ void Guest::SpendMoney(money64& peep_expend_type, money64 amount, ExpenditureTyp
     assert(!(getGameState().park.flags & PARK_FLAGS_NO_MONEY));
 
     if (!HasItem(ShopItem::creditCard))
-        CashInPocket = std::max(0.00_GBP, static_cast<money64>(CashInPocket) - amount);
-    CashSpent += amount;
+        CashInPocket = std::max(0.00_GBP, CashInPocket - amount);
+    CashSpent = AddClamp(CashSpent, amount);
 
-    peep_expend_type += amount;
+    peep_expend_type = AddClamp(peep_expend_type, amount);
 
     auto* windowMgr = Ui::GetWindowManager();
     windowMgr->InvalidateByNumber(WindowClass::peep, Id);
@@ -2675,29 +2682,29 @@ void Guest::SpendMoney(money64& peep_expend_type, money64 amount, ExpenditureTyp
 
     MoneyEffect::CreateAt(amount, GetLocation(), true);
 
-    OpenRCT2::Audio::Play3D(OpenRCT2::Audio::SoundId::purchase, GetLocation());
+    Audio::Play3D(Audio::SoundId::purchase, GetLocation());
 }
 
 void Guest::SetHasRidden(const Ride& ride)
 {
-    OpenRCT2::RideUse::GetHistory().Add(Id, ride.id);
+    RideUse::GetHistory().Add(Id, ride.id);
 
     SetHasRiddenRideType(ride.type);
 }
 
 bool Guest::HasRidden(const Ride& ride) const
 {
-    return OpenRCT2::RideUse::GetHistory().Contains(Id, ride.id);
+    return RideUse::GetHistory().Contains(Id, ride.id);
 }
 
 void Guest::SetHasRiddenRideType(ride_type_t rideType)
 {
-    OpenRCT2::RideUse::GetTypeHistory().Add(Id, rideType);
+    RideUse::GetTypeHistory().Add(Id, rideType);
 }
 
 bool Guest::HasRiddenRideType(ride_type_t rideType) const
 {
-    return OpenRCT2::RideUse::GetTypeHistory().Contains(Id, rideType);
+    return RideUse::GetTypeHistory().Contains(Id, rideType);
 }
 
 void Guest::SetParkEntryTime(int32_t entryTime)
@@ -2881,8 +2888,8 @@ void Guest::GoToRideEntrance(const Ride& ride)
     const auto* rideEntry = GetRideEntryByIndex(ride.subtype);
     if (rideEntry != nullptr)
     {
-        if (rideEntry->Cars[rideEntry->DefaultCar].flags & CAR_ENTRY_FLAG_MINI_GOLF
-            || rideEntry->Cars[rideEntry->DefaultCar].flags & (CAR_ENTRY_FLAG_CHAIRLIFT | CAR_ENTRY_FLAG_GO_KART))
+        if (rideEntry->Cars[rideEntry->DefaultCar].flags.hasAny(
+                CarEntryFlag::isMiniGolf, CarEntryFlag::isChairlift, CarEntryFlag::isGoKart))
         {
             shift_multiplier = 32;
         }
@@ -2905,7 +2912,7 @@ void Guest::GoToRideEntrance(const Ride& ride)
 }
 
 static bool FindVehicleToEnter(
-    Guest& guest, const Ride& ride, sfl::static_vector<uint8_t, OpenRCT2::Limits::kMaxTrainsPerRide>& car_array)
+    Guest& guest, const Ride& ride, sfl::static_vector<uint8_t, Limits::kMaxTrainsPerRide>& car_array)
 {
     uint8_t chosen_train = RideStation::kNoTrain;
 
@@ -2936,7 +2943,7 @@ static bool FindVehicleToEnter(
         else
             chosen_train = ride.getStation(guest.CurrentRideStation).TrainAtStation;
     }
-    if (chosen_train >= OpenRCT2::Limits::kMaxTrainsPerRide)
+    if (chosen_train >= Limits::kMaxTrainsPerRide)
     {
         return false;
     }
@@ -3228,11 +3235,11 @@ static int16_t GuestCalculateRideIntensityNauseaSatisfaction(Guest& guest, const
  */
 static void GuestUpdateRideNauseaGrowth(Guest& guest, const Ride& ride)
 {
-    uint32_t nauseaMultiplier = std::clamp(256 - guest.HappinessTarget, 64, 200);
-    uint32_t nauseaGrowthRateChange = (ride.ratings.nausea * nauseaMultiplier) / 512;
-    nauseaGrowthRateChange *= std::max(static_cast<uint8_t>(128), guest.Hunger) / 64;
-    nauseaGrowthRateChange >>= (EnumValue(guest.NauseaTolerance) & 3);
-    guest.NauseaTarget = static_cast<uint8_t>(std::min(guest.NauseaTarget + nauseaGrowthRateChange, 255u));
+    const auto nauseaMultiplier = std::clamp(256 - guest.HappinessTarget, 64, 200);
+    const auto rideGeneratedNausea = (ride.ratings.nausea * nauseaMultiplier) / 512;
+    const auto hungerAdjustedNausea = ((rideGeneratedNausea * std::max<uint8_t>(128, guest.Hunger)) / 128) * 2;
+    const auto nauseaGrowthRateChange = hungerAdjustedNausea >> (EnumValue(guest.NauseaTolerance) & 3);
+    guest.NauseaTarget = static_cast<uint8_t>(std::min<int32_t>(guest.NauseaTarget + nauseaGrowthRateChange, 255));
 }
 
 static bool GuestShouldGoOnRideAgain(Guest& guest, const Ride& ride)
@@ -3546,7 +3553,7 @@ static void PeepHeadForNearestRide(Guest& guest, bool considerOnlyCloseRides, T 
         }
     }
 
-    OpenRCT2::BitSet<OpenRCT2::Limits::kMaxRidesInPark> rideConsideration;
+    OpenRCT2::BitSet<Limits::kMaxRidesInPark> rideConsideration;
     if (!considerOnlyCloseRides && (guest.HasItem(ShopItem::map)))
     {
         // Consider all rides in the park
@@ -3563,8 +3570,8 @@ static void PeepHeadForNearestRide(Guest& guest, bool considerOnlyCloseRides, T 
     {
         // Take nearby rides into consideration
         constexpr auto kSearchRadius = 10 * 32;
-        int32_t cx = floor2(guest.x, 32);
-        int32_t cy = floor2(guest.y, 32);
+        int32_t cx = Numerics::floor2(guest.x, 32);
+        int32_t cy = Numerics::floor2(guest.y, 32);
         for (auto x = cx - kSearchRadius; x <= cx + kSearchRadius; x += kCoordsXYStep)
         {
             for (auto y = cy - kSearchRadius; y <= cy + kSearchRadius; y += kCoordsXYStep)
@@ -3590,7 +3597,7 @@ static void PeepHeadForNearestRide(Guest& guest, bool considerOnlyCloseRides, T 
     }
 
     // Filter the considered rides
-    RideId potentialRides[OpenRCT2::Limits::kMaxRidesInPark];
+    RideId potentialRides[Limits::kMaxRidesInPark];
     size_t numPotentialRides = 0;
 
     auto& gameState = getGameState();
@@ -3728,7 +3735,7 @@ static bool PeepShouldUseCashMachine(Guest& guest, RideId rideIndex)
         ride->updateSatisfaction(guest.Happiness >> 6);
         ride->curNumCustomers++;
         ride->totalCustomers = AddClamp(ride->totalCustomers, 1u);
-        ride->windowInvalidateFlags |= RIDE_INVALIDATE_RIDE_CUSTOMER;
+        ride->windowInvalidateFlags.set(RideInvalidateFlag::customers);
     }
     return true;
 }
@@ -3888,7 +3895,7 @@ void Guest::UpdateRideAtEntrance()
         }
     }
 
-    sfl::static_vector<uint8_t, OpenRCT2::Limits::kMaxTrainsPerRide> carArray;
+    sfl::static_vector<uint8_t, Limits::kMaxTrainsPerRide> carArray;
 
     if (ride->getRideTypeDescriptor().HasFlag(RtdFlag::noVehicles))
     {
@@ -4090,8 +4097,8 @@ void Guest::UpdateRideAdvanceThroughEntrance()
         if (rideEntry != nullptr)
         {
             uint8_t vehicle = rideEntry->DefaultCar;
-            if (rideEntry->Cars[vehicle].flags & CAR_ENTRY_FLAG_MINI_GOLF
-                || rideEntry->Cars[vehicle].flags & (CAR_ENTRY_FLAG_CHAIRLIFT | CAR_ENTRY_FLAG_GO_KART))
+            if (rideEntry->Cars[vehicle].flags.hasAny(
+                    CarEntryFlag::isMiniGolf, CarEntryFlag::isChairlift, CarEntryFlag::isGoKart))
             {
                 distanceThreshold = 28;
             }
@@ -4164,13 +4171,13 @@ void Guest::UpdateRideAdvanceThroughEntrance()
 
     const auto* vehicle_type = &rideEntry->Cars[vehicle->vehicle_type];
 
-    if (vehicle_type->flags & CAR_ENTRY_FLAG_LOADING_WAYPOINTS)
+    if (vehicle_type->flags.has(CarEntryFlag::loadingWaypoints))
     {
         UpdateRideLeaveEntranceWaypoints(*ride);
         return;
     }
 
-    if (vehicle_type->flags & CAR_ENTRY_FLAG_DODGEM_CAR_PLACEMENT)
+    if (vehicle_type->flags.has(CarEntryFlag::useDodgemCarPlacement))
     {
         SetDestination(vehicle->GetLocation(), 15);
         RideSubState = PeepRideSubState::approachVehicle;
@@ -4222,7 +4229,7 @@ static void PeepGoToRideExit(Guest& guest, const Ride& ride, int16_t x, int16_t 
 
     guest.MoveTo({ x, y, z });
 
-    Guard::Assert(guest.CurrentRideStation.ToUnderlying() < OpenRCT2::Limits::kMaxStationsPerRide);
+    Guard::Assert(guest.CurrentRideStation.ToUnderlying() < Limits::kMaxStationsPerRide);
     auto exit = ride.getStation(guest.CurrentRideStation).Exit;
     x = exit.x;
     y = exit.y;
@@ -4248,7 +4255,7 @@ static void PeepGoToRideExit(Guest& guest, const Ride& ride, int16_t x, int16_t 
     if (rideEntry != nullptr)
     {
         const CarEntry& carEntry = rideEntry->Cars[rideEntry->DefaultCar];
-        if (carEntry.flags & CAR_ENTRY_FLAG_MINI_GOLF || carEntry.flags & (CAR_ENTRY_FLAG_CHAIRLIFT | CAR_ENTRY_FLAG_GO_KART))
+        if (carEntry.flags.hasAny(CarEntryFlag::isMiniGolf, CarEntryFlag::isChairlift, CarEntryFlag::isGoKart))
         {
             shift_multiplier = 32;
         }
@@ -4348,7 +4355,7 @@ void Guest::UpdateRideFreeVehicleEnterRide(Ride& ride)
         else
         {
             ride.totalProfit = AddClamp<money64>(ride.totalProfit, ridePrice);
-            ride.windowInvalidateFlags |= RIDE_INVALIDATE_RIDE_INCOME;
+            ride.windowInvalidateFlags.set(RideInvalidateFlag::income);
             SpendMoney(PaidOnRides, ridePrice, ExpenditureType::parkRideTickets);
         }
     }
@@ -4468,7 +4475,7 @@ void Guest::UpdateRideFreeVehicleCheck()
         return;
     }*/
 
-    if (rideEntry->Cars[0].flags & CAR_ENTRY_FLAG_MINI_GOLF)
+    if (rideEntry->Cars[0].flags.has(CarEntryFlag::isMiniGolf))
     {
         vehicle->mini_golf_flags &= ~MiniGolfFlag::Flag5;
 
@@ -4738,7 +4745,7 @@ void Guest::UpdateRideLeaveVehicle()
     AnimationImageIdOffset = 0;
 
 
-    if (ride_station.ToUnderlying() >= OpenRCT2::Limits::kMaxStationsPerRide)
+    if (ride_station.ToUnderlying() >= Limits::kMaxStationsPerRide)
     {
         // HACK #5658: Some parks have hacked rides which end up in this state
         auto bestStationIndex = RideGetFirstValidStationExit(*ride);
@@ -4757,10 +4764,10 @@ void Guest::UpdateRideLeaveVehicle()
 
     const auto* carEntry = &rideEntry->Cars[vehicle->vehicle_type];
 
-    assert(CurrentRideStation.ToUnderlying() < OpenRCT2::Limits::kMaxStationsPerRide);
+    assert(CurrentRideStation.ToUnderlying() < Limits::kMaxStationsPerRide);
     auto& station = ride->getStation(CurrentRideStation);
 
-    if (!(carEntry->flags & CAR_ENTRY_FLAG_LOADING_WAYPOINTS))
+    if (!carEntry->flags.has(CarEntryFlag::loadingWaypoints))
     {
         TileCoordsXYZD exitLocation = station.Exit;
         CoordsXYZD platformLocation;
@@ -4807,12 +4814,12 @@ void Guest::UpdateRideLeaveVehicle()
             {
                 carEntry = &rideEntry->Cars[rideEntry->DefaultCar];
 
-                if (carEntry->flags & CAR_ENTRY_FLAG_GO_KART)
+                if (carEntry->flags.has(CarEntryFlag::isGoKart))
                 {
                     shiftMultiplier = 9;
                 }
 
-                if (carEntry->flags & (CAR_ENTRY_FLAG_CHAIRLIFT | CAR_ENTRY_FLAG_GO_KART))
+                if (carEntry->flags.hasAny(CarEntryFlag::isChairlift, CarEntryFlag::isGoKart))
                 {
                     specialDirection = ((vehicle->Orientation + 3) / 8) + 1;
                     specialDirection &= 3;
@@ -4899,10 +4906,9 @@ void Guest::UpdateRideLeaveVehicle()
         return;
     }
 
-    CoordsXYZ waypointLoc;
     const auto& rtd = ride->getRideTypeDescriptor();
-    waypointLoc = { rtd.GetGuestWaypointLocation(*vehicle, *ride, CurrentRideStation),
-                    exitLocation.z + ride->getRideTypeDescriptor().Heights.PlatformHeight };
+    CoordsXYZ waypointLoc = { rtd.GetGuestWaypointLocation(*vehicle, *ride, CurrentRideStation),
+                              exitLocation.z + ride->getRideTypeDescriptor().Heights.PlatformHeight };
 
     rideEntry = vehicle->GetRideEntry();
     carEntry = &rideEntry->Cars[vehicle->vehicle_type];
@@ -4966,7 +4972,7 @@ void Guest::UpdateRidePrepareForExit()
     if (rideEntry != nullptr)
     {
         const auto& carEntry = rideEntry->Cars[rideEntry->DefaultCar];
-        if (carEntry.flags & (CAR_ENTRY_FLAG_CHAIRLIFT | CAR_ENTRY_FLAG_GO_KART))
+        if (carEntry.flags.hasAny(CarEntryFlag::isChairlift, CarEntryFlag::isGoKart))
         {
             shiftMultiplier = 32;
         }
@@ -5108,10 +5114,9 @@ void Guest::UpdateRideApproachVehicleWaypoints()
 
 void UpdateRideApproachVehicleWaypointsMotionSimulator(Guest& guest, const CoordsXY& loc, int16_t& xy_distance)
 {
-    int16_t actionZ;
     auto ride = GetRide(guest.CurrentRide);
-    // Motion simulators have steps this moves the peeps up the steps
-    actionZ = ride->getStation(guest.CurrentRideStation).GetBaseZ() + 2;
+    // Motion simulators have steps. This moves the peeps up the steps.
+    int16_t actionZ = ride->getStation(guest.CurrentRideStation).GetBaseZ() + 2;
 
     uint8_t waypoint = guest.Var37 & 3;
     if (waypoint == 2)
@@ -5222,7 +5227,7 @@ void Guest::UpdateRideApproachExitWaypoints()
     if (rideEntry != nullptr)
     {
         auto carEntry = &rideEntry->Cars[rideEntry->DefaultCar];
-        if (carEntry->flags & (CAR_ENTRY_FLAG_CHAIRLIFT | CAR_ENTRY_FLAG_GO_KART))
+        if (carEntry->flags.hasAny(CarEntryFlag::isChairlift, CarEntryFlag::isGoKart))
         {
             shift_multiplier = 32;
         }
@@ -5614,7 +5619,6 @@ void Guest::UpdateRideMazePathfinding()
     if (auto loc = UpdateAction(); loc.has_value())
     {
         MoveTo({ loc.value(), z });
-        return;
     }
 }
 
@@ -5728,7 +5732,7 @@ void Guest::UpdateRideShopInteract()
     // Do not play toilet flush sound on title screen as it's considered loud and annoying
     if (gLegacyScene != LegacyScene::titleSequence)
     {
-        OpenRCT2::Audio::Play3D(OpenRCT2::Audio::SoundId::toiletFlush, GetLocation());
+        Audio::Play3D(Audio::SoundId::toiletFlush, GetLocation());
     }
 
     RideSubState = PeepRideSubState::leaveShop;
@@ -5765,7 +5769,7 @@ void Guest::UpdateRideShopLeave()
     if (ride != nullptr)
     {
         ride->totalCustomers = AddClamp(ride->totalCustomers, 1u);
-        ride->windowInvalidateFlags |= RIDE_INVALIDATE_RIDE_CUSTOMER;
+        ride->windowInvalidateFlags.set(RideInvalidateFlag::customers);
         ride->updateSatisfaction(Happiness / 64);
     }
 }
@@ -6206,7 +6210,7 @@ void Guest::UpdateWalking()
 
     uint8_t chosen_edge = ScenarioRand() & 0x3;
 
-    for (; !(edges & (1 << chosen_edge));)
+    while (!(edges & (1 << chosen_edge)))
         chosen_edge = (chosen_edge + 1) & 3;
 
     RideId ride_to_view;
@@ -6234,7 +6238,7 @@ void Guest::UpdateWalking()
 
     uint8_t chosen_position = ScenarioRand() & 0x3;
 
-    for (; !(positions_free & (1 << chosen_position));)
+    while (!(positions_free & (1 << chosen_position)))
         chosen_position = (chosen_position + 1) & 3;
 
     CurrentRide = ride_to_view;
@@ -6724,7 +6728,7 @@ bool Guest::UpdateWalkingFindBench()
         return false;
     uint8_t chosen_edge = ScenarioRand() & 0x3;
 
-    for (; !(edges & (1 << chosen_edge));)
+    while (!(edges & (1 << chosen_edge)))
         chosen_edge = (chosen_edge + 1) & 0x3;
 
     uint8_t free_edge = 3;
@@ -6830,7 +6834,7 @@ bool Guest::UpdateWalkingFindBin()
         chosen_edge = (chosen_edge + 1) & 0x3;
         bin_quantities = Numerics::ror8(bin_quantities, 2);
         if ((free_edge - 1) == 0)
-            return 0;
+            return false;
     }
 
     peep->Var37 = chosen_edge;
@@ -7050,11 +7054,8 @@ bool Loc690FD0(Guest& guest, RideId* rideToView, uint8_t* rideSeatToView, TileEl
  */
 static bool GuestFindRideToLookAt(Guest& guest, uint8_t edge, RideId* rideToView, uint8_t* rideSeatToView)
 {
-    TileElement* tileElement;
-
     auto surfaceElement = MapGetSurfaceElementAt(guest.NextLoc);
-
-    tileElement = reinterpret_cast<TileElement*>(surfaceElement);
+    TileElement* tileElement = reinterpret_cast<TileElement*>(surfaceElement);
     if (tileElement == nullptr)
     {
         return false;
@@ -7500,7 +7501,7 @@ void Guest::UpdateAnimationGroup()
             if ((ScenarioRand() & 0xFFFF) <= 13107)
             {
                 isBalloonPopped = true;
-                OpenRCT2::Audio::Play3D(OpenRCT2::Audio::SoundId::balloonPop, { x, y, z });
+                Audio::Play3D(Audio::SoundId::balloonPop, { x, y, z });
             }
             Balloon::Create({ x, y, z + 9 }, BalloonColour, isBalloonPopped);
         }
@@ -7691,95 +7692,95 @@ static constexpr PeepNauseaTolerance nausea_tolerance_distribution[] = {
 };
 
 /** rct2: 0x009823BC */
-static constexpr uint8_t kTrouserColours[] = {
-    COLOUR_BLACK,
-    COLOUR_GREY,
-    COLOUR_LIGHT_BROWN,
-    COLOUR_SATURATED_BROWN,
-    COLOUR_DARK_BROWN,
-    COLOUR_SALMON_PINK,
-    COLOUR_BLACK,
-    COLOUR_GREY,
-    COLOUR_LIGHT_BROWN,
-    COLOUR_SATURATED_BROWN,
-    COLOUR_DARK_BROWN,
-    COLOUR_SALMON_PINK,
-    COLOUR_BLACK,
-    COLOUR_GREY,
-    COLOUR_LIGHT_BROWN,
-    COLOUR_SATURATED_BROWN,
-    COLOUR_DARK_BROWN,
-    COLOUR_SALMON_PINK,
-    COLOUR_DARK_PURPLE,
-    COLOUR_LIGHT_PURPLE,
-    COLOUR_DARK_BLUE,
-    COLOUR_SATURATED_GREEN,
-    COLOUR_SATURATED_RED,
-    COLOUR_DARK_ORANGE,
-    COLOUR_BORDEAUX_RED,
-    COLOUR_DARK_OLIVE_DARK,
-    COLOUR_OLIVE_DARK,
-    COLOUR_AQUA_DARK,
-    COLOUR_DULL_BROWN_DARK,
+static constexpr Drawing::Colour kTrouserColours[] = {
+    Drawing::Colour::black,
+    Drawing::Colour::grey,
+    Drawing::Colour::lightBrown,
+    Drawing::Colour::saturatedBrown,
+    Drawing::Colour::darkBrown,
+    Drawing::Colour::salmonPink,
+    Drawing::Colour::black,
+    Drawing::Colour::grey,
+    Drawing::Colour::lightBrown,
+    Drawing::Colour::saturatedBrown,
+    Drawing::Colour::darkBrown,
+    Drawing::Colour::salmonPink,
+    Drawing::Colour::black,
+    Drawing::Colour::grey,
+    Drawing::Colour::lightBrown,
+    Drawing::Colour::saturatedBrown,
+    Drawing::Colour::darkBrown,
+    Drawing::Colour::salmonPink,
+    Drawing::Colour::darkPurple,
+    Drawing::Colour::lightPurple,
+    Drawing::Colour::darkBlue,
+    Drawing::Colour::saturatedGreen,
+    Drawing::Colour::saturatedRed,
+    Drawing::Colour::darkOrange,
+    Drawing::Colour::bordeauxRed,
+    Drawing::Colour::armyGreen,
+    Drawing::Colour::hunterGreen,
+    Drawing::Colour::deepWater,
+    Drawing::Colour::umber,
 };
 
 /** rct2: 0x009823D5 */
-static constexpr uint8_t kTshirtColours[] = {
-    COLOUR_BLACK,
-    COLOUR_GREY,
-    COLOUR_LIGHT_BROWN,
-    COLOUR_SATURATED_BROWN,
-    COLOUR_DARK_BROWN,
-    COLOUR_SALMON_PINK,
-    COLOUR_BLACK,
-    COLOUR_GREY,
-    COLOUR_LIGHT_BROWN,
-    COLOUR_SATURATED_BROWN,
-    COLOUR_DARK_BROWN,
-    COLOUR_SALMON_PINK,
-    COLOUR_DARK_PURPLE,
-    COLOUR_LIGHT_PURPLE,
-    COLOUR_DARK_BLUE,
-    COLOUR_SATURATED_GREEN,
-    COLOUR_SATURATED_RED,
-    COLOUR_DARK_ORANGE,
-    COLOUR_BORDEAUX_RED,
-    COLOUR_WHITE,
-    COLOUR_BRIGHT_PURPLE,
-    COLOUR_LIGHT_BLUE,
-    COLOUR_TEAL,
-    COLOUR_DARK_GREEN,
-    COLOUR_MOSS_GREEN,
-    COLOUR_BRIGHT_GREEN,
-    COLOUR_OLIVE_GREEN,
-    COLOUR_DARK_OLIVE_GREEN,
-    COLOUR_YELLOW,
-    COLOUR_LIGHT_ORANGE,
-    COLOUR_BRIGHT_RED,
-    COLOUR_DARK_PINK,
-    COLOUR_BRIGHT_PINK,
-    COLOUR_DARK_OLIVE_DARK,
-    COLOUR_DARK_OLIVE_LIGHT,
-    COLOUR_SATURATED_BROWN_LIGHT,
-    COLOUR_BORDEAUX_RED_DARK,
-    COLOUR_BORDEAUX_RED_LIGHT,
-    COLOUR_GRASS_GREEN_DARK,
-    COLOUR_GRASS_GREEN_LIGHT,
-    COLOUR_OLIVE_DARK,
-    COLOUR_OLIVE_LIGHT,
-    COLOUR_SATURATED_GREEN_LIGHT,
-    COLOUR_TAN_DARK,
-    COLOUR_TAN_LIGHT,
-    COLOUR_DULL_PURPLE_LIGHT,
-    COLOUR_DULL_GREEN_DARK,
-    COLOUR_DULL_GREEN_LIGHT,
-    COLOUR_SATURATED_PURPLE_DARK,
-    COLOUR_SATURATED_PURPLE_LIGHT,
-    COLOUR_ORANGE_LIGHT,
-    COLOUR_AQUA_DARK,
-    COLOUR_MAGENTA_LIGHT,
-    COLOUR_DULL_BROWN_DARK,
-    COLOUR_DULL_BROWN_LIGHT,
+static constexpr Drawing::Colour kTshirtColours[] = {
+    Drawing::Colour::black,
+    Drawing::Colour::grey,
+    Drawing::Colour::lightBrown,
+    Drawing::Colour::saturatedBrown,
+    Drawing::Colour::darkBrown,
+    Drawing::Colour::salmonPink,
+    Drawing::Colour::black,
+    Drawing::Colour::grey,
+    Drawing::Colour::lightBrown,
+    Drawing::Colour::saturatedBrown,
+    Drawing::Colour::darkBrown,
+    Drawing::Colour::salmonPink,
+    Drawing::Colour::darkPurple,
+    Drawing::Colour::lightPurple,
+    Drawing::Colour::darkBlue,
+    Drawing::Colour::saturatedGreen,
+    Drawing::Colour::saturatedRed,
+    Drawing::Colour::darkOrange,
+    Drawing::Colour::bordeauxRed,
+    Drawing::Colour::white,
+    Drawing::Colour::brightPurple,
+    Drawing::Colour::lightBlue,
+    Drawing::Colour::darkWater,
+    Drawing::Colour::darkGreen,
+    Drawing::Colour::mossGreen,
+    Drawing::Colour::brightGreen,
+    Drawing::Colour::oliveGreen,
+    Drawing::Colour::darkOliveGreen,
+    Drawing::Colour::yellow,
+    Drawing::Colour::lightOrange,
+    Drawing::Colour::brightRed,
+    Drawing::Colour::darkPink,
+    Drawing::Colour::brightPink,
+    Drawing::Colour::armyGreen,
+    Drawing::Colour::honeyDew,
+    Drawing::Colour::tan,
+    Drawing::Colour::maroon,
+    Drawing::Colour::coralPink,
+    Drawing::Colour::forestGreen,
+    Drawing::Colour::chartreuse,
+    Drawing::Colour::hunterGreen,
+    Drawing::Colour::celadon,
+    Drawing::Colour::limeGreen,
+    Drawing::Colour::sepia,
+    Drawing::Colour::peach,
+    Drawing::Colour::periwinkle,
+    Drawing::Colour::viridian,
+    Drawing::Colour::seafoamGreen,
+    Drawing::Colour::violet,
+    Drawing::Colour::lavender,
+    Drawing::Colour::pastelOrange,
+    Drawing::Colour::deepWater,
+    Drawing::Colour::pastelPink,
+    Drawing::Colour::umber,
+    Drawing::Colour::beige,
 };
 // clang-format on
 
@@ -8019,18 +8020,18 @@ Guest* Guest::Generate(const CoordsXYZ& coords)
     IncrementGuestsHeadingForPark();
 
 #ifdef ENABLE_SCRIPTING
-    auto& hookEngine = OpenRCT2::GetContext()->GetScriptEngine().GetHookEngine();
-    if (hookEngine.HasSubscriptions(OpenRCT2::Scripting::HookType::guestGeneration))
+    auto& hookEngine = GetContext()->GetScriptEngine().GetHookEngine();
+    if (hookEngine.HasSubscriptions(Scripting::HookType::guestGeneration))
     {
-        auto ctx = OpenRCT2::GetContext()->GetScriptEngine().GetContext();
+        auto ctx = GetContext()->GetScriptEngine().GetContext();
 
         // Create event args object
-        auto obj = OpenRCT2::Scripting::DukObject(ctx);
+        auto obj = Scripting::DukObject(ctx);
         obj.Set("id", peep->Id.ToUnderlying());
 
         // Call the subscriptions
         auto e = obj.Take();
-        hookEngine.Call(OpenRCT2::Scripting::HookType::guestGeneration, e, true);
+        hookEngine.Call(Scripting::HookType::guestGeneration, e, true);
     }
 #endif
 
@@ -8416,14 +8417,14 @@ void Guest::ThrowUp()
     const auto curLoc = GetLocation();
     Litter::Create({ curLoc, Orientation }, (Id.ToUnderlying() & 1) ? Litter::Type::vomitAlt : Litter::Type::vomit);
 
-    static constexpr OpenRCT2::Audio::SoundId coughs[4] = {
-        OpenRCT2::Audio::SoundId::cough1,
-        OpenRCT2::Audio::SoundId::cough2,
-        OpenRCT2::Audio::SoundId::cough3,
-        OpenRCT2::Audio::SoundId::cough4,
+    static constexpr Audio::SoundId coughs[4] = {
+        Audio::SoundId::cough1,
+        Audio::SoundId::cough2,
+        Audio::SoundId::cough3,
+        Audio::SoundId::cough4,
     };
     auto soundId = coughs[ScenarioRand() & 3];
-    OpenRCT2::Audio::Play3D(soundId, curLoc);
+    Audio::Play3D(soundId, curLoc);
 }
 
 void Guest::Serialise(DataSerialiser& stream)

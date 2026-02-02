@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -352,7 +352,7 @@ constexpr uint16_t kRCT12TileElementLargeTypeMask = 0x3FF;
 constexpr uint8_t kRCT12TrackElementTypeFlagChainLift = 1 << 7;
 constexpr uint8_t kRCT12TrackElementSequenceGreenLight = 1 << 7;
 
-constexpr uint16_t const kRCT12xy8Undefined = 0xFFFF;
+constexpr uint16_t kRCT12xy8Undefined = 0xFFFF;
 
 using RCT12ObjectEntryIndex = uint8_t;
 constexpr RCT12ObjectEntryIndex kRCT12ObjectEntryIndexNull = 255;
@@ -639,12 +639,12 @@ struct RCT12TileElement : public RCT12TileElementBase
     template<typename TType, RCT12TileElementType TClass>
     const TType* as() const
     {
-        return static_cast<RCT12TileElementType>(GetType()) == TClass ? reinterpret_cast<const TType*>(this) : nullptr;
+        return GetType() == TClass ? reinterpret_cast<const TType*>(this) : nullptr;
     }
     template<typename TType, RCT12TileElementType TClass>
     TType* as()
     {
-        return static_cast<RCT12TileElementType>(GetType()) == TClass ? reinterpret_cast<TType*>(this) : nullptr;
+        return GetType() == TClass ? reinterpret_cast<TType*>(this) : nullptr;
     }
 
     const RCT12SurfaceElement* AsSurface() const
@@ -824,8 +824,8 @@ public:
     RCT12ObjectEntryIndex GetEntryIndex() const;
     uint8_t GetAge() const;
     uint8_t GetSceneryQuadrant() const;
-    colour_t GetPrimaryColour() const;
-    colour_t GetSecondaryColour() const;
+    OpenRCT2::Drawing::Colour GetPrimaryColour() const;
+    OpenRCT2::Drawing::Colour GetSecondaryColour() const;
     bool NeedsSupports() const;
 };
 static_assert(sizeof(RCT12SmallSceneryElement) == 8);
@@ -837,8 +837,8 @@ private:
 public:
     uint32_t GetEntryIndex() const;
     uint16_t GetSequenceIndex() const;
-    colour_t GetPrimaryColour() const;
-    colour_t GetSecondaryColour() const;
+    OpenRCT2::Drawing::Colour GetPrimaryColour() const;
+    OpenRCT2::Drawing::Colour GetSecondaryColour() const;
     uint8_t GetBannerIndex() const;
 };
 static_assert(sizeof(RCT12LargeSceneryElement) == 8);
@@ -856,15 +856,15 @@ private:
 public:
     RCT12ObjectEntryIndex GetEntryIndex() const;
     uint8_t GetSlope() const;
-    colour_t GetPrimaryColour() const;
-    colour_t GetSecondaryColour() const;
-    colour_t GetTertiaryColour() const;
+    OpenRCT2::Drawing::Colour GetPrimaryColour() const;
+    OpenRCT2::Drawing::Colour GetSecondaryColour() const;
+    OpenRCT2::Drawing::Colour GetTertiaryColour() const;
     uint8_t GetAnimationFrame() const;
     uint8_t GetBannerIndex() const;
     bool IsAcrossTrack() const;
     bool AnimationIsBackwards() const;
     int32_t GetRCT1WallType(int32_t edge) const;
-    colour_t GetRCT1WallColour() const;
+    OpenRCT2::Drawing::Colour GetRCT1WallColour() const;
     uint8_t GetRCT1Slope() const;
 };
 static_assert(sizeof(RCT12WallElement) == 8);
@@ -1223,8 +1223,8 @@ static_assert(sizeof(RCT12VehicleColour) == 2);
 
 #pragma pack(pop)
 
-OpenRCT2::ObjectEntryIndex RCTEntryIndexToOpenRCT2EntryIndex(const RCT12ObjectEntryIndex index);
-RideId RCT12RideIdToOpenRCT2RideId(const RCT12RideId rideId);
+OpenRCT2::ObjectEntryIndex RCTEntryIndexToOpenRCT2EntryIndex(RCT12ObjectEntryIndex index);
+RideId RCT12RideIdToOpenRCT2RideId(RCT12RideId rideId);
 bool IsLikelyUTF8(std::string_view s);
 std::string RCT12RemoveFormattingUTF8(std::string_view s);
 std::string ConvertFormattedStringToOpenRCT2(std::string_view buffer);
@@ -1278,6 +1278,6 @@ namespace OpenRCT2::RCT12
      * Handles single and multi-byte strings.
      */
     size_t GetRCTStringBufferLen(const char* buffer, size_t maxBufferLen);
-    bool TrackTypeHasSpeedSetting(OpenRCT2::RCT12::TrackElemType trackType);
-    bool TrackTypeIsStation(OpenRCT2::RCT12::TrackElemType trackType);
+    bool TrackTypeHasSpeedSetting(TrackElemType trackType);
+    bool TrackTypeIsStation(TrackElemType trackType);
 } // namespace OpenRCT2::RCT12

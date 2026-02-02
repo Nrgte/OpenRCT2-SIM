@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -96,11 +96,11 @@ void Balloon::Pop(bool playSound)
     frame = 0;
     if (playSound)
     {
-        OpenRCT2::Audio::Play3D(OpenRCT2::Audio::SoundId::balloonPop, { x, y, z });
+        Audio::Play3D(Audio::SoundId::balloonPop, { x, y, z });
     }
 }
 
-void Balloon::Create(const CoordsXYZ& balloonPos, int32_t colour, bool isPopped)
+void Balloon::Create(const CoordsXYZ& balloonPos, Drawing::Colour colour, bool isPopped)
 {
     auto* balloon = getGameState().entities.CreateEntity<Balloon>();
     if (balloon == nullptr)

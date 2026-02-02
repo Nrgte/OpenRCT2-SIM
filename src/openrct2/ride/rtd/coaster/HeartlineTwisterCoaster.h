@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -50,9 +50,9 @@ constexpr RideTypeDescriptor HeartlineTwisterCoasterRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 70,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_WHITE, COLOUR_LIGHT_BLUE, COLOUR_WHITE },
-        { COLOUR_BORDEAUX_RED, COLOUR_YELLOW, COLOUR_BLACK },
-        { COLOUR_DARK_PURPLE, COLOUR_WHITE, COLOUR_DARK_GREEN },
+        { Drawing::Colour::white, Drawing::Colour::lightBlue, Drawing::Colour::white },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::yellow, Drawing::Colour::black },
+        { Drawing::Colour::darkPurple, Drawing::Colour::white, Drawing::Colour::darkGreen },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_HEARTLINE_TWISTER_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_HEARTLINE_TWISTER_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -62,7 +62,7 @@ constexpr RideTypeDescriptor HeartlineTwisterCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(3, 00), RideRating::make(1, 70), RideRating::make(1, 65) },
         18,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000, 764, 0, 0 },

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -11,9 +11,9 @@
 
 #include "../Identifiers.h"
 #include "../actions/CommandFlag.h"
-#include "../object/Object.h"
 #include "../world/Location.hpp"
 #include "../world/QuarterTile.h"
+#include "RideTypes.h"
 
 #include <optional>
 
@@ -739,6 +739,7 @@ bool TrackTypeIsStation(OpenRCT2::TrackElemType trackType);
 bool TrackTypeIsBrakes(OpenRCT2::TrackElemType trackType);
 bool TrackTypeIsBlockBrakes(OpenRCT2::TrackElemType trackType);
 bool TrackTypeIsBooster(OpenRCT2::TrackElemType trackType);
+bool TrackTypeIsReverser(OpenRCT2::TrackElemType trackType);
 
 TrackRoll TrackGetActualBank(OpenRCT2::TileElement* tileElement, TrackRoll bank);
 TrackRoll TrackGetActualBank2(ride_type_t rideType, bool isInverted, TrackRoll bank);
@@ -756,3 +757,5 @@ constexpr bool TrackPieceDirectionIsDiagonal(const uint8_t direction)
 {
     return direction & kTrackDirectionDiagonalMask;
 }
+
+bool TrackGetIsSheltered(const CoordsXYZ& input);

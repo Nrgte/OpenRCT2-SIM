@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -23,7 +23,8 @@
 
 namespace OpenRCT2::GameActions
 {
-    SignSetStyleAction::SignSetStyleAction(BannerIndex bannerIndex, uint8_t mainColour, uint8_t textColour, bool isLarge)
+    SignSetStyleAction::SignSetStyleAction(
+        BannerIndex bannerIndex, Drawing::Colour mainColour, Drawing::Colour textColour, bool isLarge)
         : _bannerIndex(bannerIndex)
         , _mainColour(mainColour)
         , _textColour(textColour)

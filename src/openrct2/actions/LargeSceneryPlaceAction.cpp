@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -12,6 +12,7 @@
 #include "../Diagnostic.h"
 #include "../GameState.h"
 #include "../OpenRCT2.h"
+#include "../core/Guard.hpp"
 #include "../management/Finance.h"
 #include "../object/LargeSceneryEntry.h"
 #include "../object/ObjectEntryManager.h"
@@ -32,8 +33,8 @@
 namespace OpenRCT2::GameActions
 {
     LargeSceneryPlaceAction::LargeSceneryPlaceAction(
-        const CoordsXYZD& loc, ObjectEntryIndex sceneryType, uint8_t primaryColour, uint8_t secondaryColour,
-        uint8_t tertiaryColour)
+        const CoordsXYZD& loc, ObjectEntryIndex sceneryType, Drawing::Colour primaryColour, Drawing::Colour secondaryColour,
+        Drawing::Colour tertiaryColour)
         : _loc(loc)
         , _sceneryType(sceneryType)
         , _primaryColour(primaryColour)
@@ -78,22 +79,22 @@ namespace OpenRCT2::GameActions
 
         money64 supportsCost = 0;
 
-        if (_primaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_primaryColour))
         {
             LOG_ERROR("Invalid primary colour %u", _primaryColour);
             return Result(Status::invalidParameters, STR_CANT_POSITION_THIS_HERE, STR_ERR_INVALID_COLOUR);
         }
-        else if (_secondaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_secondaryColour))
         {
             LOG_ERROR("Invalid secondary colour %u", _secondaryColour);
             return Result(Status::invalidParameters, STR_CANT_POSITION_THIS_HERE, STR_ERR_INVALID_COLOUR);
         }
-        else if (_tertiaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_tertiaryColour))
         {
             LOG_ERROR("Invalid tertiary colour %u", _tertiaryColour);
             return Result(Status::invalidParameters, STR_CANT_POSITION_THIS_HERE, STR_ERR_INVALID_COLOUR);
         }
-        else if (_sceneryType >= kMaxLargeSceneryObjects)
+        if (_sceneryType >= kMaxLargeSceneryObjects)
         {
             LOG_ERROR("Invalid sceneryType %u", _sceneryType);
             return Result(Status::invalidParameters, STR_CANT_POSITION_THIS_HERE, STR_ERR_VALUE_OUT_OF_RANGE);
@@ -241,7 +242,7 @@ namespace OpenRCT2::GameActions
             }
 
             banner->text = {};
-            banner->colour = 2;
+            banner->colour = Drawing::Colour::white;
             banner->textColour = Drawing::TextColour::white;
             banner->flags = { BannerFlag::isLargeScenery };
             banner->type = 0;
@@ -290,7 +291,7 @@ namespace OpenRCT2::GameActions
             if (!GetFlags().has(CommandFlag::ghost))
             {
                 FootpathRemoveLitter({ curTile, zLow });
-                if (!getGameState().cheats.disableClearanceChecks)
+                if (!gameState.cheats.disableClearanceChecks)
                 {
                     WallRemoveAt({ curTile, zLow, zHigh });
                 }

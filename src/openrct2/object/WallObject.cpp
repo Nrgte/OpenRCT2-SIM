@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -14,9 +14,9 @@
 #include "../core/Json.hpp"
 #include "../core/String.hpp"
 #include "../drawing/Drawing.h"
+#include "../drawing/ScrollingText.h"
 #include "../interface/Cursors.h"
 #include "../localisation/Language.h"
-#include "../world/Banner.h"
 
 namespace OpenRCT2
 {
@@ -77,17 +77,17 @@ namespace OpenRCT2
         screenCoords.x += 14;
         screenCoords.y += (_legacyType.height * 2) + 16;
 
-        auto imageId = ImageId(_legacyType.image, COLOUR_BORDEAUX_RED);
+        auto imageId = ImageId(_legacyType.image, Drawing::Colour::bordeauxRed);
         if (_legacyType.flags & WALL_SCENERY_HAS_SECONDARY_COLOUR)
         {
-            imageId = imageId.WithSecondary(COLOUR_YELLOW);
+            imageId = imageId.WithSecondary(Drawing::Colour::yellow);
         }
 
         GfxDrawSprite(rt, imageId, screenCoords);
 
         if (_legacyType.flags & WALL_SCENERY_HAS_GLASS)
         {
-            auto glassImageId = imageId.WithTransparency(COLOUR_BORDEAUX_RED).WithIndexOffset(6);
+            auto glassImageId = imageId.WithTransparency(Drawing::Colour::bordeauxRed).WithIndexOffset(6);
             GfxDrawSprite(rt, glassImageId, screenCoords);
         }
         else if (_legacyType.flags & WALL_SCENERY_IS_DOOR)

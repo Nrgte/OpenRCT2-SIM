@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -10,7 +10,6 @@
 #pragma once
 
 #include "../../Identifiers.h"
-#include "../../interface/Colour.h"
 #include "../../object/ObjectTypes.h"
 #include "../../object/WallSceneryEntry.h"
 #include "../Banner.h"
@@ -37,9 +36,9 @@ namespace OpenRCT2
 
     private:
         ObjectEntryIndex entryIndex; // 05
-        colour_t colour_1;           // 07
-        colour_t colour_2;           // 08
-        colour_t colour_3;           // 09
+        Drawing::Colour colour_1;    // 07
+        Drawing::Colour colour_2;    // 08
+        Drawing::Colour colour_3;    // 09
         BannerIndex banner_index;    // 0A
         uint8_t animation; // 0C 0b_dfff_fta0 d = direction, f = frame num, t = across track flag (not used), a = animating
 #pragma clang diagnostic push
@@ -55,18 +54,18 @@ namespace OpenRCT2
         uint8_t GetSlope() const;
         void SetSlope(uint8_t newslope);
 
-        colour_t GetPrimaryColour() const;
-        void SetPrimaryColour(colour_t newColour);
-        colour_t GetSecondaryColour() const;
-        void SetSecondaryColour(colour_t newColour);
-        colour_t GetTertiaryColour() const;
-        void SetTertiaryColour(colour_t newColour);
+        Drawing::Colour GetPrimaryColour() const;
+        void SetPrimaryColour(Drawing::Colour newColour);
+        Drawing::Colour GetSecondaryColour() const;
+        void SetSecondaryColour(Drawing::Colour newColour);
+        Drawing::Colour GetTertiaryColour() const;
+        void SetTertiaryColour(Drawing::Colour newColour);
 
         uint8_t GetAnimationFrame() const;
         void SetAnimationFrame(uint8_t frameNum);
 
         bool IsAnimating() const;
-        void SetIsAnimating(const bool isAnimating);
+        void SetIsAnimating(bool isAnimating);
 
         Banner* GetBanner() const;
         BannerIndex GetBannerIndex() const;

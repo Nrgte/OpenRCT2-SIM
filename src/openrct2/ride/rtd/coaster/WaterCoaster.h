@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -63,10 +63,10 @@ constexpr RideTypeDescriptor WaterCoasterRTD =
     .PhotoItem = ShopItem::photo4,
     .BonusValue = 60,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_DARK_GREEN, COLOUR_DARK_GREEN, COLOUR_BLACK },
-        { COLOUR_DARK_BROWN, COLOUR_DARK_BROWN, COLOUR_BORDEAUX_RED },
-        { COLOUR_WHITE, COLOUR_WHITE, COLOUR_DARK_PURPLE },
-        { COLOUR_DULL_BROWN_LIGHT, COLOUR_DULL_BROWN_LIGHT, COLOUR_DARK_BROWN }, // De Vliegende Hollander
+        { Drawing::Colour::darkGreen, Drawing::Colour::darkGreen, Drawing::Colour::black },
+        { Drawing::Colour::darkBrown, Drawing::Colour::darkBrown, Drawing::Colour::bordeauxRed },
+        { Drawing::Colour::white, Drawing::Colour::white, Drawing::Colour::darkPurple },
+        { Drawing::Colour::beige, Drawing::Colour::beige, Drawing::Colour::darkBrown }, // De Vliegende Hollander
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_WATER_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_WATER_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -76,7 +76,7 @@ constexpr RideTypeDescriptor WaterCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 70), RideRating::make(2, 80), RideRating::make(2, 10) },
         14,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

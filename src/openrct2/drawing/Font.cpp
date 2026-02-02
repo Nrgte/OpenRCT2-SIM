@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -318,7 +318,7 @@ ImageId FontSpriteGetCodepointSprite(FontStyle fontStyle, int32_t codepoint)
     auto codePointOffset = FontSpriteGetCodepointOffset(codepoint);
     int32_t offset = EnumValue(fontStyle) * SPR_FONTS_GLYPH_COUNT;
 
-    return ImageId(SPR_FONTS_BEGIN + offset + codePointOffset, COLOUR_BLACK);
+    return ImageId(SPR_FONTS_BEGIN + offset + codePointOffset, OpenRCT2::Drawing::Colour::black);
 }
 
 int32_t FontGetLineHeight(FontStyle fontStyle)

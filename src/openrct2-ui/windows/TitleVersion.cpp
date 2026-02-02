@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -12,7 +12,6 @@
 #include <openrct2/Context.h>
 #include <openrct2/Version.h>
 #include <openrct2/drawing/Drawing.h>
-#include <openrct2/interface/Colour.h>
 #include <openrct2/interface/ColourWithFlags.h>
 #include <openrct2/ui/WindowManager.h>
 
@@ -27,7 +26,7 @@ namespace OpenRCT2::Ui::Windows
         void onDraw(Drawing::RenderTarget& rt) override
         {
             // Write name and version information
-            const auto whiteOutline = ColourWithFlags{ COLOUR_WHITE }.withFlag(ColourFlag::withOutline, true);
+            const auto whiteOutline = ColourWithFlags{ Drawing::Colour::white }.withFlag(ColourFlag::withOutline, true);
             DrawText(rt, windowPos, { whiteOutline }, gVersionInfoFull);
             width = GfxGetStringWidth(gVersionInfoFull, FontStyle::medium);
 

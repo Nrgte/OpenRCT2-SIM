@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -22,7 +22,6 @@
 #include "../entity/Litter.h"
 #include "../entity/Peep.h"
 #include "../entity/Staff.h"
-#include "../interface/Colour.h"
 #include "../management/Award.h"
 #include "../management/Finance.h"
 #include "../management/Marketing.h"
@@ -302,9 +301,9 @@ namespace OpenRCT2::Park
 
         park.name = LanguageGetString(STR_UNNAMED_PARK);
         gameState.pluginStorage = {};
-        park.staffHandymanColour = COLOUR_BRIGHT_RED;
-        park.staffMechanicColour = COLOUR_LIGHT_BLUE;
-        park.staffSecurityColour = COLOUR_YELLOW;
+        park.staffHandymanColour = Drawing::Colour::brightRed;
+        park.staffMechanicColour = Drawing::Colour::lightBlue;
+        park.staffSecurityColour = Drawing::Colour::yellow;
         park.numGuestsInPark = 0;
         park.numGuestsInParkLastWeek = 0;
         park.numGuestsHeadingForPark = 0;
@@ -334,7 +333,7 @@ namespace OpenRCT2::Park
         gameState.researchFundingLevel = RESEARCH_FUNDING_NORMAL;
 
         gameState.scenarioOptions.guestInitialCash = 50.00_GBP;
-        gameState.scenarioOptions.guestInitialHappiness = Park::CalculateGuestInitialHappiness(50);
+        gameState.scenarioOptions.guestInitialHappiness = CalculateGuestInitialHappiness(50);
         gameState.scenarioOptions.guestInitialHunger = 200;
         gameState.scenarioOptions.guestInitialThirst = 200;
         gameState.scenarioOptions.objective.Type = Scenario::ObjectiveType::guestsBy;
@@ -383,7 +382,7 @@ namespace OpenRCT2::Park
         // Every ~102 seconds
         if (currentTicks % 4096 == 0)
         {
-            Park::UpdateSize(park);
+            UpdateSize(park);
         }
 
         generateGuests(park, gameState);

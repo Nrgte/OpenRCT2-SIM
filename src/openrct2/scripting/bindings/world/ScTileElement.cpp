@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -13,6 +13,7 @@
 
     #include "../../../Context.h"
     #include "../../../core/Guard.hpp"
+    #include "../../../drawing/ScrollingText.h"
     #include "../../../entity/EntityRegistry.h"
     #include "../../../object/LargeSceneryEntry.h"
     #include "../../../object/WallSceneryEntry.h"
@@ -1328,25 +1329,25 @@ namespace OpenRCT2::Scripting
             case TileElementType::SmallScenery:
             {
                 auto* el = _element->AsSmallScenery();
-                duk_push_int(ctx, el->GetPrimaryColour());
+                duk_push_int(ctx, EnumValue(el->GetPrimaryColour()));
                 break;
             }
             case TileElementType::LargeScenery:
             {
                 auto* el = _element->AsLargeScenery();
-                duk_push_int(ctx, el->GetPrimaryColour());
+                duk_push_int(ctx, EnumValue(el->GetPrimaryColour()));
                 break;
             }
             case TileElementType::Wall:
             {
                 auto* el = _element->AsWall();
-                duk_push_int(ctx, el->GetPrimaryColour());
+                duk_push_int(ctx, EnumValue(el->GetPrimaryColour()));
                 break;
             }
             case TileElementType::Banner:
             {
                 auto* el = _element->AsBanner();
-                duk_push_int(ctx, el->GetBanner()->colour);
+                duk_push_int(ctx, EnumValue(el->GetBanner()->colour));
                 break;
             }
             default:
@@ -1365,28 +1366,28 @@ namespace OpenRCT2::Scripting
             case TileElementType::SmallScenery:
             {
                 auto* el = _element->AsSmallScenery();
-                el->SetPrimaryColour(value);
+                el->SetPrimaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
             case TileElementType::LargeScenery:
             {
                 auto* el = _element->AsLargeScenery();
-                el->SetPrimaryColour(value);
+                el->SetPrimaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
             case TileElementType::Wall:
             {
                 auto* el = _element->AsWall();
-                el->SetPrimaryColour(value);
+                el->SetPrimaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
             case TileElementType::Banner:
             {
                 auto* el = _element->AsBanner();
-                el->GetBanner()->colour = value;
+                el->GetBanner()->colour = static_cast<Drawing::Colour>(value);
                 Invalidate();
                 break;
             }
@@ -1404,19 +1405,19 @@ namespace OpenRCT2::Scripting
             case TileElementType::SmallScenery:
             {
                 auto* el = _element->AsSmallScenery();
-                duk_push_int(ctx, el->GetSecondaryColour());
+                duk_push_int(ctx, EnumValue(el->GetSecondaryColour()));
                 break;
             }
             case TileElementType::LargeScenery:
             {
                 auto* el = _element->AsLargeScenery();
-                duk_push_int(ctx, el->GetSecondaryColour());
+                duk_push_int(ctx, EnumValue(el->GetSecondaryColour()));
                 break;
             }
             case TileElementType::Wall:
             {
                 auto* el = _element->AsWall();
-                duk_push_int(ctx, el->GetSecondaryColour());
+                duk_push_int(ctx, EnumValue(el->GetSecondaryColour()));
                 break;
             }
             case TileElementType::Banner:
@@ -1441,21 +1442,21 @@ namespace OpenRCT2::Scripting
             case TileElementType::SmallScenery:
             {
                 auto* el = _element->AsSmallScenery();
-                el->SetSecondaryColour(value);
+                el->SetSecondaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
             case TileElementType::LargeScenery:
             {
                 auto* el = _element->AsLargeScenery();
-                el->SetSecondaryColour(value);
+                el->SetSecondaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
             case TileElementType::Wall:
             {
                 auto* el = _element->AsWall();
-                el->SetSecondaryColour(value);
+                el->SetSecondaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
@@ -1480,19 +1481,19 @@ namespace OpenRCT2::Scripting
             case TileElementType::SmallScenery:
             {
                 auto* el = _element->AsSmallScenery();
-                duk_push_int(ctx, el->GetTertiaryColour());
+                duk_push_int(ctx, EnumValue(el->GetTertiaryColour()));
                 break;
             }
             case TileElementType::LargeScenery:
             {
                 auto* el = _element->AsLargeScenery();
-                duk_push_int(ctx, el->GetTertiaryColour());
+                duk_push_int(ctx, EnumValue(el->GetTertiaryColour()));
                 break;
             }
             case TileElementType::Wall:
             {
                 auto* el = _element->AsWall();
-                duk_push_int(ctx, el->GetTertiaryColour());
+                duk_push_int(ctx, EnumValue(el->GetTertiaryColour()));
                 break;
             }
             default:
@@ -1511,21 +1512,21 @@ namespace OpenRCT2::Scripting
             case TileElementType::SmallScenery:
             {
                 auto* el = _element->AsSmallScenery();
-                el->SetTertiaryColour(value);
+                el->SetTertiaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
             case TileElementType::LargeScenery:
             {
                 auto* el = _element->AsLargeScenery();
-                el->SetTertiaryColour(value);
+                el->SetTertiaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
             case TileElementType::Wall:
             {
                 auto* el = _element->AsWall();
-                el->SetTertiaryColour(value);
+                el->SetTertiaryColour(static_cast<Drawing::Colour>(value));
                 Invalidate();
                 break;
             }
@@ -2244,7 +2245,7 @@ namespace OpenRCT2::Scripting
         else
         {
             banner->text = {};
-            banner->colour = 0;
+            banner->colour = Drawing::Colour::black;
             banner->textColour = Drawing::TextColour::black;
             banner->flags = {};
             if (_element->GetType() == TileElementType::Wall)

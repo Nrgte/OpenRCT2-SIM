@@ -34,7 +34,7 @@ env:
   OPENRCT2_BUILD_SERVER: GitHub
   OPENRCT2_ORG_TOKEN: ${{ secrets.OPENRCT2_ORG_TOKEN }}
   BACKTRACE_IO_TOKEN: ${{ secrets.BACKTRACE_IO_TOKEN }}
-  OPENRCT2_VERSION: 0.4.30
+  OPENRCT2_VERSION: 0.4.31
 
 # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-using-a-fallback-value
 concurrency:
@@ -164,13 +164,14 @@ jobs:
           path: OpenRCT2
       - name: Download gxc
         run: |
-          curl -Lo tools.tar.gz https://github.com/IntelOrca/libsawyer/releases/download/v1.3.0/libsawyer-tools-linux-x64.tar.gz
+          curl -Lo tools.tar.gz https://github.com/OpenRCT2/libsawyer/releases/download/v1.4.0/libsawyer-tools-linux-x64.tar.gz
           mkdir -p "$GITHUB_WORKSPACE/bin"
           tar -C "$GITHUB_WORKSPACE/bin" -xf tools.tar.gz
           echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
       - name: Build graphics .dat files
         run: |
           gxc build g2.dat OpenRCT2/resources/g2/sprites.json
+          gxc build palettes.dat OpenRCT2/resources/palettes/sprites.json
           gxc build fonts.dat OpenRCT2/resources/fonts/sprites.json
           gxc build tracks.dat OpenRCT2/resources/tracks/sprites.json
       - name: Upload graphics .dat files
@@ -179,6 +180,7 @@ jobs:
           name: graphics-${{ needs.build_variables.outputs.name }}
           path: |
             g2.dat
+            palettes.dat
             fonts.dat
             tracks.dat
   windows:
@@ -196,7 +198,7 @@ jobs:
       - name: Setup environment
         run: |
           BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)
-          if [[ $BRANCH == 'develop' || $BRANCH == 'master' ]]; then
+          if [[ $BRANCH == 'develop' || $GITHUB_REF_TYPE == 'tag' ]]; then
              echo "CONFIGURATION=ReleaseLTCG" >> "$GITHUB_ENV"
           else
              echo "CONFIGURATION=Release" >> "$GITHUB_ENV"

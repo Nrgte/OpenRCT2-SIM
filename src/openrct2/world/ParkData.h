@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -10,7 +10,6 @@
 #pragma once
 
 #include "../core/EnumUtils.hpp"
-#include "../interface/Colour.h"
 #include "../management/Award.h"
 #include "../management/Finance.h"
 #include "../management/Marketing.h"
@@ -18,6 +17,11 @@
 
 #include <string>
 #include <vector>
+
+namespace OpenRCT2::Drawing
+{
+    enum class Colour : uint8_t;
+}
 
 constexpr auto kMaxEntranceFee = 999.00_GBP;
 
@@ -115,9 +119,9 @@ namespace OpenRCT2::Park
 
         uint64_t samePriceThroughoutPark{};
 
-        colour_t staffHandymanColour;
-        colour_t staffMechanicColour;
-        colour_t staffSecurityColour;
+        Drawing::Colour staffHandymanColour;
+        Drawing::Colour staffMechanicColour;
+        Drawing::Colour staffSecurityColour;
 
         uint8_t peepWarningThrottle[16];
 

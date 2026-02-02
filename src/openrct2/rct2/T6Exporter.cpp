@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -43,7 +43,7 @@ namespace OpenRCT2::RCT2
     {
         try
         {
-            auto fs = OpenRCT2::FileStream(path, OpenRCT2::FileMode::write);
+            auto fs = FileStream(path, FileMode::write);
             return SaveTrack(&fs);
         }
         catch (const std::exception& e)
@@ -53,20 +53,20 @@ namespace OpenRCT2::RCT2
         }
     }
 
-    bool T6Exporter::SaveTrack(OpenRCT2::IStream* stream)
+    bool T6Exporter::SaveTrack(IStream* stream)
     {
         auto& rtd = GetRideTypeDescriptor(_trackDesign.trackAndVehicle.rtdIndex);
         auto td6rideType = OpenRCT2RideTypeToRCT2RideType(_trackDesign.trackAndVehicle.rtdIndex);
-        OpenRCT2::MemoryStream tempStream;
+        MemoryStream tempStream;
         tempStream.WriteValue<uint8_t>(td6rideType);
         tempStream.WriteValue<uint8_t>(0);
         tempStream.WriteValue<uint32_t>(0);
         tempStream.WriteValue<uint8_t>(static_cast<uint8_t>(_trackDesign.operation.rideMode));
         tempStream.WriteValue<uint8_t>(EnumValue(_trackDesign.appearance.vehicleColourSettings) | (2 << 2));
-        for (auto i = 0; i < RCT2::Limits::kMaxVehicleColours; i++)
+        for (auto i = 0; i < Limits::kMaxVehicleColours; i++)
         {
-            tempStream.WriteValue<uint8_t>(_trackDesign.appearance.vehicleColours[i].Body);
-            tempStream.WriteValue<uint8_t>(_trackDesign.appearance.vehicleColours[i].Trim);
+            tempStream.WriteValue<Drawing::Colour>(_trackDesign.appearance.vehicleColours[i].Body);
+            tempStream.WriteValue<Drawing::Colour>(_trackDesign.appearance.vehicleColours[i].Trim);
         }
         tempStream.WriteValue<uint8_t>(0);
         auto entranceStyle = GetStationStyleFromIdentifier(_trackDesign.appearance.stationObjectIdentifier);
@@ -106,23 +106,23 @@ namespace OpenRCT2::RCT2
         tempStream.WriteValue<money16>(ToMoney16(_trackDesign.statistics.upkeepCost));
         for (auto i = 0; i < Limits::kNumColourSchemes; i++)
         {
-            tempStream.WriteValue<uint8_t>(_trackDesign.appearance.trackColours[i].main);
+            tempStream.WriteValue<Drawing::Colour>(_trackDesign.appearance.trackColours[i].main);
         }
         for (auto i = 0; i < Limits::kNumColourSchemes; i++)
         {
-            tempStream.WriteValue<uint8_t>(_trackDesign.appearance.trackColours[i].additional);
+            tempStream.WriteValue<Drawing::Colour>(_trackDesign.appearance.trackColours[i].additional);
         }
         for (auto i = 0; i < Limits::kNumColourSchemes; i++)
         {
-            tempStream.WriteValue<uint8_t>(_trackDesign.appearance.trackColours[i].supports);
+            tempStream.WriteValue<Drawing::Colour>(_trackDesign.appearance.trackColours[i].supports);
         }
         tempStream.WriteValue<uint32_t>(0);
         tempStream.Write(&_trackDesign.trackAndVehicle.vehicleObject.Entry, sizeof(RCTObjectEntry));
         tempStream.WriteValue<uint8_t>(_trackDesign.statistics.spaceRequired.x);
         tempStream.WriteValue<uint8_t>(_trackDesign.statistics.spaceRequired.y);
-        for (auto i = 0; i < RCT2::Limits::kMaxVehicleColours; i++)
+        for (auto i = 0; i < Limits::kMaxVehicleColours; i++)
         {
-            tempStream.WriteValue<uint8_t>(_trackDesign.appearance.vehicleColours[i].Tertiary);
+            tempStream.WriteValue<Drawing::Colour>(_trackDesign.appearance.vehicleColours[i].Tertiary);
         }
         auto liftSpeed = std::min<uint8_t>(31, _trackDesign.operation.liftHillSpeed);
         auto numCircuits = std::min<uint8_t>(7, _trackDesign.operation.numCircuits);
@@ -155,7 +155,7 @@ namespace OpenRCT2::RCT2
                 auto trackType = OpenRCT2TrackTypeToRCT2(trackElement.type);
                 if (trackElement.type == TrackElemType::multiDimInvertedUp90ToFlatQuarterLoop)
                 {
-                    trackType = OpenRCT2::RCT12::TrackElemType::invertedUp90ToFlatQuarterLoopAlias;
+                    trackType = RCT12::TrackElemType::invertedUp90ToFlatQuarterLoopAlias;
                 }
                 tempStream.WriteValue<uint8_t>(static_cast<uint8_t>(trackType));
                 auto flags = RCT12::convertToTD46Flags(trackElement);
@@ -183,7 +183,7 @@ namespace OpenRCT2::RCT2
             if (sceneryElement.sceneryObject.Entry.GetType() == ObjectType::walls)
             {
                 flags &= ~0xFC;
-                flags |= (sceneryElement.tertiaryColour << 2);
+                flags |= (EnumValue(sceneryElement.tertiaryColour) << 2);
             }
 
             tempStream.Write(&sceneryElement.sceneryObject.Entry, sizeof(RCTObjectEntry));
@@ -192,8 +192,8 @@ namespace OpenRCT2::RCT2
             tempStream.WriteValue<int8_t>(tileCoords.y);
             tempStream.WriteValue<int8_t>(tileCoords.z);
             tempStream.WriteValue<uint8_t>(flags);
-            tempStream.WriteValue<uint8_t>(sceneryElement.primaryColour);
-            tempStream.WriteValue<uint8_t>(sceneryElement.secondaryColour);
+            tempStream.WriteValue<Drawing::Colour>(sceneryElement.primaryColour);
+            tempStream.WriteValue<Drawing::Colour>(sceneryElement.secondaryColour);
         }
 
         tempStream.WriteValue<uint8_t>(0xFF);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -49,11 +49,11 @@ constexpr RideTypeDescriptor ClassicMiniRollerCoasterRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 60,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_YELLOW, COLOUR_YELLOW, COLOUR_SATURATED_BROWN },
-        { COLOUR_BORDEAUX_RED, COLOUR_BORDEAUX_RED, COLOUR_DARK_OLIVE_GREEN },
-        { COLOUR_TEAL, COLOUR_YELLOW, COLOUR_TEAL },
-        { COLOUR_SATURATED_BROWN, COLOUR_SATURATED_BROWN, COLOUR_OLIVE_GREEN },
-        { COLOUR_BLACK, COLOUR_LIGHT_BLUE, COLOUR_BLACK },
+        { Drawing::Colour::yellow, Drawing::Colour::yellow, Drawing::Colour::saturatedBrown },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::bordeauxRed, Drawing::Colour::darkOliveGreen },
+        { Drawing::Colour::darkWater, Drawing::Colour::yellow, Drawing::Colour::darkWater },
+        { Drawing::Colour::saturatedBrown, Drawing::Colour::saturatedBrown, Drawing::Colour::oliveGreen },
+        { Drawing::Colour::black, Drawing::Colour::lightBlue, Drawing::Colour::black },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_JUNIOR_ROLLER_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_JUNIOR_ROLLER_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -63,7 +63,7 @@ constexpr RideTypeDescriptor ClassicMiniRollerCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 40), RideRating::make(2, 80), RideRating::make(1, 90) },
         13,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -48,8 +48,8 @@ constexpr RideTypeDescriptor LaunchedFreefallRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 65,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_WHITE, COLOUR_BRIGHT_RED, COLOUR_LIGHT_PURPLE },
-        { COLOUR_DARK_GREEN, COLOUR_YELLOW, COLOUR_WHITE },
+        { Drawing::Colour::white, Drawing::Colour::brightRed, Drawing::Colour::lightPurple },
+        { Drawing::Colour::darkGreen, Drawing::Colour::yellow, Drawing::Colour::white },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_LAUNCHED_FREEFALL_TRACK, SPR_RIDE_DESIGN_PREVIEW_LAUNCHED_FREEFALL_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -59,7 +59,7 @@ constexpr RideTypeDescriptor LaunchedFreefallRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 70), RideRating::make(3, 00), RideRating::make(3, 50) },
         16,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusDownwardLaunch,          0, RideRating::make(0, 30), RideRating::make(0, 65), RideRating::make(0, 45) },

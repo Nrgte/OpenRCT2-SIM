@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -203,7 +203,7 @@ static_assert(std::size(kStationBaseTypeSpriteIndexes) == kStationBaseTypeCount)
 
 static bool TrackPaintUtilDrawStationImpl(
     PaintSession& session, const Ride& ride, Direction direction, uint16_t height, uint16_t coverHeight,
-    const TrackElement& trackElement, const StationBaseType baseType, const int32_t baseOffsetZ, int32_t fenceOffsetA,
+    const TrackElement& trackElement, StationBaseType baseType, int32_t baseOffsetZ, int32_t fenceOffsetA,
     int32_t fenceOffsetB);
 
 bool TrackPaintUtilDrawStation(
@@ -1795,7 +1795,7 @@ void TrackPaintUtilSpinningTunnelPaint(PaintSession& session, int8_t thickness, 
 
 void TrackPaintUtilOnridePhotoPlatformPaintBase(PaintSession& session, int32_t height)
 {
-    auto image = ImageId(SPR_STATION_BASE_BORDERLESS, COLOUR_BLACK);
+    auto image = ImageId(SPR_STATION_BASE_BORDERLESS, OpenRCT2::Drawing::Colour::black);
     if (session.TrackColours == ConstructionMarker)
         image = session.TrackColours.WithIndex(SPR_STATION_BASE_BORDERLESS);
     PaintAddImageAsParent(session, image, { 0, 0, height }, { 32, 32, 1 });
@@ -1993,7 +1993,8 @@ void PaintTrack(PaintSession& session, Direction direction, int32_t height, cons
                 // 0x1689 represents 0 height there are -127 to 128 heights above and below it
                 // There are 3 arrays of 256 heights (units, m, ft) chosen with the GetHeightMarkerOffset()
                 auto heightNum = (height + 8) / 16 - kMapBaseZ;
-                auto imageId = ImageId(SPR_HEIGHT_MARKER_BASE + GetHeightMarkerOffset() + heightNum, COLOUR_LIGHT_BLUE);
+                auto imageId = ImageId(
+                    SPR_HEIGHT_MARKER_BASE + GetHeightMarkerOffset() + heightNum, OpenRCT2::Drawing::Colour::lightBlue);
 
                 PaintAddImageAsParent(session, imageId, { 16, 16, height + ax + 3 }, { { 1000, 1000, 2047 }, { 1, 1, 0 } });
             }

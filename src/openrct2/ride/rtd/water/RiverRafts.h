@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -50,7 +50,7 @@ constexpr RideTypeDescriptor RiverRaftsRTD =
     .PhotoItem = ShopItem::photo4,
     .BonusValue = 65,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BLACK, COLOUR_BLACK, COLOUR_SATURATED_BROWN },
+        { Drawing::Colour::black, Drawing::Colour::black, Drawing::Colour::saturatedBrown },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_RIVER_RAFTS_TRACK, SPR_RIDE_DESIGN_PREVIEW_RIVER_RAFTS_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -60,7 +60,7 @@ constexpr RideTypeDescriptor RiverRaftsRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(1, 45), RideRating::make(0, 25), RideRating::make(0, 34) },
         12,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           2000,             7208, 0, 0 },

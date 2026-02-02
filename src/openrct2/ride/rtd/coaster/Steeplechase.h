@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -46,13 +46,13 @@ constexpr RideTypeDescriptor SteeplechaseRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 60,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_LIGHT_BLUE, COLOUR_LIGHT_BLUE, COLOUR_BLACK },
-        { COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_BLACK },
-        { COLOUR_BRIGHT_GREEN, COLOUR_BRIGHT_GREEN, COLOUR_BLACK },
-        { COLOUR_YELLOW, COLOUR_YELLOW, COLOUR_BLACK },
-        { COLOUR_LIGHT_ORANGE, COLOUR_LIGHT_ORANGE, COLOUR_BLACK },
-        { COLOUR_WHITE, COLOUR_WHITE, COLOUR_BLACK },
-        { COLOUR_BRIGHT_PINK, COLOUR_BRIGHT_PINK, COLOUR_BLACK },
+        { Drawing::Colour::lightBlue, Drawing::Colour::lightBlue, Drawing::Colour::black },
+        { Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::black },
+        { Drawing::Colour::brightGreen, Drawing::Colour::brightGreen, Drawing::Colour::black },
+        { Drawing::Colour::yellow, Drawing::Colour::yellow, Drawing::Colour::black },
+        { Drawing::Colour::lightOrange, Drawing::Colour::lightOrange, Drawing::Colour::black },
+        { Drawing::Colour::white, Drawing::Colour::white, Drawing::Colour::black },
+        { Drawing::Colour::brightPink, Drawing::Colour::brightPink, Drawing::Colour::black },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_STEEPLECHASE_TRACK, SPR_RIDE_DESIGN_PREVIEW_STEEPLECHASE_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -62,7 +62,7 @@ constexpr RideTypeDescriptor SteeplechaseRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 70), RideRating::make(2, 40), RideRating::make(1, 80) },
         14,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

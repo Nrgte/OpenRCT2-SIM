@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -32,7 +32,7 @@ namespace OpenRCT2
         ObjectEntryIndex EntryIndex;
         ::BannerIndex BannerIndex;
         uint8_t SequenceIndex;
-        uint8_t Colour[3];
+        Drawing::Colour Colour[3];
         uint8_t Flags2;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-private-field"
@@ -48,12 +48,12 @@ namespace OpenRCT2
         uint8_t GetSequenceIndex() const;
         void SetSequenceIndex(uint8_t newIndex);
 
-        colour_t GetPrimaryColour() const;
-        void SetPrimaryColour(colour_t colour);
-        colour_t GetSecondaryColour() const;
-        void SetSecondaryColour(colour_t colour);
-        colour_t GetTertiaryColour() const;
-        void SetTertiaryColour(colour_t colour);
+        Drawing::Colour GetPrimaryColour() const;
+        void SetPrimaryColour(Drawing::Colour colour);
+        Drawing::Colour GetSecondaryColour() const;
+        void SetSecondaryColour(Drawing::Colour colour);
+        Drawing::Colour GetTertiaryColour() const;
+        void SetTertiaryColour(Drawing::Colour colour);
 
         Banner* GetBanner() const;
         ::BannerIndex GetBannerIndex() const;

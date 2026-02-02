@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -51,11 +51,11 @@ constexpr RideTypeDescriptor MiniHelicoptersRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 45,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_DARK_PURPLE, COLOUR_YELLOW, COLOUR_DARK_PURPLE },
-        { COLOUR_WHITE, COLOUR_WHITE, COLOUR_BRIGHT_RED },
-        { COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_YELLOW },
-        { COLOUR_BRIGHT_PINK, COLOUR_BRIGHT_PINK, COLOUR_WHITE },
-        { COLOUR_LIGHT_BLUE, COLOUR_LIGHT_BLUE, COLOUR_WHITE },
+        { Drawing::Colour::darkPurple, Drawing::Colour::yellow, Drawing::Colour::darkPurple },
+        { Drawing::Colour::white, Drawing::Colour::white, Drawing::Colour::brightRed },
+        { Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::yellow },
+        { Drawing::Colour::brightPink, Drawing::Colour::brightPink, Drawing::Colour::white },
+        { Drawing::Colour::lightBlue, Drawing::Colour::lightBlue, Drawing::Colour::white },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_MINI_HELICOPTERS_TRACK, SPR_RIDE_DESIGN_PREVIEW_MINI_HELICOPTERS_SUPPORTS },
     .ColourKey = RideColourKey::Ride,

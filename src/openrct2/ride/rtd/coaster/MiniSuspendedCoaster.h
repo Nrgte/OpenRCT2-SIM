@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -47,8 +47,8 @@ constexpr RideTypeDescriptor MiniSuspendedCoasterRTD =
     .PhotoItem = ShopItem::photo2,
     .BonusValue = 50,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BLACK, COLOUR_BLACK, COLOUR_SATURATED_BROWN },
-        { COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_BLACK },
+        { Drawing::Colour::black, Drawing::Colour::black, Drawing::Colour::saturatedBrown },
+        { Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::black },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_MINI_SUSPENDED_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_MINI_SUSPENDED_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -58,7 +58,7 @@ constexpr RideTypeDescriptor MiniSuspendedCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 80), RideRating::make(2, 50), RideRating::make(2, 70) },
         15,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

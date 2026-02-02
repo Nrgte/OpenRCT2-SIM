@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -21,7 +21,7 @@
 
 namespace OpenRCT2::GameActions
 {
-    StaffSetColourAction::StaffSetColourAction(StaffType staffType, uint8_t colour)
+    StaffSetColourAction::StaffSetColourAction(StaffType staffType, Drawing::Colour colour)
         : _staffType(static_cast<uint8_t>(staffType))
         , _colour(colour)
     {

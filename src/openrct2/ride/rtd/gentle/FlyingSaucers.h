@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -49,10 +49,10 @@ constexpr RideTypeDescriptor FlyingSaucersRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 35,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_DARK_PURPLE, COLOUR_GREY, COLOUR_BLACK },
-        { COLOUR_BLACK, COLOUR_YELLOW, COLOUR_BLACK },
-        { COLOUR_YELLOW, COLOUR_SATURATED_RED, COLOUR_BLACK },
-        { COLOUR_ICY_BLUE, COLOUR_WHITE, COLOUR_BLACK },
+        { Drawing::Colour::darkPurple, Drawing::Colour::grey, Drawing::Colour::black },
+        { Drawing::Colour::black, Drawing::Colour::yellow, Drawing::Colour::black },
+        { Drawing::Colour::yellow, Drawing::Colour::saturatedRed, Drawing::Colour::black },
+        { Drawing::Colour::icyBlue, Drawing::Colour::white, Drawing::Colour::black },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_FLYING_SAUCERS_TRACK, 0 },
     .ColourKey = RideColourKey::Ride,

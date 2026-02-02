@@ -3837,11 +3837,16 @@ STR_7001    :Nom de l’attraction
 STR_7002    :{STRINGID} {STRINGID}
 STR_7003    :Le fichier audio « {STRING} » est tronqué. L’échantillon {INT32} était attendu, mais seulement {INT32} sont disponibles. Songez à réinstaller RCT2.
 STR_7004    :Forcer le rendu
-STR_7005    :Remplir de chemin une zone
+STR_7005    :Remplir une zone de chemins
 STR_7006    :Dessiner une bordure autour des boutons-images
 STR_7007    :Type d’attraction
 STR_7008    :Type d’attraction inconnu ({INT32})
-STR_7012    :Złoty polonais (PLN)
 STR_7009    :Réception des scripts…
 STR_7010    :Impossible de jouer l’enregistrement, le fichier {SMALLFONT}{STRING}{MEDIUMFONT} n’existe pas ou est invalide
 STR_7011    :Impossible de jouer l’enregistrement
+STR_7012    :Złoty polonais (PLN)
+STR_7013    :Remplir des zones de chemins
+STR_7014    :Je possède le jeu dans Steam, mais je ne l’ai pas encore installé.
+STR_7015    :Veuillez quitter Steam s’il est lancé, puis cliquez « OK ».
+STR_7016    :OpenRCT2 a essayé de lancer un téléchargement dans Steam. Veuillez ouvrir Steam et laisser le jeu se télécharger. Quand Steam aura terminé, cliquez « OK ».
+STR_7017    :Quitter

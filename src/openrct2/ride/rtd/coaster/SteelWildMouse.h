@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -47,10 +47,10 @@ constexpr RideTypeDescriptor SteelWildMouseRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 55,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_LIGHT_BLUE, COLOUR_LIGHT_BLUE, COLOUR_YELLOW },
-        { COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_WHITE },
-        { COLOUR_DARK_PURPLE, COLOUR_BRIGHT_PINK, COLOUR_DARK_PURPLE },
-        { COLOUR_LIGHT_BROWN, COLOUR_LIGHT_BROWN, COLOUR_BORDEAUX_RED },
+        { Drawing::Colour::lightBlue, Drawing::Colour::lightBlue, Drawing::Colour::yellow },
+        { Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::white },
+        { Drawing::Colour::darkPurple, Drawing::Colour::brightPink, Drawing::Colour::darkPurple },
+        { Drawing::Colour::lightBrown, Drawing::Colour::lightBrown, Drawing::Colour::bordeauxRed },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_WILD_MOUSE_TRACK, SPR_RIDE_DESIGN_PREVIEW_WILD_MOUSE_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -60,7 +60,7 @@ constexpr RideTypeDescriptor SteelWildMouseRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 80), RideRating::make(2, 50), RideRating::make(2, 10) },
         14,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             873, 0, 0 },

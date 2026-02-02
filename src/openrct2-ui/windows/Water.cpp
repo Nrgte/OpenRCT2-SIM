@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -294,7 +294,7 @@ namespace OpenRCT2::Ui::Windows
          */
         void ToolUpdateWater(const ScreenCoordsXY& screenPos)
         {
-            auto* windowMgr = Ui::GetWindowManager();
+            auto* windowMgr = GetWindowManager();
             auto& gameState = getGameState();
 
             if (gCurrentToolId == Tool::upDownArrow)
@@ -304,8 +304,10 @@ namespace OpenRCT2::Ui::Windows
 
                 auto waterLowerAction = GameActions::WaterLowerAction(
                     { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y });
+                waterLowerAction.SetFlags({ GameActions::CommandFlag::allowDuringPaused });
                 auto waterRaiseAction = GameActions::WaterRaiseAction(
                     { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y });
+                waterRaiseAction.SetFlags({ GameActions::CommandFlag::allowDuringPaused });
 
                 auto res = GameActions::Query(&waterLowerAction, gameState);
                 money64 lowerCost = res.error == GameActions::Status::ok ? res.cost : kMoney64Undefined;
@@ -394,8 +396,10 @@ namespace OpenRCT2::Ui::Windows
 
             auto waterLowerAction = GameActions::WaterLowerAction(
                 { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y });
+            waterLowerAction.SetFlags({ GameActions::CommandFlag::allowDuringPaused });
             auto waterRaiseAction = GameActions::WaterRaiseAction(
                 { gMapSelectPositionA.x, gMapSelectPositionA.y, gMapSelectPositionB.x, gMapSelectPositionB.y });
+            waterRaiseAction.SetFlags({ GameActions::CommandFlag::allowDuringPaused });
 
             auto res = GameActions::Query(&waterLowerAction, gameState);
             money64 lowerCost = res.error == GameActions::Status::ok ? res.cost : kMoney64Undefined;

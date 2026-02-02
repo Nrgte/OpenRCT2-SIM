@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -51,9 +51,9 @@ constexpr RideTypeDescriptor ChairliftRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 55,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BORDEAUX_RED, COLOUR_BORDEAUX_RED, COLOUR_GREY },
-        { COLOUR_WHITE, COLOUR_WHITE, COLOUR_OLIVE_GREEN },
-        { COLOUR_LIGHT_BROWN, COLOUR_LIGHT_BROWN, COLOUR_WHITE },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::bordeauxRed, Drawing::Colour::grey },
+        { Drawing::Colour::white, Drawing::Colour::white, Drawing::Colour::oliveGreen },
+        { Drawing::Colour::lightBrown, Drawing::Colour::lightBrown, Drawing::Colour::white },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_CHAIRLIFT_TRACK, SPR_RIDE_DESIGN_PREVIEW_CHAIRLIFT_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -63,7 +63,7 @@ constexpr RideTypeDescriptor ChairliftRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(1, 60), RideRating::make(0, 40), RideRating::make(0, 50) },
         14,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,            6000,     764, 0, 0 },

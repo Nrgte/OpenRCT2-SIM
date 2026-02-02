@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -10,6 +10,11 @@
 #pragma once
 
 #include "GameAction.h"
+
+namespace OpenRCT2::Drawing
+{
+    enum class Colour : uint8_t;
+}
 
 namespace OpenRCT2::GameActions
 {
@@ -23,11 +28,11 @@ namespace OpenRCT2::GameActions
     private:
         CoordsXYZD _loc;
         ObjectEntryIndex _bannerType{ kBannerNull };
-        uint8_t _primaryColour{};
+        Drawing::Colour _primaryColour{};
 
     public:
         BannerPlaceAction() = default;
-        BannerPlaceAction(const CoordsXYZD& loc, ObjectEntryIndex bannerType, colour_t primaryColour);
+        BannerPlaceAction(const CoordsXYZD& loc, ObjectEntryIndex bannerType, Drawing::Colour primaryColour);
 
         void AcceptParameters(GameActionParameterVisitor&) final;
 

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -21,7 +21,8 @@
 namespace OpenRCT2::GameActions
 {
     LargeScenerySetColourAction::LargeScenerySetColourAction(
-        const CoordsXYZD& loc, uint8_t tileIndex, uint8_t primaryColour, uint8_t secondaryColour, uint8_t tertiaryColour)
+        const CoordsXYZD& loc, uint8_t tileIndex, Drawing::Colour primaryColour, Drawing::Colour secondaryColour,
+        Drawing::Colour tertiaryColour)
         : _loc(loc)
         , _tileIndex(tileIndex)
         , _primaryColour(primaryColour)
@@ -54,15 +55,15 @@ namespace OpenRCT2::GameActions
 
     Result LargeScenerySetColourAction::Query(GameState_t& gameState) const
     {
-        return QueryExecute(false);
+        return QueryExecute(gameState, false);
     }
 
     Result LargeScenerySetColourAction::Execute(GameState_t& gameState) const
     {
-        return QueryExecute(true);
+        return QueryExecute(gameState, true);
     }
 
-    Result LargeScenerySetColourAction::QueryExecute(bool isExecuting) const
+    Result LargeScenerySetColourAction::QueryExecute(GameState_t& gameState, bool isExecuting) const
     {
         auto res = Result();
         res.expenditure = ExpenditureType::landscaping;
@@ -78,17 +79,17 @@ namespace OpenRCT2::GameActions
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_VALUE_OUT_OF_RANGE);
         }
 
-        if (_primaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_primaryColour))
         {
             LOG_ERROR("Invalid primary colour %u", _primaryColour);
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_INVALID_COLOUR);
         }
-        else if (_secondaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_secondaryColour))
         {
             LOG_ERROR("Invalid secondary colour %u", _secondaryColour);
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_INVALID_COLOUR);
         }
-        else if (_tertiaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_tertiaryColour))
         {
             LOG_ERROR("Invalid tertiary colour %u", _tertiaryColour);
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_INVALID_COLOUR);
@@ -128,7 +129,7 @@ namespace OpenRCT2::GameActions
             auto rotatedTileCoords = CoordsXYZ{ CoordsXY{ tile.offset }.Rotate(_loc.direction), tile.offset.z };
             auto currentTile = CoordsXYZ{ baseTile.x, baseTile.y, baseTile.z } + rotatedTileCoords;
 
-            if (gLegacyScene != LegacyScene::scenarioEditor && !getGameState().cheats.sandboxMode)
+            if (gLegacyScene != LegacyScene::scenarioEditor && !gameState.cheats.sandboxMode)
             {
                 if (!MapIsLocationOwned(currentTile))
                 {

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -10,10 +10,14 @@
 #pragma once
 
 #include "../../SpriteIds.h"
-#include "../../interface/Colour.h"
 #include "../../world/Location.hpp"
 
 #include <optional>
+
+namespace OpenRCT2::Drawing
+{
+    enum class Colour : uint8_t;
+}
 
 enum
 {
@@ -106,4 +110,4 @@ enum
     SPR_RCT1_WATER_OVERLAY = SPR_CSG_BEGIN + 46792,
 };
 
-std::optional<colour_t> GetPatrolAreaTileColour(const CoordsXY& pos);
+std::optional<OpenRCT2::Drawing::Colour> GetPatrolAreaTileColour(const CoordsXY& pos);

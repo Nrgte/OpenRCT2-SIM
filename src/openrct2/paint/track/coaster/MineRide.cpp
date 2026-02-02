@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -3059,7 +3059,8 @@ static void MineRideTrackOnRidePhoto(
     const TrackElement& trackElement, SupportType supportType)
 {
     PaintAddImageAsParentRotated(
-        session, direction, ImageId(SPR_STATION_BASE_BORDERLESS, COLOUR_BLACK), { 0, 0, height }, { 32, 32, 1 });
+        session, direction, ImageId(SPR_STATION_BASE_BORDERLESS, OpenRCT2::Drawing::Colour::black), { 0, 0, height },
+        { 32, 32, 1 });
     DrawSupportsSideBySide(session, direction, height, session.SupportColours, supportType.metal, 6);
 
     switch (direction)
@@ -5423,7 +5424,7 @@ static void MineRideTrackDiagRightBank(
     }
 }
 
-TrackPaintFunction GetTrackPaintFunctionMineRide(OpenRCT2::TrackElemType trackType)
+TrackPaintFunction GetTrackPaintFunctionMineRide(TrackElemType trackType)
 {
     switch (trackType)
     {

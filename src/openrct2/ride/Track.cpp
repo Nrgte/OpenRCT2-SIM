@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -13,6 +13,7 @@
 #include "../Diagnostic.h"
 #include "../Game.h"
 #include "../GameState.h"
+#include "../actions/ResultWithMessage.h"
 #include "../audio/Audio.h"
 #include "../config/Config.h"
 #include "../interface/Viewport.h"
@@ -27,6 +28,7 @@
 #include "../world/MapAnimation.h"
 #include "../world/Park.h"
 #include "../world/Scenery.h"
+#include "../world/tile_element/SmallSceneryElement.h"
 #include "../world/tile_element/TileElement.h"
 #include "../world/tile_element/TrackElement.h"
 #include "Ride.h"
@@ -43,13 +45,13 @@ using namespace OpenRCT2::TrackMetaData;
 using OpenRCT2::GameActions::CommandFlag;
 using OpenRCT2::GameActions::CommandFlags;
 
-PitchAndRoll TrackPitchAndRollStart(OpenRCT2::TrackElemType trackType)
+PitchAndRoll TrackPitchAndRollStart(TrackElemType trackType)
 {
     const auto& ted = GetTrackElementDescriptor(trackType);
     return { ted.definition.pitchStart, ted.definition.rollStart };
 }
 
-PitchAndRoll TrackPitchAndRollEnd(OpenRCT2::TrackElemType trackType)
+PitchAndRoll TrackPitchAndRollEnd(TrackElemType trackType)
 {
     const auto& ted = GetTrackElementDescriptor(trackType);
     return { ted.definition.pitchEnd, ted.definition.rollEnd };
@@ -219,7 +221,7 @@ ResultWithMessage TrackAddStationElement(CoordsXYZD loc, RideId rideIndex, Comma
             stationElement = find_station_element(loc, rideIndex);
             if (stationElement != nullptr)
             {
-                OpenRCT2::TrackElemType targetTrackType;
+                TrackElemType targetTrackType;
                 if (stationFrontLoc == loc)
                 {
                     auto stationIndex = RideGetFirstEmptyStationStart(*ride);
@@ -353,7 +355,7 @@ ResultWithMessage TrackRemoveStationElement(const CoordsXYZD& loc, RideId rideIn
             stationElement = find_station_element(currentLoc, rideIndex);
             if (stationElement != nullptr)
             {
-                OpenRCT2::TrackElemType targetTrackType;
+                TrackElemType targetTrackType;
                 if ((currentLoc == stationFrontLoc) || (currentLoc + CoordsDirectionDelta[currentLoc.direction] == removeLoc))
                 {
                     auto stationIndex = RideGetFirstEmptyStationStart(*ride);
@@ -488,11 +490,10 @@ bool TrackCircuitIteratorsMatch(const TrackCircuitIterator* firstIt, const Track
 
 void TrackGetBack(const CoordsXYE& input, CoordsXYE* output)
 {
-    CoordsXYE lastTrack;
+    CoordsXYE lastTrack = input;
     TrackBeginEnd currentTrack;
     bool result;
 
-    lastTrack = input;
     do
     {
         result = TrackBlockGetPrevious(lastTrack, &currentTrack);
@@ -619,7 +620,7 @@ TrackRoll TrackGetActualBank3(bool useInvertedSprites, TileElement* tileElement)
     return TrackGetActualBank2(ride->type, isInverted, bankStart);
 }
 
-bool TrackTypeIsStation(OpenRCT2::TrackElemType trackType)
+bool TrackTypeIsStation(TrackElemType trackType)
 {
     switch (trackType)
     {
@@ -632,7 +633,7 @@ bool TrackTypeIsStation(OpenRCT2::TrackElemType trackType)
     }
 }
 
-bool TrackTypeIsBrakes(OpenRCT2::TrackElemType trackType)
+bool TrackTypeIsBrakes(TrackElemType trackType)
 {
     switch (trackType)
     {
@@ -646,12 +647,12 @@ bool TrackTypeIsBrakes(OpenRCT2::TrackElemType trackType)
     }
 }
 
-bool TrackTypeIsBlockBrakes(OpenRCT2::TrackElemType trackType)
+bool TrackTypeIsBlockBrakes(TrackElemType trackType)
 {
     return (trackType == TrackElemType::blockBrakes) || (trackType == TrackElemType::diagBlockBrakes);
 }
 
-bool TrackTypeIsBooster(OpenRCT2::TrackElemType trackType)
+bool TrackTypeIsBooster(TrackElemType trackType)
 {
     switch (trackType)
     {
@@ -663,7 +664,12 @@ bool TrackTypeIsBooster(OpenRCT2::TrackElemType trackType)
     }
 }
 
-bool TrackElementIsCovered(OpenRCT2::TrackElemType trackElementType)
+bool TrackTypeIsReverser(TrackElemType trackType)
+{
+    return (trackType == TrackElemType::leftReverser) || (trackType == TrackElemType::rightReverser);
+}
+
+bool TrackElementIsCovered(TrackElemType trackElementType)
 {
     switch (trackElementType)
     {
@@ -692,7 +698,7 @@ bool TrackElementIsCovered(OpenRCT2::TrackElemType trackElementType)
     }
 }
 
-OpenRCT2::TrackElemType UncoverTrackElement(OpenRCT2::TrackElemType trackElementType)
+TrackElemType UncoverTrackElement(TrackElemType trackElementType)
 {
     switch (trackElementType)
     {
@@ -739,12 +745,12 @@ OpenRCT2::TrackElemType UncoverTrackElement(OpenRCT2::TrackElemType trackElement
     }
 }
 
-bool TrackTypeHasSpeedSetting(OpenRCT2::TrackElemType trackType)
+bool TrackTypeHasSpeedSetting(TrackElemType trackType)
 {
     return TrackTypeIsBooster(trackType) || TrackTypeIsBrakes(trackType) || TrackTypeIsBlockBrakes(trackType);
 }
 
-bool TrackTypeIsHelix(OpenRCT2::TrackElemType trackType)
+bool TrackTypeIsHelix(TrackElemType trackType)
 {
     if (trackType >= TrackElemType::leftHalfBankedHelixUpSmall && trackType <= TrackElemType::rightHalfBankedHelixDownLarge)
         return true;
@@ -779,4 +785,41 @@ std::optional<CoordsXYZD> GetTrackSegmentOrigin(const CoordsXYE& posEl)
     coords.z -= trackBlock.z;
 
     return CoordsXYZD(coords, direction);
+}
+
+// Extracted from the calculation in Vehicle::UpdateMeasurements()
+bool TrackGetIsSheltered(const CoordsXYZ& input)
+{
+    // Set tile_element to first element. Since elements aren't always ordered by base height,
+    // we must start at the first element and iterate through each tile element.
+    auto tileElement = MapGetFirstElementAt(input);
+    if (tileElement == nullptr)
+        return false;
+
+    do
+    {
+        // If the tile_element is lower than the vehicle, continue (don't set flag)
+        if (tileElement->GetBaseZ() <= input.z)
+            continue;
+
+        if (tileElement->GetType() == TileElementType::LargeScenery)
+            return true;
+
+        if (tileElement->GetType() == TileElementType::Path)
+            return true;
+
+        if (tileElement->GetType() != TileElementType::SmallScenery)
+            continue;
+
+        auto* sceneryEntry = tileElement->AsSmallScenery()->GetEntry();
+        if (sceneryEntry == nullptr)
+            continue;
+
+        if (sceneryEntry->HasFlag(SMALL_SCENERY_FLAG_FULL_TILE))
+            return true;
+
+        // Iterate through each tile_element.
+    } while (!(tileElement++)->IsLastForTile());
+
+    return false;
 }

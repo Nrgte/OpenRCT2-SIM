@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -348,9 +348,9 @@ void VirtualFloorPaint(PaintSession& session)
         }
     }
 
-    const ImageId remap_base = ImageId(0, COLOUR_DARK_PURPLE);
-    const ImageId remap_edge = ImageId(0, COLOUR_WHITE);
-    const ImageId remap_lit = ImageId(0, COLOUR_DARK_BROWN);
+    const ImageId remap_base = ImageId(0, OpenRCT2::Drawing::Colour::darkPurple);
+    const ImageId remap_edge = ImageId(0, OpenRCT2::Drawing::Colour::white);
+    const ImageId remap_lit = ImageId(0, OpenRCT2::Drawing::Colour::darkBrown);
 
     // Edges which are internal to objects (i.e., the tile on both sides
     //  is occupied/lit) are not rendered to provide visual clarity.

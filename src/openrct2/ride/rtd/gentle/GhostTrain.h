@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -52,10 +52,10 @@ constexpr RideTypeDescriptor GhostTrainRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 50,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_DARK_GREEN, COLOUR_BORDEAUX_RED, COLOUR_BLACK },
-        { COLOUR_TEAL, COLOUR_WHITE, COLOUR_DARK_BROWN },
-        { COLOUR_DARK_BROWN, COLOUR_BORDEAUX_RED, COLOUR_BLACK },
-        { COLOUR_BORDEAUX_RED, COLOUR_YELLOW, COLOUR_BLACK },
+        { Drawing::Colour::darkGreen, Drawing::Colour::bordeauxRed, Drawing::Colour::black },
+        { Drawing::Colour::darkWater, Drawing::Colour::white, Drawing::Colour::darkBrown },
+        { Drawing::Colour::darkBrown, Drawing::Colour::bordeauxRed, Drawing::Colour::black },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::yellow, Drawing::Colour::black },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_GHOST_TRAIN_TRACK, SPR_RIDE_DESIGN_PREVIEW_GHOST_TRAIN_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -65,7 +65,7 @@ constexpr RideTypeDescriptor GhostTrainRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 00), RideRating::make(0, 20), RideRating::make(0, 03) },
         12,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -49,14 +49,14 @@ constexpr RideTypeDescriptor WoodenRollerCoasterRTD =
     .PhotoItem = ShopItem::photo3,
     .BonusValue = 105,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_BORDEAUX_RED, COLOUR_BLACK, COLOUR_WHITE },
-        { COLOUR_BRIGHT_RED, COLOUR_BLACK, COLOUR_GREY },
-        { COLOUR_YELLOW, COLOUR_DARK_BROWN, COLOUR_DARK_BROWN },
-        { COLOUR_TEAL, COLOUR_BORDEAUX_RED, COLOUR_WHITE },
-        { COLOUR_LIGHT_BLUE, COLOUR_BLACK, COLOUR_BLACK },
-        { COLOUR_LIGHT_BLUE, COLOUR_BLACK, COLOUR_DARK_BROWN },
-        { COLOUR_SATURATED_BROWN_LIGHT, COLOUR_TAN_DARK, COLOUR_LIGHT_BROWN }, // Generic GCI 
-        { COLOUR_TAN_DARK, COLOUR_DULL_BROWN_DARK, COLOUR_GREY }, // The Voyage /* Change supports to "minetrain" if possible in the future. */
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::black, Drawing::Colour::white },
+        { Drawing::Colour::brightRed, Drawing::Colour::black, Drawing::Colour::grey },
+        { Drawing::Colour::yellow, Drawing::Colour::darkBrown, Drawing::Colour::darkBrown },
+        { Drawing::Colour::darkWater, Drawing::Colour::bordeauxRed, Drawing::Colour::white },
+        { Drawing::Colour::lightBlue, Drawing::Colour::black, Drawing::Colour::black },
+        { Drawing::Colour::lightBlue, Drawing::Colour::black, Drawing::Colour::darkBrown },
+        { Drawing::Colour::tan, Drawing::Colour::sepia, Drawing::Colour::lightBrown }, // Generic GCI 
+        { Drawing::Colour::sepia, Drawing::Colour::umber, Drawing::Colour::grey }, // The Voyage /* Change supports to "minetrain" if possible in the future. */
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_WOODEN_ROLLER_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_WOODEN_ROLLER_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -66,7 +66,7 @@ constexpr RideTypeDescriptor WoodenRollerCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(3, 20), RideRating::make(2, 60), RideRating::make(2, 00) },
         19,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             873, 0, 0 },

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -13,7 +13,10 @@
 
 #include <cstdint>
 
-using colour_t = uint8_t;
+namespace OpenRCT2::Drawing
+{
+    enum class Colour : uint8_t;
+}
 
 namespace OpenRCT2
 {
@@ -29,13 +32,13 @@ namespace OpenRCT2
 
     struct ColourWithFlags
     {
-        colour_t colour{};
+        Drawing::Colour colour{};
         ColourFlags flags{};
 
         ColourWithFlags withFlag(ColourFlag flag, bool on) const;
 
         static ColourWithFlags fromLegacy(uint8_t legacy);
 
-        ColourWithFlags& operator=(colour_t rhs);
+        ColourWithFlags& operator=(Drawing::Colour rhs);
     };
 } // namespace OpenRCT2

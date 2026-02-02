@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -37,8 +37,8 @@ namespace OpenRCT2::GameActions
     using namespace OpenRCT2::TrackMetaData;
 
     WallPlaceAction::WallPlaceAction(
-        ObjectEntryIndex wallType, const CoordsXYZ& loc, uint8_t edge, int32_t primaryColour, int32_t secondaryColour,
-        int32_t tertiaryColour)
+        ObjectEntryIndex wallType, const CoordsXYZ& loc, uint8_t edge, Drawing::Colour primaryColour,
+        Drawing::Colour secondaryColour, Drawing::Colour tertiaryColour)
         : _wallType(wallType)
         , _loc(loc)
         , _edge(edge)
@@ -346,7 +346,7 @@ namespace OpenRCT2::GameActions
             }
 
             banner->text = {};
-            banner->colour = COLOUR_WHITE;
+            banner->colour = Drawing::Colour::white;
             banner->textColour = Drawing::TextColour::white;
             banner->flags = { BannerFlag::isWall };
             banner->type = 0; // Banner must be deleted after this point in an early return
@@ -402,7 +402,7 @@ namespace OpenRCT2::GameActions
     bool WallPlaceAction::WallCheckObstructionWithTrack(
         const WallSceneryEntry* wall, int32_t z0, TrackElement* trackElement, bool* wallAcrossTrack) const
     {
-        OpenRCT2::TrackElemType trackType = trackElement->GetTrackType();
+        TrackElemType trackType = trackElement->GetTrackType();
 
         using namespace OpenRCT2::TrackMetaData;
         const auto& ted = GetTrackElementDescriptor(trackType);
@@ -588,7 +588,7 @@ namespace OpenRCT2::GameActions
     }
 
     bool WallPlaceAction::TrackIsAllowedWallEdges(
-        ride_type_t rideType, OpenRCT2::TrackElemType trackType, uint8_t trackSequence, uint8_t direction)
+        ride_type_t rideType, TrackElemType trackType, uint8_t trackSequence, uint8_t direction)
     {
         if (!GetRideTypeDescriptor(rideType).HasFlag(RtdFlag::noWallsAroundTrack))
         {

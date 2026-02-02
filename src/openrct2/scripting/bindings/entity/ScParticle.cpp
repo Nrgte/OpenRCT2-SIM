@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -49,7 +49,7 @@ namespace OpenRCT2::Scripting
 
     VehicleCrashParticle* ScCrashedVehicleParticle::GetCrashedVehicleParticle() const
     {
-        return OpenRCT2::getGameState().entities.GetEntity<VehicleCrashParticle>(_id);
+        return getGameState().entities.GetEntity<VehicleCrashParticle>(_id);
     }
 
     void ScCrashedVehicleParticle::frame_set(uint8_t value)
@@ -208,8 +208,8 @@ namespace OpenRCT2::Scripting
         if (entity != nullptr)
         {
             DukObject dukColour(ctx);
-            dukColour.Set("body", entity->colour[0]);
-            dukColour.Set("trim", entity->colour[1]);
+            dukColour.Set("body", EnumValue(entity->colour[0]));
+            dukColour.Set("trim", EnumValue(entity->colour[1]));
             return dukColour.Take();
         }
         return ToDuk(ctx, nullptr);
@@ -225,6 +225,6 @@ namespace OpenRCT2::Scripting
             entity->Invalidate();
         }
     }
-}; // namespace OpenRCT2::Scripting
+} // namespace OpenRCT2::Scripting
 
 #endif

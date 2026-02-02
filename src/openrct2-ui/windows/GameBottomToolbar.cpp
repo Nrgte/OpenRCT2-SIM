@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -18,6 +18,7 @@
 #include <openrct2/OpenRCT2.h>
 #include <openrct2/SpriteIds.h>
 #include <openrct2/config/Config.h>
+#include <openrct2/drawing/Drawing.h>
 #include <openrct2/drawing/Rectangle.h>
 #include <openrct2/entity/EntityRegistry.h>
 #include <openrct2/entity/Guest.h>
@@ -81,15 +82,15 @@ namespace OpenRCT2::Ui::Windows
     class GameBottomToolbar final : public Window
     {
     private:
-        colour_t GetHoverWidgetColour(WidgetIndex index)
+        Drawing::Colour GetHoverWidgetColour(WidgetIndex index)
         {
             return (
                 gHoverWidget.windowClassification == WindowClass::bottomToolbar && gHoverWidget.widgetIndex == index
-                    ? static_cast<colour_t>(COLOUR_WHITE)
+                    ? static_cast<Drawing::Colour>(Drawing::Colour::white)
                     : colours[0].colour);
         }
 
-        void DrawLeftPanel(Drawing::RenderTarget& rt)
+        void DrawLeftPanel(RenderTarget& rt)
         {
             const auto& leftPanelWidget = widgets[WIDX_LEFT_OUTSET];
 
@@ -150,23 +151,24 @@ namespace OpenRCT2::Ui::Windows
                 const auto& widget = widgets[WIDX_PARK_RATING];
                 auto screenCoords = windowPos + ScreenCoordsXY{ widget.left + 11, widget.midY() - 5 };
 
-                DrawParkRating(rt, colours[3].colour, screenCoords, std::max(10, ((gameState.park.rating / 4) * 263) / 256));
+                DrawParkRating(
+                    rt, colours[3].colour, false, screenCoords, std::max(10, ((gameState.park.rating / 4) * 263) / 256));
             }
         }
 
-        void DrawParkRating(Drawing::RenderTarget& rt, int32_t colour, const ScreenCoordsXY& coords, uint8_t factor)
+        void DrawParkRating(RenderTarget& rt, Colour colour, bool blink, const ScreenCoordsXY& coords, uint8_t factor)
         {
             int16_t bar_width = (factor * 114) / 255;
             Rectangle::fillInset(
                 rt, { coords + ScreenCoordsXY{ 1, 1 }, coords + ScreenCoordsXY{ 114, 9 } }, colours[0],
                 Rectangle::BorderStyle::inset, Rectangle::FillBrightness::light, Rectangle::FillMode::none);
-            if (!(colour & kBarBlink) || GameIsPaused() || (gCurrentRealTimeTicks & 8))
+            if (!blink || GameIsPaused() || (gCurrentRealTimeTicks & 8))
             {
                 if (bar_width > 2)
                 {
                     Rectangle::fillInset(
                         rt, { coords + ScreenCoordsXY{ 2, 2 }, coords + ScreenCoordsXY{ bar_width - 1, 8 } },
-                        ColourWithFlags{ static_cast<uint8_t>(colour) });
+                        ColourWithFlags{ colour });
                 }
             }
 
@@ -175,7 +177,7 @@ namespace OpenRCT2::Ui::Windows
             GfxDrawSprite(rt, ImageId(SPR_RATING_HIGH), coords + ScreenCoordsXY{ 114, 0 });
         }
 
-        void DrawRightPanel(Drawing::RenderTarget& rt)
+        void DrawRightPanel(RenderTarget& rt)
         {
             const auto& rightPanelWidget = widgets[WIDX_RIGHT_OUTSET];
 
@@ -237,7 +239,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void DrawNewsItem(Drawing::RenderTarget& rt)
+        void DrawNewsItem(RenderTarget& rt)
         {
             const auto& middleOutsetWidget = widgets[WIDX_MIDDLE_OUTSET];
             auto* newsItem = News::GetItem(0);
@@ -254,7 +256,7 @@ namespace OpenRCT2::Ui::Windows
             auto screenCoords = windowPos + ScreenCoordsXY{ middleOutsetWidget.midX(), middleOutsetWidget.top + 11 };
             int32_t itemWidth = middleOutsetWidget.width() - 63;
             DrawNewsTicker(
-                rt, screenCoords, itemWidth, COLOUR_BRIGHT_GREEN, STR_BOTTOM_TOOLBAR_NEWS_TEXT, newsItem->text,
+                rt, screenCoords, itemWidth, Drawing::Colour::brightGreen, STR_BOTTOM_TOOLBAR_NEWS_TEXT, newsItem->text,
                 newsItem->ticks);
 
             const auto& newsSubjectWidget = widgets[WIDX_NEWS_SUBJECT];
@@ -271,7 +273,7 @@ namespace OpenRCT2::Ui::Windows
                         break;
 
                     RenderTarget clippedRT;
-                    if (!ClipDrawPixelInfo(clippedRT, rt, screenCoords + ScreenCoordsXY{ 1, 1 }, 22, 22))
+                    if (!ClipRenderTarget(clippedRT, rt, screenCoords + ScreenCoordsXY{ 1, 1 }, 22, 22))
                     {
                         break;
                     }
@@ -353,7 +355,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void DrawMiddlePanel(Drawing::RenderTarget& rt)
+        void DrawMiddlePanel(RenderTarget& rt)
         {
             Widget* middleOutsetWidget = &widgets[WIDX_MIDDLE_OUTSET];
 
@@ -620,7 +622,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void onDraw(Drawing::RenderTarget& rt) override
+        void onDraw(RenderTarget& rt) override
         {
             const auto& leftWidget = widgets[WIDX_LEFT_OUTSET];
             const auto& rightWidget = widgets[WIDX_RIGHT_OUTSET];
@@ -711,7 +713,7 @@ namespace OpenRCT2::Ui::Windows
     {
         if (gLegacyScene == LegacyScene::playing)
         {
-            auto* windowMgr = Ui::GetWindowManager();
+            auto* windowMgr = GetWindowManager();
             windowMgr->InvalidateWidgetByClass(WindowClass::bottomToolbar, WIDX_MIDDLE_OUTSET);
         }
     }

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -24,7 +24,7 @@
 namespace OpenRCT2::GameActions
 {
     WallSetColourAction::WallSetColourAction(
-        const CoordsXYZD& loc, int32_t primaryColour, int32_t secondaryColour, int32_t tertiaryColour)
+        const CoordsXYZD& loc, Drawing::Colour primaryColour, Drawing::Colour secondaryColour, Drawing::Colour tertiaryColour)
         : _loc(loc)
         , _primaryColour(primaryColour)
         , _secondaryColour(secondaryColour)
@@ -67,7 +67,7 @@ namespace OpenRCT2::GameActions
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_OFF_EDGE_OF_MAP);
         }
 
-        if (gLegacyScene != LegacyScene::scenarioEditor && !MapIsLocationInPark(_loc) && !getGameState().cheats.sandboxMode)
+        if (gLegacyScene != LegacyScene::scenarioEditor && !MapIsLocationInPark(_loc) && !gameState.cheats.sandboxMode)
         {
             return Result(Status::notOwned, STR_CANT_REPAINT_THIS, STR_LAND_NOT_OWNED_BY_PARK);
         }
@@ -95,19 +95,19 @@ namespace OpenRCT2::GameActions
             return Result(Status::unknown, STR_CANT_REPAINT_THIS, kStringIdNone);
         }
 
-        if (_primaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_primaryColour))
         {
             LOG_ERROR("Primary colour invalid: colour = %d", _primaryColour);
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_INVALID_COLOUR);
         }
-        else if (_secondaryColour >= COLOUR_COUNT)
+        if (!Drawing::colourIsValid(_secondaryColour))
         {
             LOG_ERROR("Secondary colour invalid: colour = %d", _secondaryColour);
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_ERR_INVALID_COLOUR);
         }
-        else if (wallEntry->flags & WALL_SCENERY_HAS_TERTIARY_COLOUR)
+        if (wallEntry->flags & WALL_SCENERY_HAS_TERTIARY_COLOUR)
         {
-            if (_tertiaryColour >= COLOUR_COUNT)
+            if (!Drawing::colourIsValid(_tertiaryColour))
             {
                 LOG_ERROR("Tertiary colour invalid: colour = %d", _tertiaryColour);
                 return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, kStringIdNone);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -50,14 +50,14 @@ constexpr RideTypeDescriptor LoopingRollerCoasterRTD =
     .PhotoItem = ShopItem::photo,
     .BonusValue = 95,
     .ColourPresets = TRACK_COLOUR_PRESETS(
-        { COLOUR_LIGHT_BROWN, COLOUR_LIGHT_BROWN, COLOUR_BLACK },
-        { COLOUR_BRIGHT_RED, COLOUR_BRIGHT_RED, COLOUR_BLACK },
-        { COLOUR_WHITE, COLOUR_WHITE, COLOUR_SATURATED_RED },
-        { COLOUR_BORDEAUX_RED, COLOUR_BORDEAUX_RED, COLOUR_WHITE },
-        { COLOUR_LIGHT_PURPLE, COLOUR_LIGHT_PURPLE, COLOUR_DARK_GREEN },
-        { COLOUR_OLIVE_GREEN, COLOUR_OLIVE_GREEN, COLOUR_LIGHT_BROWN },
-        { COLOUR_GREY, COLOUR_LIGHT_ORANGE, COLOUR_GREY },
-        { COLOUR_GRASS_GREEN_LIGHT, COLOUR_SATURATED_GREEN_LIGHT, COLOUR_AQUA_DARK }, // Mindbender
+        { Drawing::Colour::lightBrown, Drawing::Colour::lightBrown, Drawing::Colour::black },
+        { Drawing::Colour::brightRed, Drawing::Colour::brightRed, Drawing::Colour::black },
+        { Drawing::Colour::white, Drawing::Colour::white, Drawing::Colour::saturatedRed },
+        { Drawing::Colour::bordeauxRed, Drawing::Colour::bordeauxRed, Drawing::Colour::white },
+        { Drawing::Colour::lightPurple, Drawing::Colour::lightPurple, Drawing::Colour::darkGreen },
+        { Drawing::Colour::oliveGreen, Drawing::Colour::oliveGreen, Drawing::Colour::lightBrown },
+        { Drawing::Colour::grey, Drawing::Colour::lightOrange, Drawing::Colour::grey },
+        { Drawing::Colour::chartreuse, Drawing::Colour::limeGreen, Drawing::Colour::deepWater }, // Mindbender
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_LOOPING_ROLLER_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_LOOPING_ROLLER_COASTER_SUPPORTS },
     .ColourKey = RideColourKey::Ride,
@@ -67,7 +67,7 @@ constexpr RideTypeDescriptor LoopingRollerCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(3, 00), RideRating::make(0, 50), RideRating::make(0, 20) },
         15,
-        -1,
+        kDynamicRideShelterRating,
         true,
         {
             { RatingsModifierType::BonusLength,           6000,             764, 0, 0 },

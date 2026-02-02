@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -25,10 +25,13 @@ namespace OpenRCT2
     struct WallElement;
 } // namespace OpenRCT2
 
+namespace OpenRCT2::Drawing
+{
+    enum class Colour : uint8_t;
+}
+
 constexpr OpenRCT2::ObjectEntryIndex kBannerNull = OpenRCT2::kObjectEntryIndexNull;
 constexpr size_t kMaxBanners = 8192;
-
-constexpr uint8_t kScrollingModeNone = 255;
 
 enum class BannerFlag : uint8_t
 {
@@ -45,8 +48,7 @@ struct Banner
     OpenRCT2::ObjectEntryIndex type = kBannerNull;
     BannerFlags flags{};
     std::string text;
-    mutable std::string formattedTextBuffer;
-    uint8_t colour{};
+    OpenRCT2::Drawing::Colour colour{};
     RideId rideIndex{};
     OpenRCT2::Drawing::TextColour textColour{};
     TileCoordsXY position;

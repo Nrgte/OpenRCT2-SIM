@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -9,6 +9,7 @@
 
 #include "LargeSceneryElement.h"
 
+#include "../../drawing/Colour.h"
 #include "../../object/LargeSceneryEntry.h"
 #include "../../object/ObjectEntryManager.h"
 #include "../../object/ObjectManager.h"
@@ -18,36 +19,36 @@
 
 namespace OpenRCT2
 {
-    colour_t LargeSceneryElement::GetPrimaryColour() const
+    Drawing::Colour LargeSceneryElement::GetPrimaryColour() const
     {
         return Colour[0];
     }
 
-    colour_t LargeSceneryElement::GetSecondaryColour() const
+    Drawing::Colour LargeSceneryElement::GetSecondaryColour() const
     {
         return Colour[1];
     }
 
-    colour_t LargeSceneryElement::GetTertiaryColour() const
+    Drawing::Colour LargeSceneryElement::GetTertiaryColour() const
     {
         return Colour[2];
     }
 
-    void LargeSceneryElement::SetPrimaryColour(colour_t newColour)
+    void LargeSceneryElement::SetPrimaryColour(Drawing::Colour newColour)
     {
-        assert(newColour < COLOUR_COUNT);
+        assert(EnumValue(newColour) < Drawing::kColourNumTotal);
         Colour[0] = newColour;
     }
 
-    void LargeSceneryElement::SetSecondaryColour(colour_t newColour)
+    void LargeSceneryElement::SetSecondaryColour(Drawing::Colour newColour)
     {
-        assert(newColour < COLOUR_COUNT);
+        assert(EnumValue(newColour) < Drawing::kColourNumTotal);
         Colour[1] = newColour;
     }
 
-    void LargeSceneryElement::SetTertiaryColour(colour_t newColour)
+    void LargeSceneryElement::SetTertiaryColour(Drawing::Colour newColour)
     {
-        assert(newColour < COLOUR_COUNT);
+        assert(EnumValue(newColour) < Drawing::kColourNumTotal);
         Colour[2] = newColour;
     }
 

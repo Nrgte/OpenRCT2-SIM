@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -25,8 +25,8 @@
 namespace OpenRCT2::GameActions
 {
     SmallScenerySetColourAction::SmallScenerySetColourAction(
-        const CoordsXYZ& loc, uint8_t quadrant, ObjectEntryIndex sceneryType, uint8_t primaryColour, uint8_t secondaryColour,
-        uint8_t tertiaryColour)
+        const CoordsXYZ& loc, uint8_t quadrant, ObjectEntryIndex sceneryType, Drawing::Colour primaryColour,
+        Drawing::Colour secondaryColour, Drawing::Colour tertiaryColour)
         : _loc(loc)
         , _quadrant(quadrant)
         , _sceneryType(sceneryType)
@@ -61,15 +61,15 @@ namespace OpenRCT2::GameActions
 
     Result SmallScenerySetColourAction::Query(GameState_t& gameState) const
     {
-        return QueryExecute(false);
+        return QueryExecute(gameState, false);
     }
 
     Result SmallScenerySetColourAction::Execute(GameState_t& gameState) const
     {
-        return QueryExecute(true);
+        return QueryExecute(gameState, true);
     }
 
-    Result SmallScenerySetColourAction::QueryExecute(bool isExecuting) const
+    Result SmallScenerySetColourAction::QueryExecute(GameState_t& gameState, bool isExecuting) const
     {
         auto res = Result();
         res.expenditure = ExpenditureType::landscaping;
@@ -83,7 +83,7 @@ namespace OpenRCT2::GameActions
             return Result(Status::invalidParameters, STR_CANT_REPAINT_THIS, STR_OFF_EDGE_OF_MAP);
         }
 
-        if (gLegacyScene != LegacyScene::scenarioEditor && !getGameState().cheats.sandboxMode)
+        if (gLegacyScene != LegacyScene::scenarioEditor && !gameState.cheats.sandboxMode)
         {
             if (!MapIsLocationOwned(_loc))
             {

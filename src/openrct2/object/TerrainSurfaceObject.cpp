@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -25,7 +25,7 @@ namespace OpenRCT2
         GetStringTable().Sort();
         NameStringId = LanguageAllocateObjectString(GetName());
         IconImageId = LoadImages();
-        if ((Flags & TerrainSurfaceFlags::smoothWithSelf) || (Flags & TerrainSurfaceFlags::smoothWithOther))
+        if (Flags.hasAny(TerrainSurfaceFlag::smoothWithSelf, TerrainSurfaceFlag::smoothWithOther))
         {
             PatternBaseImageId = IconImageId + 1;
             EntryBaseImageId = PatternBaseImageId + 6;
@@ -52,7 +52,7 @@ namespace OpenRCT2
     void TerrainSurfaceObject::DrawPreview(Drawing::RenderTarget& rt, int32_t width, int32_t height) const
     {
         auto imageId = ImageId(GetImageId({}, 1, 0, 0, false, false));
-        if (Colour != kNoValue)
+        if (Colour != Drawing::kColourNull)
         {
             imageId = imageId.WithPrimary(Colour);
         }
@@ -84,14 +84,14 @@ namespace OpenRCT2
 
         if (properties.is_object())
         {
-            Colour = Colour::FromString(Json::GetString(properties["colour"]), kNoValue);
+            Colour = colourFromString(Json::GetString(properties["colour"]), Drawing::kColourNull);
             Rotations = Json::GetNumber<int8_t>(properties["rotations"], 1);
             Price = Json::GetNumber<money64>(properties["price"]);
-            Flags = Json::GetFlags<TerrainSurfaceFlags>(
+            Flags = Json::GetFlagHolder<TerrainSurfaceFlags, TerrainSurfaceFlag>(
                 properties,
-                { { "smoothWithSelf", TerrainSurfaceFlags::smoothWithSelf },
-                  { "smoothWithOther", TerrainSurfaceFlags::smoothWithOther },
-                  { "canGrow", TerrainSurfaceFlags::canGrow } });
+                { { "smoothWithSelf", TerrainSurfaceFlag::smoothWithSelf },
+                  { "smoothWithOther", TerrainSurfaceFlag::smoothWithOther },
+                  { "canGrow", TerrainSurfaceFlag::canGrow } });
 
             const auto mapColours = properties["mapColours"];
             const bool mapColoursAreValid = mapColours.is_array() && mapColours.size() == std::size(MapColours);
@@ -100,7 +100,7 @@ namespace OpenRCT2
                 if (mapColoursAreValid)
                     MapColours[i] = mapColours[i];
                 else
-                    MapColours[i] = PaletteIndex::pi0;
+                    MapColours[i] = Drawing::PaletteIndex::transparent;
             }
 
             for (auto& el : properties["special"])
@@ -172,7 +172,7 @@ namespace OpenRCT2
         }
 
         ImageId image(EntryBaseImageId + (result * kNumImagesInEntry) + offset);
-        if (Colour != kNoValue)
+        if (Colour != Drawing::kColourNull)
         {
             image = image.WithPrimary(Colour);
         }

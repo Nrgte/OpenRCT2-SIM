@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -135,7 +135,7 @@ namespace OpenRCT2::Random
             s1 = r.s1;
         }
 
-        template<typename TSseq, typename = typename std::enable_if<!std::is_same<TSseq, RotateEngine>::value>::type>
+        template<typename TSseq, typename = std::enable_if<!std::is_same<TSseq, RotateEngine>::value>::type>
         explicit RotateEngine(TSseq& seed_seq)
         {
             seed(seed_seq);
@@ -148,7 +148,7 @@ namespace OpenRCT2::Random
         }
 
         template<typename TSseq>
-        typename std::enable_if<std::is_class<TSseq>::value, void>::type seed(TSseq& seed_seq)
+        std::enable_if<std::is_class<TSseq>::value, void>::type seed(TSseq& seed_seq)
         {
             std::array<result_type, 2> s;
             seed_seq.generate(s.begin(), s.end());

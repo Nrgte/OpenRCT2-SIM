@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -49,9 +49,9 @@ constexpr RideTypeDescriptor ClassicWoodenRollerCoasterRTD =
    .PhotoItem = ShopItem::photo3,
    .BonusValue = 105,
    .ColourPresets = TRACK_COLOUR_PRESETS(
-       { COLOUR_SATURATED_BROWN, COLOUR_SATURATED_BROWN, COLOUR_SATURATED_BROWN},
-       { COLOUR_WHITE, COLOUR_LIGHT_BROWN, COLOUR_WHITE },
-       { COLOUR_LIGHT_BROWN, COLOUR_BLACK, COLOUR_LIGHT_BROWN },
+       { Drawing::Colour::saturatedBrown, Drawing::Colour::saturatedBrown, Drawing::Colour::saturatedBrown},
+       { Drawing::Colour::white, Drawing::Colour::lightBrown, Drawing::Colour::white },
+       { Drawing::Colour::lightBrown, Drawing::Colour::black, Drawing::Colour::lightBrown },
    ),
    .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_CLASSIC_WOODEN_ROLLER_COASTER_TRACK, SPR_RIDE_DESIGN_PREVIEW_CLASSIC_WOODEN_ROLLER_COASTER_SUPPORTS },
    .ColourKey = RideColourKey::Ride,
@@ -61,7 +61,7 @@ constexpr RideTypeDescriptor ClassicWoodenRollerCoasterRTD =
         RatingsCalculationType::Normal,
         { RideRating::make(2, 80), RideRating::make(2, 60), RideRating::make(2, 00) },
         19,
-        -1,
+        kDynamicRideShelterRating,
         false,
         {
             { RatingsModifierType::BonusLength,           6000,             873, 0, 0 },

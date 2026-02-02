@@ -3835,3 +3835,12 @@ STR_7005    :Arrastra unha área de camiño
 STR_7006    :Debuxa un bordo arredor dos botóns de imaxe
 STR_7007    :Tipo de atracción
 STR_7008    :Tipo de atracción descoñecida ({INT32})
+STR_7009    :Recibindo scripts…
+STR_7010    :Non se puido iniciar a repetición, o ficheiro ‘{STRING}’ non existe ou non é válido
+STR_7011    :Non se puido iniciar a repetición
+STR_7012    :Zloti polaco (PLN)
+STR_7013    :Arrastrar áreas de camiño
+STR_7014    :Teño o xogo en Steam, pero aínda non o instalei.
+STR_7015    :Pecha Steam se está en execución e logo preme en "Aceptar".
+STR_7016    :OpenRCT2 tentou iniciar unha descarga en Steam. Abre Steam e deixa que se descargue o xogo. Cando Steam remate, preme en "Aceptar".
+STR_7017    :Saír

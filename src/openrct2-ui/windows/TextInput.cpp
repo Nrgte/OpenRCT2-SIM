@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2014-2025 OpenRCT2 developers
+ * Copyright (c) 2014-2026 OpenRCT2 developers
  *
  * For a complete list of all authors, please refer to contributors.md
  * Interested in contributing? Visit https://github.com/OpenRCT2/OpenRCT2
@@ -16,6 +16,7 @@
 #include <openrct2/Input.h>
 #include <openrct2/core/String.hpp>
 #include <openrct2/core/UTF8.h>
+#include <openrct2/drawing/ColourMap.h>
 #include <openrct2/drawing/Drawing.h>
 #include <openrct2/drawing/Rectangle.h>
 #include <openrct2/localisation/Formatting.h>
@@ -78,9 +79,9 @@ namespace OpenRCT2::Ui::Windows
                 _parentWidget.window.number = 0;
                 _parentWidget.widgetIndex = 0;
 
-                colours[0] = COLOUR_GREY;
-                colours[1] = COLOUR_GREY;
-                colours[2] = COLOUR_GREY;
+                colours[0] = Drawing::Colour::grey;
+                colours[1] = Drawing::Colour::grey;
+                colours[2] = Drawing::Colour::grey;
             }
             else
             {
@@ -196,7 +197,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        void onDraw(Drawing::RenderTarget& rt) override
+        void onDraw(RenderTarget& rt) override
         {
             drawWidgets(rt);
 
@@ -269,10 +270,11 @@ namespace OpenRCT2::Ui::Windows
 
                     if (_cursorBlink > 15)
                     {
-                        uint8_t colour = ColourMapA[colours[1].colour].mid_light;
+                        auto colour = getColourMap(colours[1].colour).midLight;
                         // TODO: palette index addition
                         Rectangle::fill(
-                            rt, { { cursorX, screenCoords.y + 9 }, { cursorX + textWidth, screenCoords.y + 9 } }, colour + 5);
+                            rt, { { cursorX, screenCoords.y + 9 }, { cursorX + textWidth, screenCoords.y + 9 } },
+                            static_cast<PaletteIndex>(EnumValue(colour) + 5));
                     }
 
                     cur_drawn++;
