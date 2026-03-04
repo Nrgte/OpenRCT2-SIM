@@ -11,17 +11,17 @@
 #include <deque>
 #include <memory>
 
-using namespace OpenRCT2;
+//using namespace OpenRCT2;
 
 struct GuestRideRating
 {
 public:
     RideId ID;
     uint8_t Rating;
-    RideRating_t MeasuredRideValue;
+    OpenRCT2::RideRating_t MeasuredRideValue;
 
 //public:
-    GuestRideRating(RideId id, uint8_t rating, RideRating_t measuredRideValue)
+    GuestRideRating(RideId id, uint8_t rating, OpenRCT2::RideRating_t measuredRideValue)
         : ID(id)
         , Rating(rating)
         , MeasuredRideValue (measuredRideValue){}
@@ -42,7 +42,7 @@ public:
     {
         return GetRide(this->ID);
     }
-    RideRating_t getMeasuredValue()
+    OpenRCT2::RideRating_t getMeasuredValue()
     {
         return this->MeasuredRideValue;
     }
@@ -73,14 +73,14 @@ public:
     mutable std::mutex pathfindingQueueMutex;
 
     AdvancedGuestStats();
-    void InsertRideIntensityRating(RideId id, uint8_t rating, RideRating_t rideRating);
-    float GetMedianIntensityRating(RideId id, RideRating_t currentIntensity);
-    std::string GetMedianIntensityRatingString(RideId id, RideRating_t currentIntensity);
+    void InsertRideIntensityRating(RideId id, uint8_t rating, OpenRCT2::RideRating_t rideRating);
+    float GetMedianIntensityRating(RideId id, OpenRCT2::RideRating_t currentIntensity);
+    std::string GetMedianIntensityRatingString(RideId id, OpenRCT2::RideRating_t currentIntensity);
     uint8_t GetQueueTimeThreshold();
     uint8_t GetQueueTimeCancelChance();
     std::vector<GuestRideRating> FindRidesByRideId(std::vector<GuestRideRating>& ratings, RideId targetId);
     std::vector<GuestRideRating> FindRideIntensityRatingsByRideId(RideId targetId);
-    void DeleteOldIntensityRatings(RideId id, RideRating_t currentIntensity);
+    void DeleteOldIntensityRatings(RideId id, OpenRCT2::RideRating_t currentIntensity);
     //void Serialise(DataSerialiser& stream);
    
 

@@ -861,17 +861,15 @@ namespace OpenRCT2::RCT1
             dst->status = static_cast<RideStatus>(src->status);
 
             // Flags
-            dst->lifecycleFlags = src->lifecycleFlags;
+            dst->flags.holder = src->flags;
             // These flags were not in the base game
             if (_gameVersion == FILE_VERSION_RCT1)
             {
-                dst->lifecycleFlags &= ~RIDE_LIFECYCLE_MUSIC;
-                dst->lifecycleFlags &= ~RIDE_LIFECYCLE_INDESTRUCTIBLE;
-                dst->lifecycleFlags &= ~RIDE_LIFECYCLE_INDESTRUCTIBLE_TRACK;
+                dst->flags.unset(RideFlag::music, RideFlag::indestructible, RideFlag::indestructibleTrack);
             }
             if (VehicleTypeIsReversed(src->vehicleType))
             {
-                dst->lifecycleFlags |= RIDE_LIFECYCLE_REVERSED_TRAINS;
+                dst->flags.set(RideFlag::reversedTrains);
             }
 
             // Station
@@ -967,7 +965,7 @@ namespace OpenRCT2::RCT1
             dst->liftHillSpeed = 5;
 
             dst->music = kObjectEntryIndexNull;
-            if (GetRideTypeDescriptor(dst->type).HasFlag(RtdFlag::allowMusic))
+            if (GetRideTypeDescriptor(dst->type).flags.has(RtdFlag::allowMusic))
             {
                 if (_gameVersion == FILE_VERSION_RCT1)
                 {
@@ -985,7 +983,7 @@ namespace OpenRCT2::RCT1
                         if (src->departFlags & RCT1_RIDE_DEPART_PLAY_MUSIC)
                         {
                             dst->departFlags &= ~RCT1_RIDE_DEPART_PLAY_MUSIC;
-                            dst->lifecycleFlags |= RIDE_LIFECYCLE_MUSIC;
+                            dst->flags.set(RideFlag::music);
                         }
                     }
                 }
@@ -1134,7 +1132,7 @@ namespace OpenRCT2::RCT1
             }
 
             dst->entranceStyle = kObjectEntryIndexNull;
-            if (dst->getRideTypeDescriptor().HasFlag(RtdFlag::hasEntranceAndExit))
+            if (dst->getRideTypeDescriptor().flags.has(RtdFlag::hasEntranceAndExit))
             {
                 // Entrance styles were introduced with AA. They correspond directly with those in RCT2.
                 if (_gameVersion == FILE_VERSION_RCT1)
@@ -1252,6 +1250,9 @@ namespace OpenRCT2::RCT1
         {
             for (int i = 0; i < Limits::kMaxEntities; i++)
             {
+                // Make sure the EntityIndex matches the array position to handle corrupted saves where duplicate or invalid
+                // indices would cause CreateEntityAt to fail
+                _s4.Entities[i].Unknown.EntityIndex = static_cast<uint16_t>(i);
                 ImportEntity(gameState, _s4.Entities[i].Unknown);
             }
         }
@@ -1625,7 +1626,7 @@ namespace OpenRCT2::RCT1
                     }
 
                     // Set last element flag in case the original last element was never added
-                    if (tileElements.size() > 0)
+                    if (!tileElements.empty())
                     {
                         tileElements.back().SetLastForTile(true);
                     }
@@ -2903,12 +2904,12 @@ namespace OpenRCT2::RCT1
         dst->track_progress = src->TrackProgress;
         dst->vertical_drop_countdown = src->VerticalDropCountdown;
         dst->sub_state = src->SubState;
-        dst->Flags = src->UpdateFlags;
+        dst->flags.holder = src->UpdateFlags;
 
         SetVehicleColours(dst, src);
 
         dst->mini_golf_current_animation = MiniGolfAnimation(src->MiniGolfCurrentAnimation);
-        dst->mini_golf_flags = src->MiniGolfFlags;
+        dst->miniGolfFlags.holder = src->MiniGolfFlags;
 
         dst->MoveTo({ src->x, src->y, src->z });
 
@@ -2916,13 +2917,13 @@ namespace OpenRCT2::RCT1
         dst->next_free_seat = src->NextFreeSeat;
         if (src->Flags & RCT12_ENTITY_FLAGS_IS_CRASHED_VEHICLE_ENTITY)
         {
-            dst->SetFlag(VehicleFlags::Crashed);
+            dst->flags.set(VehicleFlag::crashed);
         }
         dst->BlockBrakeSpeed = kRCT2DefaultBlockBrakeSpeed;
 
         if (VehicleTypeIsReversed(rct1Ride.vehicleType))
         {
-            dst->SetFlag(VehicleFlags::CarIsReversed);
+            dst->flags.set(VehicleFlag::carIsReversed);
         }
     }
 

@@ -16,10 +16,11 @@
 #include "../GameState.h"
 #include "../Input.h"
 #include "../OpenRCT2.h"
+#include "../actions/GameActionRunner.h"
 #include "../actions/ResultWithMessage.h"
-#include "../actions/RideSetSettingAction.h"
-#include "../actions/RideSetStatusAction.h"
-#include "../actions/RideSetVehicleAction.h"
+#include "../actions/ride/RideSetSettingAction.h"
+#include "../actions/ride/RideSetStatusAction.h"
+#include "../actions/ride/RideSetVehicleAction.h"
 #include "../audio/Audio.h"
 #include "../config/Config.h"
 #include "../core/BitSet.hpp"
@@ -312,7 +313,7 @@ size_t Ride::getNumPrices() const
         auto rideEntry = getRideEntry();
         if (rideEntry != nullptr)
         {
-            if (lifecycleFlags & RIDE_LIFECYCLE_ON_RIDE_PHOTO)
+            if (flags.has(RideFlag::onRidePhoto))
             {
                 result++;
             }
@@ -444,7 +445,7 @@ money64 Ride::calculateIncomePerHour() const
         priceMinusCost -= GetShopItemDescriptor(currentShopItem).Cost;
     }
 
-    currentShopItem = (lifecycleFlags & RIDE_LIFECYCLE_ON_RIDE_PHOTO) ? getRideTypeDescriptor().PhotoItem : entry->shop_item[1];
+    currentShopItem = flags.has(RideFlag::onRidePhoto) ? getRideTypeDescriptor().PhotoItem : entry->shop_item[1];
 
     if (currentShopItem != ShopItem::none)
     {
@@ -842,17 +843,17 @@ bool Ride::findTrackGap(const CoordsXYE& input, CoordsXYE* output) const
 
 void Ride::formatStatusTo(Formatter& ft) const
 {
-    if (lifecycleFlags & RIDE_LIFECYCLE_CRASHED)
+    if (flags.has(RideFlag::crashed))
     {
         ft.Add<StringId>(STR_CRASHED);
     }
-    else if (lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN)
+    else if (flags.has(RideFlag::brokenDown))
     {
         ft.Add<StringId>(STR_BROKEN_DOWN);
     }
     else if (status == RideStatus::closed)
     {
-        if (!getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+        if (!getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility))
         {
             if (numRiders != 0)
             {
@@ -877,7 +878,7 @@ void Ride::formatStatusTo(Formatter& ft) const
     {
         ft.Add<StringId>(STR_TEST_RUN);
     }
-    else if (mode == RideMode::race && !(lifecycleFlags & RIDE_LIFECYCLE_PASS_STATION_NO_STOPPING) && !raceWinner.IsNull())
+    else if (mode == RideMode::race && !flags.has(RideFlag::passStationNoStopping) && !raceWinner.IsNull())
     {
         auto peep = getGameState().entities.GetEntity<Guest>(raceWinner);
         if (peep != nullptr)
@@ -891,7 +892,7 @@ void Ride::formatStatusTo(Formatter& ft) const
             ft.Add<StringId>(kStringIdNone);
         }
     }
-    else if (!getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+    else if (!getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility))
     {
         ft.Add<StringId>(numRiders == 1 ? STR_PERSON_ON_RIDE : STR_PEOPLE_ON_RIDE);
         ft.Add<uint16_t>(numRiders);
@@ -920,7 +921,7 @@ int32_t Ride::getTotalTime() const
 
 bool Ride::canHaveMultipleCircuits() const
 {
-    if (!getRideTypeDescriptor().HasFlag(RtdFlag::allowMultipleCircuits))
+    if (!getRideTypeDescriptor().flags.has(RtdFlag::allowMultipleCircuits))
         return false;
 
     // Only allow circuit or launch modes
@@ -947,14 +948,20 @@ bool Ride::supportsStatus(RideStatus s) const
         case RideStatus::open:
             return true;
         case RideStatus::simulating:
-            return (!rtd.HasFlag(RtdFlag::noTestMode) && rtd.HasFlag(RtdFlag::hasTrack));
+            return (!rtd.flags.has(RtdFlag::noTestMode) && rtd.flags.has(RtdFlag::hasTrack));
         case RideStatus::testing:
-            return !rtd.HasFlag(RtdFlag::noTestMode);
+            return !rtd.flags.has(RtdFlag::noTestMode);
         case RideStatus::count: // Meaningless but necessary to satisfy -Wswitch
             return false;
     }
     // Unreachable
     return false;
+}
+
+bool Ride::hasFailingBrakes() const
+{
+    return flags.has(RideFlag::brokenDown) && breakdownReasonPending == BREAKDOWN_BRAKES_FAILURE
+        && mechanicStatus != MechanicStatus::hasFixedStationBrakes;
 }
 
 #pragma region Initialisation functions
@@ -1037,7 +1044,7 @@ void Ride::updateAll()
 
 std::unique_ptr<TrackDesign> Ride::saveToTrackDesign(TrackDesignState& tds) const
 {
-    if (!(lifecycleFlags & RIDE_LIFECYCLE_TESTED))
+    if (!flags.has(RideFlag::tested))
     {
         ContextShowError(STR_CANT_SAVE_TRACK_DESIGN, kStringIdNone, {});
         return nullptr;
@@ -1154,7 +1161,7 @@ void Ride::update()
     RideBreakdownUpdate(*this);
 
     // Various things include news messages
-    if (lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN | RIDE_LIFECYCLE_DUE_INSPECTION))
+    if (flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown, RideFlag::dueInspection))
     {
         // Breakdown updates originally were performed when (id == (gCurrentTicks / 2) & 0xFF)
         // with the increased MAX_RIDES the update is tied to the first byte of the id this allows
@@ -1167,7 +1174,7 @@ void Ride::update()
     RideInspectionUpdate(*this);
 
     // If ride is simulating but crashed, reset the vehicles
-    if (status == RideStatus::simulating && (lifecycleFlags & RIDE_LIFECYCLE_CRASHED))
+    if (status == RideStatus::simulating && flags.has(RideFlag::crashed))
     {
         // We require this to execute right away during the simulation, always ignore network and queue.
         auto gameAction = GameActions::RideSetStatusAction(id, RideStatus::simulating);
@@ -1181,9 +1188,9 @@ void Ride::update()
  */
 void updateChairlift(Ride& ride)
 {
-    if (!(ride.lifecycleFlags & RIDE_LIFECYCLE_ON_TRACK))
+    if (!ride.flags.has(RideFlag::onTrack))
         return;
-    if ((ride.lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN | RIDE_LIFECYCLE_CRASHED))
+    if (ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown, RideFlag::crashed)
         && ride.breakdownReasonPending == 0)
         return;
 
@@ -1344,7 +1351,7 @@ static void RideInspectionUpdate(Ride& ride)
     // An inspection interval of 0 minutes means the ride is set to never be inspected.
     if (inspectionIntervalMinutes == 0)
     {
-        ride.lifecycleFlags &= ~RIDE_LIFECYCLE_DUE_INSPECTION;
+        ride.flags.unset(RideFlag::dueInspection);
         return;
     }
 
@@ -1354,13 +1361,11 @@ static void RideInspectionUpdate(Ride& ride)
     if (inspectionIntervalMinutes > ride.lastInspection)
         return;
 
-    if (ride.lifecycleFlags
-        & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN | RIDE_LIFECYCLE_DUE_INSPECTION
-           | RIDE_LIFECYCLE_CRASHED))
+    if (ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown, RideFlag::dueInspection, RideFlag::crashed))
         return;
 
     // Inspect the first station that has an exit
-    ride.lifecycleFlags |= RIDE_LIFECYCLE_DUE_INSPECTION;
+    ride.flags.set(RideFlag::dueInspection);
     ride.mechanicStatus = MechanicStatus::calling;
 
     auto stationIndex = RideGetFirstValidStationExit(ride);
@@ -1404,7 +1409,7 @@ static void RideBreakdownUpdate(Ride& ride)
     if (gLegacyScene == LegacyScene::trackDesigner)
         return;
 
-    if (ride.lifecycleFlags & (RIDE_LIFECYCLE_BROKEN_DOWN | RIDE_LIFECYCLE_CRASHED))
+    if (ride.flags.hasAny(RideFlag::brokenDown, RideFlag::crashed))
         ride.downtimeHistory[0]++;
 
     if (!(currentTicks & 8191))
@@ -1427,7 +1432,7 @@ static void RideBreakdownUpdate(Ride& ride)
         ride.windowInvalidateFlags.set(RideInvalidateFlag::maintenance);
     }
 
-    if (ride.lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN | RIDE_LIFECYCLE_CRASHED))
+    if (ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown, RideFlag::crashed))
         return;
     if (ride.status == RideStatus::closed || ride.status == RideStatus::simulating)
         return;
@@ -1527,7 +1532,7 @@ bool Ride::canBreakDown() const
     }
 
     const auto* entry = getRideEntry();
-    return entry != nullptr && !(entry->flags & RIDE_ENTRY_FLAG_CANNOT_BREAK_DOWN);
+    return entry != nullptr && !entry->flags.has(RideEntryFlag::cannotBreakDown);
 }
 
 static void ChooseRandomTrainToBreakdownSafe(Ride& ride)
@@ -1555,10 +1560,10 @@ void RidePrepareBreakdown(Ride& ride, int32_t breakdownReason)
     StationIndex i;
     Vehicle* vehicle;
 
-    if (ride.lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN | RIDE_LIFECYCLE_CRASHED))
+    if (ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown, RideFlag::crashed))
         return;
 
-    ride.lifecycleFlags |= RIDE_LIFECYCLE_BREAKDOWN_PENDING;
+    ride.flags.set(RideFlag::breakdownPending);
 
     ride.breakdownReasonPending = breakdownReason;
     ride.breakdownSoundModifier = 0;
@@ -1595,7 +1600,7 @@ void RidePrepareBreakdown(Ride& ride, int32_t breakdownReason)
                 }
                 if (vehicle != nullptr)
                 {
-                    vehicle->SetFlag(VehicleFlags::CarIsBroken);
+                    vehicle->flags.set(VehicleFlag::carIsBroken);
                 }
             }
             break;
@@ -1608,7 +1613,7 @@ void RidePrepareBreakdown(Ride& ride, int32_t breakdownReason)
             vehicle = getGameState().entities.GetEntity<Vehicle>(ride.vehicles[ride.brokenTrain]);
             if (vehicle != nullptr)
             {
-                vehicle->SetFlag(VehicleFlags::TrainIsBroken);
+                vehicle->flags.set(VehicleFlag::trainIsBroken);
             }
             break;
         case BREAKDOWN_BRAKES_FAILURE:
@@ -1644,7 +1649,7 @@ void RideBreakdownAddNewsItem(const Ride& ride)
 static void RideBreakdownStatusUpdate(Ride& ride)
 {
     // Warn player if ride hasn't been fixed for ages
-    if (ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN)
+    if (ride.flags.has(RideFlag::brokenDown))
     {
         ride.notFixedTimeout++;
         // When there has been a full 255 timeout ticks this
@@ -1677,13 +1682,13 @@ static void RideMechanicStatusUpdate(Ride& ride, MechanicStatus mechanicStatus)
     // Turn a pending breakdown into a breakdown.
     if ((mechanicStatus == MechanicStatus::undefined || mechanicStatus == MechanicStatus::calling
          || mechanicStatus == MechanicStatus::heading)
-        && (ride.lifecycleFlags & RIDE_LIFECYCLE_BREAKDOWN_PENDING) && !(ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN))
+        && ride.flags.has(RideFlag::breakdownPending) && !ride.flags.has(RideFlag::brokenDown))
     {
         auto breakdownReason = ride.breakdownReasonPending;
         if (breakdownReason == BREAKDOWN_SAFETY_CUT_OUT || breakdownReason == BREAKDOWN_BRAKES_FAILURE
             || breakdownReason == BREAKDOWN_CONTROL_FAILURE)
         {
-            ride.lifecycleFlags |= RIDE_LIFECYCLE_BROKEN_DOWN;
+            ride.flags.set(RideFlag::brokenDown);
             ride.windowInvalidateFlags.set(RideInvalidateFlag::maintenance, RideInvalidateFlag::list, RideInvalidateFlag::main);
             ride.breakdownReason = breakdownReason;
             RideBreakdownAddNewsItem(ride);
@@ -1692,7 +1697,7 @@ static void RideMechanicStatusUpdate(Ride& ride, MechanicStatus mechanicStatus)
     switch (mechanicStatus)
     {
         case MechanicStatus::undefined:
-            if (ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN)
+            if (ride.flags.has(RideFlag::brokenDown))
             {
                 ride.mechanicStatus = MechanicStatus::calling;
             }
@@ -1700,8 +1705,7 @@ static void RideMechanicStatusUpdate(Ride& ride, MechanicStatus mechanicStatus)
         case MechanicStatus::calling:
             if (ride.getRideTypeDescriptor().AvailableBreakdowns == 0)
             {
-                ride.lifecycleFlags &= ~(
-                    RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN | RIDE_LIFECYCLE_DUE_INSPECTION);
+                ride.flags.unset(RideFlag::breakdownPending, RideFlag::brokenDown, RideFlag::dueInspection);
                 break;
             }
 
@@ -1710,7 +1714,7 @@ static void RideMechanicStatusUpdate(Ride& ride, MechanicStatus mechanicStatus)
         case MechanicStatus::heading:
         {
             auto mechanic = RideGetMechanic(ride);
-            bool rideNeedsRepair = (ride.lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN));
+            bool rideNeedsRepair = ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown);
             if (mechanic == nullptr
                 || (mechanic->State != PeepState::headingToInspection && mechanic->State != PeepState::answering)
                 || mechanic->CurrentRide != ride.id)
@@ -1767,7 +1771,7 @@ static void RideCallMechanic(Ride& ride, Peep* mechanic, int32_t forInspection)
  */
 static void RideCallClosestMechanic(Ride& ride)
 {
-    auto forInspection = (ride.lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN)) == 0;
+    auto forInspection = !ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown);
     auto mechanic = RideFindClosestMechanic(ride, forInspection);
     if (mechanic != nullptr)
         RideCallMechanic(ride, mechanic, forInspection);
@@ -1869,7 +1873,7 @@ Staff* RideGetMechanic(const Ride& ride)
 
 Staff* RideGetAssignedMechanic(const Ride& ride)
 {
-    if (ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN)
+    if (ride.flags.has(RideFlag::brokenDown))
     {
         if (ride.mechanicStatus == MechanicStatus::heading || ride.mechanicStatus == MechanicStatus::fixing
             || ride.mechanicStatus == MechanicStatus::hasFixedStationBrakes)
@@ -1894,7 +1898,7 @@ static int32_t RideMusicSampleRate(const Ride& ride)
     int32_t sampleRate = 22050;
 
     // Alter sample rate for a power cut effect
-    if (ride.lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN))
+    if (ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown))
     {
         sampleRate = ride.breakdownSoundModifier * 70;
         if (ride.breakdownReasonPending != BREAKDOWN_CONTROL_FAILURE)
@@ -1912,7 +1916,7 @@ static int32_t RideMusicSampleRate(const Ride& ride)
 static bool RideMusicBreakdownEffect(Ride& ride)
 {
     // Oscillate parameters for a power cut effect when breaking down
-    if (ride.lifecycleFlags & (RIDE_LIFECYCLE_BREAKDOWN_PENDING | RIDE_LIFECYCLE_BROKEN_DOWN))
+    if (ride.flags.hasAny(RideFlag::breakdownPending, RideFlag::brokenDown))
     {
         if (ride.breakdownReasonPending == BREAKDOWN_CONTROL_FAILURE)
         {
@@ -1922,7 +1926,7 @@ static bool RideMusicBreakdownEffect(Ride& ride)
         }
         else
         {
-            if ((ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN) || ride.breakdownReasonPending == BREAKDOWN_BRAKES_FAILURE
+            if (ride.flags.has(RideFlag::brokenDown) || ride.breakdownReasonPending == BREAKDOWN_BRAKES_FAILURE
                 || ride.breakdownReasonPending == BREAKDOWN_CONTROL_FAILURE)
             {
                 if (ride.breakdownSoundModifier != 255)
@@ -1971,7 +1975,7 @@ void CircusMusicUpdate(Ride& ride)
  */
 void DefaultMusicUpdate(Ride& ride)
 {
-    if (ride.status != RideStatus::open || !(ride.lifecycleFlags & RIDE_LIFECYCLE_MUSIC))
+    if (ride.status != RideStatus::open || !ride.flags.has(RideFlag::music))
     {
         ride.musicTuneId = kTuneIDNull;
         return;
@@ -2007,7 +2011,7 @@ static void RideMusicUpdate(Ride& ride)
 {
     const auto& rtd = ride.getRideTypeDescriptor();
 
-    if (!rtd.HasFlag(RtdFlag::hasMusicByDefault) && !rtd.HasFlag(RtdFlag::allowMusic))
+    if (!rtd.flags.hasAny(RtdFlag::hasMusicByDefault, RtdFlag::allowMusic))
         return;
     rtd.MusicUpdateFunction(ride);
 }
@@ -2110,7 +2114,7 @@ void RideMeasurementsUpdate()
     for (auto& ride : RideManager(gameState))
     {
         auto measurement = ride.measurement.get();
-        if (measurement != nullptr && (ride.lifecycleFlags & RIDE_LIFECYCLE_ON_TRACK) && ride.status != RideStatus::simulating)
+        if (measurement != nullptr && ride.flags.has(RideFlag::onTrack) && ride.status != RideStatus::simulating)
         {
             if (measurement->flags.has(RideMeasurementFlag::running))
             {
@@ -2178,7 +2182,7 @@ std::pair<RideMeasurement*, OpenRCT2String> Ride::getMeasurement()
     const auto& rtd = getRideTypeDescriptor();
 
     // Check if ride type supports data logging
-    if (!rtd.HasFlag(RtdFlag::hasDataLogging))
+    if (!rtd.flags.has(RtdFlag::hasDataLogging))
     {
         return { nullptr, { STR_DATA_LOGGING_NOT_AVAILABLE_FOR_THIS_TYPE_OF_RIDE, {} } };
     }
@@ -2187,7 +2191,7 @@ std::pair<RideMeasurement*, OpenRCT2String> Ride::getMeasurement()
     if (measurement == nullptr)
     {
         measurement = std::make_unique<RideMeasurement>();
-        if (rtd.HasFlag(RtdFlag::hasGForces))
+        if (rtd.flags.has(RtdFlag::hasGForces))
         {
             measurement->flags.set(RideMeasurementFlag::gForces);
         }
@@ -2257,7 +2261,7 @@ int32_t RideGetUnusedPresetVehicleColour(ObjectEntryIndex subType)
     }
 
     // If all presets have been used, just go with a random preset
-    if (unused.size() == 0)
+    if (unused.empty())
         return UtilRand() % colourPresets->count;
 
     // Choose a random preset from the list of unused presets
@@ -2311,7 +2315,7 @@ void RideCheckAllReachable()
         if (ride.status != RideStatus::open || ride.connectedMessageThrottle != 0)
             continue;
 
-        if (ride.getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+        if (ride.getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility))
             RideShopConnected(ride);
         else
             RideEntranceExitConnected(ride);
@@ -2621,7 +2625,7 @@ static ResultWithMessage RideModeCheckValidStationNumbers(const Ride& ride)
     }
 
     const auto& rtd = ride.getRideTypeDescriptor();
-    if (rtd.HasFlag(RtdFlag::hasOneStation) && numStations > 1)
+    if (rtd.flags.has(RtdFlag::hasOneStation) && numStations > 1)
         return { false, STR_UNABLE_TO_OPERATE_WITH_MORE_THAN_ONE_STATION_IN_THIS_MODE };
 
     return { true };
@@ -2638,7 +2642,7 @@ static StationIndexWithMessage RideModeCheckStationPresent(const Ride& ride)
     if (stationIndex.IsNull())
     {
         const auto& rtd = ride.getRideTypeDescriptor();
-        if (!rtd.HasFlag(RtdFlag::hasTrack))
+        if (!rtd.flags.has(RtdFlag::hasTrack))
             return { StationIndex::GetNull(), STR_NOT_YET_CONSTRUCTED };
 
         if (rtd.specialType == RtdSpecialType::maze)
@@ -2660,7 +2664,7 @@ static ResultWithMessage RideCheckForEntranceExit(RideId rideIndex)
     if (ride == nullptr)
         return { false };
 
-    if (ride->getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+    if (ride->getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility))
         return { true };
 
     uint8_t entrance = 0;
@@ -3211,7 +3215,7 @@ static void RideSetStartFinishPoints(RideId rideIndex, const CoordsXYE& startEle
     else if (rtd.specialType == RtdSpecialType::boatHire)
         RideSetBoatHireReturnPoint(*ride, startElement);
 
-    if (ride->isBlockSectioned() && !(ride->lifecycleFlags & RIDE_LIFECYCLE_ON_TRACK))
+    if (ride->isBlockSectioned() && !ride->flags.has(RideFlag::onTrack))
     {
         RideOpenBlockBrakes(startElement);
     }
@@ -3336,7 +3340,7 @@ static Vehicle* VehicleCreateCar(
         vehicle->SetTrackType(trackElement->GetTrackType());
         vehicle->track_progress = 0;
         vehicle->SetState(Vehicle::Status::movingToEndOfStation);
-        vehicle->Flags = 0;
+        vehicle->flags.clearAll();
 
         CoordsXY chosenLoc;
         auto numAttempts = 0;
@@ -3377,7 +3381,7 @@ static Vehicle* VehicleCreateCar(
             subposition = VehicleTrackSubposition::MiniGolfStart9;
             vehicle->var_D3 = 0;
             vehicle->mini_golf_current_animation = MiniGolfAnimation::Walk;
-            vehicle->mini_golf_flags = 0;
+            vehicle->miniGolfFlags.clearAll();
         }
         if (carEntry.flags.has(CarEntryFlag::isReverserCoasterBogie))
         {
@@ -3404,7 +3408,7 @@ static Vehicle* VehicleCreateCar(
         }
         else
         {
-            if (rtd.HasFlag(RtdFlag::vehicleIsIntegral))
+            if (rtd.flags.has(RtdFlag::vehicleIsIntegral))
             {
                 if (rtd.StartTrackPiece != TrackElemType::flatTrack1x4B)
                 {
@@ -3435,20 +3439,20 @@ static Vehicle* VehicleCreateCar(
         {
             vehicle->track_progress = 15;
         }
-        vehicle->Flags = VehicleFlags::CollisionDisabled;
+        vehicle->flags = { VehicleFlag::collisionDisabled };
         if (carEntry.flags.has(CarEntryFlag::hasInvertedSpriteSet))
         {
             if (trackElement->IsInverted())
             {
-                vehicle->SetFlag(VehicleFlags::CarIsInverted);
+                vehicle->flags.set(VehicleFlag::carIsInverted);
             }
         }
         vehicle->SetState(Vehicle::Status::movingToEndOfStation);
 
-        if (ride.hasLifecycleFlag(RIDE_LIFECYCLE_REVERSED_TRAINS))
+        if (ride.flags.has(RideFlag::reversedTrains))
         {
             vehicle->SubType = carIndex == (ride.numCarsPerTrain - 1) ? Vehicle::Type::head : Vehicle::Type::tail;
-            vehicle->SetFlag(VehicleFlags::CarIsReversed);
+            vehicle->flags.set(VehicleFlag::carIsReversed);
         }
     }
 
@@ -3467,7 +3471,7 @@ static TrainReference VehicleCreateTrain(
     Ride& ride, const CoordsXYZ& trainPos, int32_t vehicleIndex, int32_t* remainingDistance, TrackElement* trackElement)
 {
     TrainReference train = { nullptr, nullptr };
-    bool isReversed = ride.hasLifecycleFlag(RIDE_LIFECYCLE_REVERSED_TRAINS);
+    bool isReversed = ride.flags.has(RideFlag::reversedTrains);
 
     for (int32_t carIndex = 0; carIndex < ride.numCarsPerTrain; carIndex++)
     {
@@ -3664,7 +3668,7 @@ ResultWithMessage Ride::createVehicles(const CoordsXYE& element, bool isApplying
     if (!VehicleCreateTrains(*this, vehiclePos, trackElement, numberOfTrains))
     {
         // This flag is needed for Ride::removeVehicles()
-        lifecycleFlags |= RIDE_LIFECYCLE_ON_TRACK;
+        flags.set(RideFlag::onTrack);
         removeVehicles();
         return { false, STR_UNABLE_TO_CREATE_ENOUGH_VEHICLES };
     }
@@ -3672,14 +3676,14 @@ ResultWithMessage Ride::createVehicles(const CoordsXYE& element, bool isApplying
 
     // Initialise station departs
     // 006DDDD0:
-    lifecycleFlags |= RIDE_LIFECYCLE_ON_TRACK;
+    flags.set(RideFlag::onTrack);
     for (int32_t i = 0; i < Limits::kMaxStationsPerRide; i++)
     {
         stations[i].Depart = (stations[i].Depart & kStationDepartFlag) | 1;
     }
 
     const auto& rtd = getRideTypeDescriptor();
-    if (rtd.specialType != RtdSpecialType::spaceRings && !rtd.HasFlag(RtdFlag::vehicleIsIntegral))
+    if (rtd.specialType != RtdSpecialType::spaceRings && !rtd.flags.has(RtdFlag::vehicleIsIntegral))
     {
         if (isBlockSectioned() && !isSimulating)
         {
@@ -3724,7 +3728,7 @@ void Ride::moveTrainsToBlockBrakes(const CoordsXYZ& firstBlockPosition, TrackEle
     // If the ride has a cable lift, we don't want to fetch the cable lift element and the block preceding it
     TrackElement* cableLiftTileElement = nullptr;
     TrackElement* cableLiftPreviousBlock = nullptr;
-    if (lifecycleFlags & RIDE_LIFECYCLE_CABLE_LIFT_HILL_COMPONENT_USED)
+    if (flags.has(RideFlag::cableLiftHillComponentUsed))
     {
         cableLiftTileElement = MapGetTrackElementAt(cableLiftLoc);
         if (cableLiftTileElement != nullptr)
@@ -3791,7 +3795,7 @@ void Ride::moveTrainsToBlockBrakes(const CoordsXYZ& firstBlockPosition, TrackEle
         }
         for (Vehicle* car = train; car != nullptr; car = getGameState().entities.GetEntity<Vehicle>(car->next_vehicle_on_train))
         {
-            car->ClearFlag(VehicleFlags::CollisionDisabled);
+            car->flags.unset(VehicleFlag::collisionDisabled);
             car->SetState(Vehicle::Status::travelling, car->sub_state);
             if ((car->GetTrackType()) == TrackElemType::endStation)
             {
@@ -3963,7 +3967,7 @@ static ResultWithMessage RideCreateCableLift(RideId rideIndex, bool isApplying)
     head->prev_vehicle_on_ride = tail->Id;
     tail->next_vehicle_on_ride = head->Id;
 
-    ride->lifecycleFlags |= RIDE_LIFECYCLE_CABLE_LIFT;
+    ride->flags.set(RideFlag::cableLift);
     head->CableLiftUpdateTrackMotion();
     return { true };
 }
@@ -4183,7 +4187,7 @@ ResultWithMessage Ride::open(bool isApplying)
     if (isApplying)
     {
         chainQueues();
-        lifecycleFlags |= RIDE_LIFECYCLE_EVER_BEEN_OPENED;
+        flags.set(RideFlag::everBeenOpened);
     }
 
     CoordsXYE trackElement = {};
@@ -4337,7 +4341,7 @@ int32_t RideGetRandomColourPresetIndex(ride_type_t rideType)
     }
 
     // If all presets have been used, just go with a random preset
-    if (unused.size() == 0)
+    if (unused.empty())
         return UtilRand() % colourPresets.count;
 
     // Choose a random preset from the list of unused presets
@@ -4416,7 +4420,7 @@ void Ride::setNameToDefault()
 RideNaming GetRideNaming(const ride_type_t rideType, const RideObjectEntry* rideEntry)
 {
     const auto& rtd = GetRideTypeDescriptor(rideType);
-    if (rtd.HasFlag(RtdFlag::listVehiclesSeparately) && rideEntry != nullptr)
+    if (rtd.flags.has(RtdFlag::listVehiclesSeparately) && rideEntry != nullptr)
     {
         return rideEntry->naming;
     }
@@ -4687,16 +4691,15 @@ void InvalidateTestResults(Ride& ride)
 {
     ride.measurement = {};
     ride.ratings.setNull();
-    ride.lifecycleFlags &= ~RIDE_LIFECYCLE_TESTED;
-    ride.lifecycleFlags &= ~RIDE_LIFECYCLE_TEST_IN_PROGRESS;
-    if (ride.lifecycleFlags & RIDE_LIFECYCLE_ON_TRACK)
+    ride.flags.unset(RideFlag::tested, RideFlag::testInProgress);
+    if (ride.flags.has(RideFlag::onTrack))
     {
         for (int32_t i = 0; i < ride.numTrains; i++)
         {
             Vehicle* vehicle = getGameState().entities.GetEntity<Vehicle>(ride.vehicles[i]);
             if (vehicle != nullptr)
             {
-                vehicle->ClearFlag(VehicleFlags::Testing);
+                vehicle->flags.unset(VehicleFlag::testing);
             }
         }
     }
@@ -4714,21 +4717,17 @@ void InvalidateTestResults(Ride& ride)
  */
 void RideFixBreakdown(Ride& ride, int32_t reliabilityIncreaseFactor)
 {
-    ride.lifecycleFlags &= ~RIDE_LIFECYCLE_BREAKDOWN_PENDING;
-    ride.lifecycleFlags &= ~RIDE_LIFECYCLE_BROKEN_DOWN;
-    ride.lifecycleFlags &= ~RIDE_LIFECYCLE_DUE_INSPECTION;
+    ride.flags.unset(RideFlag::breakdownPending, RideFlag::brokenDown, RideFlag::dueInspection);
     ride.windowInvalidateFlags.set(RideInvalidateFlag::main, RideInvalidateFlag::list, RideInvalidateFlag::maintenance);
 
-    if (ride.lifecycleFlags & RIDE_LIFECYCLE_ON_TRACK)
+    if (ride.flags.has(RideFlag::onTrack))
     {
         for (int32_t i = 0; i < ride.numTrains; i++)
         {
             for (Vehicle* vehicle = getGameState().entities.GetEntity<Vehicle>(ride.vehicles[i]); vehicle != nullptr;
                  vehicle = getGameState().entities.GetEntity<Vehicle>(vehicle->next_vehicle_on_train))
             {
-                vehicle->ClearFlag(VehicleFlags::StoppedBySafetyCutOut);
-                vehicle->ClearFlag(VehicleFlags::CarIsBroken);
-                vehicle->ClearFlag(VehicleFlags::TrainIsBroken);
+                vehicle->flags.unset(VehicleFlag::stoppedBySafetyCutout, VehicleFlag::carIsBroken, VehicleFlag::trainIsBroken);
             }
         }
     }
@@ -4744,7 +4743,7 @@ void RideFixBreakdown(Ride& ride, int32_t reliabilityIncreaseFactor)
 void RideUpdateVehicleColours(const Ride& ride)
 {
     const auto& rtd = ride.getRideTypeDescriptor();
-    if (rtd.specialType == RtdSpecialType::spaceRings || rtd.HasFlag(RtdFlag::vehicleIsIntegral))
+    if (rtd.specialType == RtdSpecialType::spaceRings || rtd.flags.has(RtdFlag::vehicleIsIntegral))
     {
         GfxInvalidateScreen();
     }
@@ -4766,7 +4765,7 @@ void RideUpdateVehicleColours(const Ride& ride)
                     colours = ride.vehicleColours[i];
                     break;
                 case VehicleColourSettings::perCar:
-                    if (vehicle->HasFlag(VehicleFlags::CarIsReversed))
+                    if (vehicle->flags.has(VehicleFlag::carIsReversed))
                     {
                         colours = ride.vehicleColours[std::min(
                             (ride.numCarsPerTrain - 1) - carIndex, Limits::kMaxCarsPerTrain - 1)];
@@ -5202,7 +5201,7 @@ void Ride::updateMaxVehicles()
                 } while (totalLength <= stationLength);
 
                 if ((mode != RideMode::stationToStation && mode != RideMode::continuousCircuit)
-                    || !rtd.HasFlag(RtdFlag::allowMoreVehiclesThanStationFits))
+                    || !rtd.flags.has(RtdFlag::allowMoreVehiclesThanStationFits))
                 {
                     maxNumTrains = std::min(maxNumTrains, int32_t(Limits::kMaxTrainsPerRide));
                 }
@@ -5589,7 +5588,7 @@ ObjectEntryIndex RideGetEntryIndex(ride_type_t rideType, ObjectEntryIndex rideSu
     {
         auto& objManager = GetContext()->GetObjectManager();
         auto& rideEntries = objManager.GetAllRideEntries(rideType);
-        if (rideEntries.size() > 0)
+        if (!rideEntries.empty())
         {
             subType = rideEntries[0];
             for (auto rideEntryIndex : rideEntries)
@@ -5606,7 +5605,7 @@ ObjectEntryIndex RideGetEntryIndex(ride_type_t rideType, ObjectEntryIndex rideSu
                     continue;
                 }
 
-                if (!GetRideTypeDescriptor(rideType).HasFlag(RtdFlag::listVehiclesSeparately))
+                if (!GetRideTypeDescriptor(rideType).flags.has(RtdFlag::listVehiclesSeparately))
                 {
                     subType = rideEntryIndex;
                     break;
@@ -5876,19 +5875,6 @@ void Ride::updateRideTypeForAllPieces()
     }
 }
 
-bool Ride::hasLifecycleFlag(uint32_t flag) const
-{
-    return (lifecycleFlags & flag) != 0;
-}
-
-void Ride::setLifecycleFlag(uint32_t flag, bool on)
-{
-    if (on)
-        lifecycleFlags |= flag;
-    else
-        lifecycleFlags &= ~flag;
-}
-
 bool Ride::hasRecolourableShopItems() const
 {
     const auto rideEntry = getRideEntry();
@@ -6014,7 +6000,7 @@ ResultWithMessage Ride::changeStatusCheckTrackValidity(const CoordsXYE& trackEle
         {
             return { false, STR_UNKNOWN_RIDE };
         }
-        if (rideEntry->flags & RIDE_ENTRY_FLAG_NO_INVERSIONS)
+        if (rideEntry->flags.has(RideEntryFlag::noInversions))
         {
             if (RideCheckTrackContainsInversions(trackElement, &problematicTrackElement))
             {
@@ -6022,7 +6008,7 @@ ResultWithMessage Ride::changeStatusCheckTrackValidity(const CoordsXYE& trackEle
                 return { false, STR_TRACK_UNSUITABLE_FOR_TYPE_OF_TRAIN };
             }
         }
-        if (rideEntry->flags & RIDE_ENTRY_FLAG_NO_BANKED_TRACK)
+        if (rideEntry->flags.has(RideEntryFlag::noBankedTrack))
         {
             if (RideCheckTrackContainsBanked(trackElement, &problematicTrackElement))
             {
@@ -6061,7 +6047,7 @@ ResultWithMessage Ride::changeStatusCreateVehicles(bool isApplying, const Coords
         RideSetStartFinishPoints(id, trackElement);
 
     const auto& rtd = getRideTypeDescriptor();
-    if (!rtd.HasFlag(RtdFlag::noVehicles) && !(lifecycleFlags & RIDE_LIFECYCLE_ON_TRACK))
+    if (!rtd.flags.has(RtdFlag::noVehicles) && !flags.has(RideFlag::onTrack))
     {
         const auto createVehicleResult = createVehicles(trackElement, isApplying, isSimulating);
         if (!createVehicleResult.Successful)
@@ -6070,8 +6056,8 @@ ResultWithMessage Ride::changeStatusCreateVehicles(bool isApplying, const Coords
         }
     }
 
-    if (rtd.HasFlag(RtdFlag::allowCableLiftHill) && (lifecycleFlags & RIDE_LIFECYCLE_CABLE_LIFT_HILL_COMPONENT_USED)
-        && !(lifecycleFlags & RIDE_LIFECYCLE_CABLE_LIFT))
+    if (rtd.flags.has(RtdFlag::allowCableLiftHill) && flags.has(RideFlag::cableLiftHillComponentUsed)
+        && !flags.has(RideFlag::cableLift))
     {
         const auto createCableLiftResult = RideCreateCableLift(id, isApplying);
         if (!createCableLiftResult.Successful)

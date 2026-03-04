@@ -439,7 +439,7 @@ namespace OpenRCT2::PathFinding
                         continue;
                     RideId rideIndex = tileElement->AsTrack()->GetRideIndex();
                     auto ride = GetRide(rideIndex);
-                    if (ride != nullptr && ride->getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+                    if (ride != nullptr && ride->getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility))
                     {
                         *outRideIndex = rideIndex;
                         return PathSearchResult::ShopEntrance;
@@ -813,7 +813,7 @@ namespace OpenRCT2::PathFinding
                      * tile. */
                     rideIndex = tileElement->AsTrack()->GetRideIndex();
                     auto ride = GetRide(rideIndex);
-                    if (ride == nullptr || !ride->getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility))
+                    if (ride == nullptr || !ride->getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility))
                         continue;
 
                     found = true;
@@ -2286,9 +2286,9 @@ namespace AdvancedPathfinding
             auto& gameState = getGameState();
             for (Ride& ride : RideManager(gameState))
             {
-                if (ride.status != RideStatus::open || (ride.lifecycleFlags & RIDE_LIFECYCLE_BROKEN_DOWN)
-                    || ride.getRideTypeDescriptor().HasFlag(RtdFlag::isShopOrFacility)
-                    || ride.getRideTypeDescriptor().HasFlag(RtdFlag::isFlatRide))
+                if (ride.status != RideStatus::open || (ride.flags.has(RideFlag::brokenDown))
+                    || ride.getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility)
+                    || ride.getRideTypeDescriptor().flags.has(RtdFlag::isFlatRide))
                     continue;
 
                 // Don't use this ride as proxy ride to get to itself.
