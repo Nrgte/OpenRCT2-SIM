@@ -49,16 +49,17 @@
 #include "../rct2/RCT2.h"
 #include "../ride/RideManager.hpp"
 #include "../ride/ShopItem.h"
+#include "../ride/Track.h"
 #include "../ride/Vehicle.h"
 #include "../scenario/Scenario.h"
 #include "../scenario/ScenarioRepository.h"
 #include "../scripting/ScriptEngine.h"
 #include "../ui/WindowManager.h"
-#include "../world/Climate.h"
 #include "../world/Entrance.h"
 #include "../world/Map.h"
 #include "../world/Park.h"
 #include "../world/Scenery.h"
+#include "../world/Weather.h"
 #include "../world/tile_element/PathElement.h"
 #include "../world/tile_element/SmallSceneryElement.h"
 #include "../world/tile_element/TrackElement.h"
@@ -773,7 +774,7 @@ namespace OpenRCT2
             {
 #ifdef ENABLE_SCRIPTING
                 auto& scriptEngine = GetContext()->GetScriptEngine();
-                scriptEngine.SetParkStorageFromJSON(gameState.pluginStorage);
+                scriptEngine.SetParkStorageFromJSON(gameState.pluginStorage, gameState.scenarioFileName);
 #endif
             }
         }
@@ -1237,8 +1238,7 @@ namespace OpenRCT2
                                 {
                                     auto* trackElement = it.element->AsTrack();
                                     auto trackType = trackElement->GetTrackType();
-                                    if (TrackTypeMustBeMadeInvisible(
-                                            trackElement->GetRideType(), trackType, os.getHeader().targetVersion))
+                                    if (TrackTypeMustBeMadeInvisible(*trackElement, os.getHeader().targetVersion))
                                     {
                                         it.element->SetInvisible(true);
                                     }

@@ -18,13 +18,12 @@
 
 #include <future>
 
-struct Peep;
-struct Guest;
-
 namespace OpenRCT2
 {
+    struct Guest;
+    struct Peep;
     struct TileElement;
-}
+} // namespace OpenRCT2
 
 namespace OpenRCT2::PathFinding
 {
@@ -52,10 +51,12 @@ namespace OpenRCT2::PathFinding
 namespace AdvancedPathfinding
 {
     std::deque<TileCoordsXYZ> AStarSearch(
-        const TileCoordsXYZ& start, const TileCoordsXYZ& goal, Peep& guest, bool useProxyRides = true);
+        const TileCoordsXYZ& start, const TileCoordsXYZ& goal, OpenRCT2::Peep& guest, bool useProxyRides = true);
     std::deque<TileCoordsXYZ> AStarSearch(
-        const TileCoordsXYZ& start, const TileCoordsXYZ& target, Peep& peep, bool useProxyRides, Ride* ignoreThisProxyRide);
-    std::deque<StationIndex> GetSortedStationQueue(Peep& peep, Ride* ride);
-    void CalculatePathfinding(Guest& peep, Ride* ride, TileCoordsXYZ loc, std::promise<TileCoordsXYZ> promise);
+        const TileCoordsXYZ& start, const TileCoordsXYZ& target, OpenRCT2::Peep& peep, bool useProxyRides,
+        Ride* ignoreThisProxyRide);
+    std::deque<StationIndex> GetSortedStationQueue(OpenRCT2::Peep& peep, Ride* ride);
+    void CalculatePathfinding(
+        OpenRCT2::Guest& peep, Ride* ride, TileCoordsXYZ loc, std::promise<TileCoordsXYZ> promise);
 };
 

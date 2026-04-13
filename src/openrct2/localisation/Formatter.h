@@ -20,8 +20,6 @@
 #include <array>
 #include <cstring>
 
-extern thread_local uint8_t gCommonFormatArgs[80];
-
 namespace OpenRCT2
 {
     class Formatter
@@ -129,10 +127,3 @@ namespace OpenRCT2
         }
     };
 } // namespace OpenRCT2
-
-// TODO: move/rename
-struct OpenRCT2String
-{
-    StringId str;
-    OpenRCT2::Formatter args;
-};

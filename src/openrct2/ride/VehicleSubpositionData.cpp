@@ -39448,7 +39448,7 @@ static constexpr const VehicleInfoList *TrackVehicleInfoListDefault[] = {
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // OnRidePhoto
     &TrackVehicleInfo_9690F6, &TrackVehicleInfo_969218, &TrackVehicleInfo_96933A, &TrackVehicleInfo_96945C,  // Down25LeftBanked
     &TrackVehicleInfo_969A06, &TrackVehicleInfo_969B28, &TrackVehicleInfo_969C4A, &TrackVehicleInfo_969D6C,  // Down25RightBanked
-    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // Watersplash
+    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // WaterSplash
     &TrackVehicleInfo_96D4AE, &TrackVehicleInfo_96D9A5, &TrackVehicleInfo_96DE9C, &TrackVehicleInfo_96E393,  // FlatToUp60LongBase
     &TrackVehicleInfo_96E88A, &TrackVehicleInfo_96ED81, &TrackVehicleInfo_96F278, &TrackVehicleInfo_96F76F,  // Up60ToFlatLongBase
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // Whirlpool
@@ -40137,7 +40137,7 @@ static constexpr const VehicleInfoList *TrackVehicleInfoListGoKartsLeftLane[] = 
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // OnRidePhoto
     &TrackVehicleInfo_9690F6, &TrackVehicleInfo_969218, &TrackVehicleInfo_96933A, &TrackVehicleInfo_96945C,  // Down25LeftBanked
     &TrackVehicleInfo_969A06, &TrackVehicleInfo_969B28, &TrackVehicleInfo_969C4A, &TrackVehicleInfo_969D6C,  // Down25RightBanked
-    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // Watersplash
+    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // WaterSplash
     &LeftLane::TrackVehicleInfoFlatToUp60LongBase0, &LeftLane::TrackVehicleInfoFlatToUp60LongBase1, &LeftLane::TrackVehicleInfoFlatToUp60LongBase2, &LeftLane::TrackVehicleInfoFlatToUp60LongBase3,  // FlatToUp60LongBase
     &LeftLane::TrackVehicleInfoUp60ToFlatLongBase0, &LeftLane::TrackVehicleInfoUp60ToFlatLongBase1, &LeftLane::TrackVehicleInfoUp60ToFlatLongBase2, &LeftLane::TrackVehicleInfoUp60ToFlatLongBase3,  // Up60ToFlatLongBase
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // Whirlpool
@@ -40441,7 +40441,7 @@ static constexpr const VehicleInfoList *TrackVehicleInfoListGoKartsRightLane[] =
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // OnRidePhoto
     &TrackVehicleInfo_9690F6, &TrackVehicleInfo_969218, &TrackVehicleInfo_96933A, &TrackVehicleInfo_96945C,  // Down25LeftBanked
     &TrackVehicleInfo_969A06, &TrackVehicleInfo_969B28, &TrackVehicleInfo_969C4A, &TrackVehicleInfo_969D6C,  // Down25RightBanked
-    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // Watersplash
+    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // WaterSplash
     &RightLane::TrackVehicleInfoFlatToUp60LongBase0, &RightLane::TrackVehicleInfoFlatToUp60LongBase1, &RightLane::TrackVehicleInfoFlatToUp60LongBase2, &RightLane::TrackVehicleInfoFlatToUp60LongBase3,  // FlatToUp60LongBase
     &RightLane::TrackVehicleInfoUp60ToFlatLongBase0, &RightLane::TrackVehicleInfoUp60ToFlatLongBase1, &RightLane::TrackVehicleInfoUp60ToFlatLongBase2, &RightLane::TrackVehicleInfoUp60ToFlatLongBase3,  // Up60ToFlatLongBase
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // Whirlpool
@@ -40745,7 +40745,7 @@ static constexpr const VehicleInfoList *TrackVehicleInfoListGoKartsMovingToRight
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // OnRidePhoto
     &TrackVehicleInfo_9690F6, &TrackVehicleInfo_969218, &TrackVehicleInfo_96933A, &TrackVehicleInfo_96945C,  // Down25LeftBanked
     &TrackVehicleInfo_969A06, &TrackVehicleInfo_969B28, &TrackVehicleInfo_969C4A, &TrackVehicleInfo_969D6C,  // Down25RightBanked
-    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // Watersplash
+    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // WaterSplash
     &TrackVehicleInfo_96D4AE, &TrackVehicleInfo_96D9A5, &TrackVehicleInfo_96DE9C, &TrackVehicleInfo_96E393,  // FlatToUp60LongBase
     &TrackVehicleInfo_96E88A, &TrackVehicleInfo_96ED81, &TrackVehicleInfo_96F278, &TrackVehicleInfo_96F76F,  // Up60ToFlatLongBase
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // Whirlpool
@@ -40890,7 +40890,7 @@ static constexpr const VehicleInfoList *TrackVehicleInfoListGoKartsMovingToLeftL
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // OnRidePhoto
     &TrackVehicleInfo_9690F6, &TrackVehicleInfo_969218, &TrackVehicleInfo_96933A, &TrackVehicleInfo_96945C,  // Down25LeftBanked
     &TrackVehicleInfo_969A06, &TrackVehicleInfo_969B28, &TrackVehicleInfo_969C4A, &TrackVehicleInfo_969D6C,  // Down25RightBanked
-    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // Watersplash
+    &TrackVehicleInfo_904D72, &TrackVehicleInfo_905314, &TrackVehicleInfo_9058B6, &TrackVehicleInfo_905E58,  // WaterSplash
     &TrackVehicleInfo_96D4AE, &TrackVehicleInfo_96D9A5, &TrackVehicleInfo_96DE9C, &TrackVehicleInfo_96E393,  // FlatToUp60LongBase
     &TrackVehicleInfo_96E88A, &TrackVehicleInfo_96ED81, &TrackVehicleInfo_96F278, &TrackVehicleInfo_96F76F,  // Up60ToFlatLongBase
     &TrackVehicleInfo_8BE57A, &TrackVehicleInfo_8BE69C, &TrackVehicleInfo_8BE7BE, &TrackVehicleInfo_8BE8E0,  // Whirlpool

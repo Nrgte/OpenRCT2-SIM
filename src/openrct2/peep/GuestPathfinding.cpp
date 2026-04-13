@@ -17,7 +17,6 @@
 #include "../profiling/Profiling.h"
 #include "../ride/RideData.h"
 #include "../ride/Station.h"
-#include "../ride/Track.h"
 #include "../scenario/Scenario.h"
 #include "../world/Entrance.h"
 #include "../world/Footpath.h"
@@ -2240,13 +2239,14 @@ namespace AdvancedPathfinding
     }
 
     std::deque<TileCoordsXYZ> AStarSearch(
-        const TileCoordsXYZ& start, const TileCoordsXYZ& target, Peep& peep, bool useProxyRides)
+        const TileCoordsXYZ& start, const TileCoordsXYZ& target, OpenRCT2::Peep& peep, bool useProxyRides)
     {
         return AStarSearch(start, target, peep, useProxyRides, nullptr);
     }
 
     std::deque<TileCoordsXYZ> AStarSearch(
-        const TileCoordsXYZ& start, const TileCoordsXYZ& target, Peep& peep, bool useProxyRides, Ride* ignoreThisProxyRide)
+        const TileCoordsXYZ& start, const TileCoordsXYZ& target, OpenRCT2::Peep& peep, bool useProxyRides,
+        ::Ride* ignoreThisProxyRide)
     {
         if (peep.PathfindingIsOnCooldown > 0)
             return std::deque<TileCoordsXYZ>{};
@@ -2260,7 +2260,7 @@ namespace AdvancedPathfinding
         if (exitElement)
             goal = GetExitPathTile(target);
 
-        Guest* guest = peep.As<Guest>();
+        OpenRCT2::Guest* guest = peep.As<Guest>();
         if (guest != nullptr)
         {
             if (guest->OutsideOfPark)
@@ -2278,13 +2278,14 @@ namespace AdvancedPathfinding
         // std::unordered_map<TileCoordsXYZ, std::pair<Ride*, std::vector<TileCoordsXYZ>>, TileCoordsXYZ::Hasher>
         // proxyRideEntranceExitMappings;
         std::unordered_map<
-            TileCoordsXYZ, std::tuple<Ride*, const RideStation*, std::vector<std::pair<const RideStation*, TileCoordsXYZ>>>,
+            TileCoordsXYZ,
+            std::tuple<Ride*, const RideStation*, std::vector<std::pair<const RideStation*, TileCoordsXYZ>>>,
             TileCoordsXYZ::Hasher>
             proxyRideEntranceExitMappings;
         if (useProxyRides)
         {
             auto& gameState = getGameState();
-            for (Ride& ride : RideManager(gameState))
+            for (auto& ride : RideManager(gameState))
             {
                 if (ride.status != RideStatus::open || (ride.flags.has(RideFlag::brokenDown))
                     || ride.getRideTypeDescriptor().flags.has(RtdFlag::isShopOrFacility)
@@ -2452,7 +2453,7 @@ namespace AdvancedPathfinding
     };
 
     std::deque<StationIndex> GetSortedStationQueue(
-        Peep& peep, Ride* ride) //, int32_t& numEntranceStations) //, TileCoordsXYZ& loc)
+        OpenRCT2::Peep& peep, ::Ride* ride) //, int32_t& numEntranceStations) //, TileCoordsXYZ& loc)
     {
         auto comparator = [](const std::pair<StationIndex, int32_t>& a, const std::pair<StationIndex, int32_t>& b) {
             return a.second > b.second; // Higher scores have lower priority
@@ -2493,7 +2494,8 @@ namespace AdvancedPathfinding
         return stationDeque;
     }
 
-    void CalculatePathfinding(Guest& peep, Ride* ride, TileCoordsXYZ loc, std::promise<TileCoordsXYZ> promise)
+    void CalculatePathfinding(
+        Guest& peep, Ride* ride, TileCoordsXYZ loc, std::promise<TileCoordsXYZ> promise)
     {
         std::deque<StationIndex> sortedStations = AdvancedPathfinding::GetSortedStationQueue(
             peep, ride); //, numEntranceStations);
