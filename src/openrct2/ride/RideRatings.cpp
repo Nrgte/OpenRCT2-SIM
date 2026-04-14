@@ -105,6 +105,7 @@ static void ride_ratings_update_state_5(RideRating::UpdateState& state);
 static void ride_ratings_begin_proximity_loop(RideRating::UpdateState& state);
 static void RideRatingsCalculate(RideRating::UpdateState& state, Ride& ride);
 static void RideRatingsCalculateValue(Ride& ride);
+static void RideRatingsCalculateValueOriginal(Ride& ride);
 static void ride_ratings_score_close_proximity(RideRating::UpdateState& state, TileElement* inputTileElement);
 static void RideRatingsAdd(RideRating::Tuple& ratings, int32_t excitement, int32_t intensity, int32_t nausea);
 
@@ -441,7 +442,7 @@ static void ride_ratings_update_state_3(RideRating::UpdateState& state)
     }
 
     RideRatingsCalculate(state, *ride);
-    RideRatingsCalculateValue(*ride);
+    RideRatingsCalculateValueOriginal(*ride);
 
     state.State = RIDE_RATINGS_STATE_FIND_NEXT_RIDE;
 }
@@ -2306,4 +2307,90 @@ bool RideRating::Tuple::isNull() const
 void RideRating::Tuple::setNull()
 {
     excitement = kUndefined;
+}
+
+static void RideRatingsCalculateValueOriginal(Ride& ride)
+{
+    struct Row
+    {
+        int32_t months, multiplier, divisor, summand;
+    };
+    static const Row ageTableNew[] = {
+        { 5, 3, 2, 0 },       // 1.5x
+        { 13, 6, 5, 0 },      // 1.2x
+        { 40, 1, 1, 0 },      // 1x
+        { 64, 3, 4, 0 },      // 0.75x
+        { 88, 9, 16, 0 },     // 0.56x
+        { 104, 27, 64, 0 },   // 0.42x
+        { 120, 81, 256, 0 },  // 0.32x
+        { 128, 81, 512, 0 },  // 0.16x
+        { 200, 81, 1024, 0 }, // 0.08x
+        { 200, 9, 16, 0 },    // 0.56x "easter egg"
+    };
+
+    if (!RideHasRatings(ride))
+    {
+        return;
+    }
+
+    // Start with the base ratings, multiplied by the ride type specific weights for excitement, intensity and nausea.
+    const auto& ratingsMultipliers = ride.getRideTypeDescriptor().RatingsMultipliers;
+    money64 value = (((ride.ratings.excitement * ratingsMultipliers.excitement) * 32) >> 15)
+        + (((ride.ratings.intensity * ratingsMultipliers.intensity) * 32) >> 15)
+        + (((ride.ratings.nausea * ratingsMultipliers.nausea) * 32) >> 15);
+
+    money64 newValue = ((((ride.ratings.excitement * ratingsMultipliers.excitement) * 32) >> 15) * 2.5)
+        + (((ride.ratings.intensity * ratingsMultipliers.intensity) * 32) >> 15)
+        + (((ride.ratings.nausea * ratingsMultipliers.nausea) * 32) >> 15);
+
+    newValue /= 2;
+
+    if (!ride.getRideTypeDescriptor().flags.has(RtdFlag::isFlatRide))
+        value = newValue;
+
+    int32_t monthsOld = 0;
+    if (!getGameState().cheats.disableRideValueAging)
+    {
+        monthsOld = ride.getAge();
+    }
+
+    // Fix it so that the multiplier and divisor are both 1.
+    monthsOld = 39;
+
+    const Row* ageTable = ageTableNew;
+    size_t tableSize = std::size(ageTableNew);
+
+    Row lastRow = ageTable[tableSize - 1];
+
+    // Ride is older than oldest age in the table?
+    if (monthsOld >= lastRow.months)
+    {
+        value = (value * lastRow.multiplier) / lastRow.divisor + lastRow.summand;
+    }
+    else
+    {
+        // Find the first hit in the table that matches this ride's age
+        for (size_t it = 0; it < tableSize; it++)
+        {
+            Row curr = ageTable[it];
+
+            if (monthsOld < curr.months)
+            {
+                value = (value * curr.multiplier) / curr.divisor + curr.summand;
+                break;
+            }
+        }
+    }
+
+    // Other ride of same type penalty
+    const auto& gameState = getGameState();
+    const auto& rideManager = RideManager(gameState);
+    auto rideType = ride.type;
+    auto otherRidesOfSameType = std::count_if(rideManager.begin(), rideManager.end(), [rideType](const Ride& r) {
+        return r.status == RideStatus::open && r.type == rideType;
+    });
+    if (otherRidesOfSameType > 1)
+        value -= value / 4;
+
+    ride.value = std::max(0.00_GBP, value);
 }
