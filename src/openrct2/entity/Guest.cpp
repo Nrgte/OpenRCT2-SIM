@@ -6087,7 +6087,7 @@ namespace OpenRCT2
                     return;
                 }
 
-                if (!(pathAddEntry->flags & PATH_ADDITION_FLAG_IS_BENCH))
+                if ((pathAddEntry->flags & PATH_ADDITION_FLAG_IS_BENCH))
                     positions_free = 9;
             }
         }
