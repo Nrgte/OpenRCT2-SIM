@@ -250,7 +250,7 @@ namespace OpenRCT2::Ui::Windows
             for (PathElement* element : ghostElements)
             {
                 if (element != nullptr)
-                    element->SetGhost(false);
+                    element->setGhost(false);
             }
 
             ghostElements.clear();
@@ -500,10 +500,14 @@ namespace OpenRCT2::Ui::Windows
                 return;
             }
 
-            const bool disablePickup = !peep->CanBePickedUp();
-            if (disablePickup != isWidgetDisabled(WIDX_PICKUP))
-                invalidate();
-            setWidgetDisabled(WIDX_PICKUP, disablePickup);
+            if (page == WINDOW_GUEST_OVERVIEW)
+            {
+                const bool disablePickup = !peep->CanBePickedUp();
+                if (disablePickup != isWidgetDisabled(WIDX_PICKUP))
+                    invalidate();
+                setWidgetDisabled(WIDX_PICKUP, disablePickup);
+            }
+
             setWidgetDisabled(WIDX_TAB_4, (getGameState().park.flags & PARK_FLAGS_NO_MONEY) != 0);
             setWidgetDisabled(WIDX_TAB_7, !Config::Get().general.debuggingTools);
         }
@@ -587,7 +591,7 @@ namespace OpenRCT2::Ui::Windows
             auto spriteId = ImageId(animationFrame, peep->TshirtColour, peep->TrousersColour);
             GfxDrawSprite(clipRT, spriteId, screenCoords);
 
-            auto* guest = peep->As<Guest>();
+            auto* guest = peep->as<Guest>();
             if (guest == nullptr)
                 return;
 
@@ -597,21 +601,21 @@ namespace OpenRCT2::Ui::Windows
             if (guest->AnimationGroup == PeepAnimationGroup::hat)
             {
                 auto itemOffset = kPeepSpriteHatItemStart + 1;
-                auto imageId = ImageId(itemOffset + itemFrame * 4, guest->HatColour);
+                auto imageId = ImageId(itemOffset + itemFrame * 4, guest->hatColour);
                 GfxDrawSprite(clipRT, imageId, screenCoords);
             }
 
             if (guest->AnimationGroup == PeepAnimationGroup::balloon)
             {
                 auto itemOffset = kPeepSpriteBalloonItemStart + 1;
-                auto imageId = ImageId(itemOffset + itemFrame * 4, guest->BalloonColour);
+                auto imageId = ImageId(itemOffset + itemFrame * 4, guest->balloonColour);
                 GfxDrawSprite(clipRT, imageId, screenCoords);
             }
 
             if (guest->AnimationGroup == PeepAnimationGroup::umbrella)
             {
                 auto itemOffset = kPeepSpriteUmbrellaItemStart + 1;
-                auto imageId = ImageId(itemOffset + itemFrame * 4, guest->UmbrellaColour);
+                auto imageId = ImageId(itemOffset + itemFrame * 4, guest->umbrellaColour);
                 GfxDrawSprite(clipRT, imageId, screenCoords);
             }
         }
@@ -658,7 +662,7 @@ namespace OpenRCT2::Ui::Windows
                     _pickedPeepX = peep->x;
                     CoordsXYZ nullLoc{};
                     nullLoc.SetNull();
-                    GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::Pickup,
+                    GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::pickup,
                                                                 EntityId::FromUnderlying(number), nullLoc,
                                                                 Network::GetCurrentPlayerId() };
                     pickupAction.SetCallback(
@@ -835,12 +839,12 @@ namespace OpenRCT2::Ui::Windows
             int32_t i = 0;
             for (; i < kPeepMaxThoughts; ++i)
             {
-                if (peep->Thoughts[i].type == PeepThoughtType::None)
+                if (peep->thoughts[i].type == PeepThoughtType::none)
                 {
                     _marqueePosition = 0;
                     return;
                 }
-                if (peep->Thoughts[i].freshness == 1)
+                if (peep->thoughts[i].freshness == 1)
                 { // If a fresh thought
                     break;
                 }
@@ -854,7 +858,7 @@ namespace OpenRCT2::Ui::Windows
             screenPos.x = marqueeWidget.width() - 1 - _marqueePosition;
             {
                 auto ft = Formatter();
-                PeepThoughtSetFormatArgs(&peep->Thoughts[i], ft);
+                PeepThoughtSetFormatArgs(&peep->thoughts[i], ft);
                 drawText(rtMarquee, { screenPos.x, 0 }, STR_WINDOW_COLOUR_2_STRINGID, ft, { FontStyle::small });
             }
         }
@@ -935,13 +939,13 @@ namespace OpenRCT2::Ui::Windows
                         int32_t random = UtilRand() & 0xFFFF;
                         if (random <= 0x2AAA)
                         {
-                            peep->InsertNewThought(PeepThoughtType::Watched);
+                            peep->insertNewThought(PeepThoughtType::watched);
                         }
                     }
                 }
             }
 
-            const std::optional<Focus> currentFocus = peep->State != PeepState::picked ? std::optional(Focus(peep->Id))
+            const std::optional<Focus> currentFocus = peep->State != PeepState::picked ? std::optional(Focus(peep->id))
                                                                                        : std::nullopt;
             // Check if guest is in a vehicle (on ride, entering, or leaving but still on vehicle)
             auto isGuestInVehicle = [&peep]() {
@@ -957,7 +961,7 @@ namespace OpenRCT2::Ui::Windows
                 onViewportRotate();
             }
 
-            for (const auto& thought : peep->Thoughts)
+            for (const auto& thought : peep->thoughts)
             {
                 if (thought.freshness == 1 || thought.freshness == 2)
                 {
@@ -1029,9 +1033,9 @@ namespace OpenRCT2::Ui::Windows
             if (destCoords.IsNull())
                 return;
 
-            GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::Place,
+            GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::place,
                                                         EntityId::FromUnderlying(number),
-                                                        { destCoords, tileElement->GetBaseZ() },
+                                                        { destCoords, tileElement->getBaseZ() },
                                                         Network::GetCurrentPlayerId() };
             pickupAction.SetCallback([](const GameActions::GameAction* ga, const GameActions::Result* result) {
                 if (result->error != GameActions::Status::ok)
@@ -1047,7 +1051,7 @@ namespace OpenRCT2::Ui::Windows
             if (widgetIndex != WIDX_PICKUP)
                 return;
 
-            GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::Cancel,
+            GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::cancel,
                                                         EntityId::FromUnderlying(number),
                                                         { _pickedPeepX, 0, 0 },
                                                         Network::GetCurrentPlayerId() };
@@ -1123,25 +1127,25 @@ namespace OpenRCT2::Ui::Windows
                 return;
             }
 
-            int32_t happinessPercentage = NormalizeGuestStatValue(peep->Happiness, kPeepMaxHappiness, 3);
+            int32_t happinessPercentage = NormalizeGuestStatValue(peep->happiness, kPeepMaxHappiness, 3);
             widgetProgressBarSetNewPercentage(widgets[WIDX_HAPPINESS_BAR], happinessPercentage);
 
             int32_t energyPercentage = NormalizeGuestStatValue(
                 peep->Energy - kPeepMinEnergy, kPeepMaxEnergy - kPeepMinEnergy, 3);
             widgetProgressBarSetNewPercentage(widgets[WIDX_ENERGY_BAR], energyPercentage);
 
-            int32_t hungerPercentage = NormalizeGuestStatValue(peep->Hunger - 32, 158, 0);
-            hungerPercentage = 100 - hungerPercentage; // the bar should be longer when peep->Hunger is low
+            int32_t hungerPercentage = NormalizeGuestStatValue(peep->hunger - 32, 158, 0);
+            hungerPercentage = 100 - hungerPercentage; // the bar should be longer when peep->hunger is low
             widgetProgressBarSetNewPercentage(widgets[WIDX_HUNGER_BAR], hungerPercentage);
 
-            int32_t thirstPercentage = NormalizeGuestStatValue(peep->Thirst - 32, 158, 0);
-            thirstPercentage = 100 - thirstPercentage; // the bar should be longer when peep->Thirst is low
+            int32_t thirstPercentage = NormalizeGuestStatValue(peep->thirst - 32, 158, 0);
+            thirstPercentage = 100 - thirstPercentage; // the bar should be longer when peep->thirst is low
             widgetProgressBarSetNewPercentage(widgets[WIDX_THIRST_BAR], thirstPercentage);
 
-            int32_t nauseaPercentage = NormalizeGuestStatValue(peep->Nausea - 32, 223, 0);
+            int32_t nauseaPercentage = NormalizeGuestStatValue(peep->nausea - 32, 223, 0);
             widgetProgressBarSetNewPercentage(widgets[WIDX_NAUSEA_BAR], nauseaPercentage);
 
-            int32_t toiletPercentage = NormalizeGuestStatValue(peep->Toilet - 64, 178, 0);
+            int32_t toiletPercentage = NormalizeGuestStatValue(peep->toilet - 64, 178, 0);
             widgetProgressBarSetNewPercentage(widgets[WIDX_TOILET_BAR], toiletPercentage);
 
             drawWidgets(rt);
@@ -1158,7 +1162,7 @@ namespace OpenRCT2::Ui::Windows
                                   widgets[WIDX_PAGE_BACKGROUND].top + (kListRowHeight * 6) + 5 };
 
             // Time in park
-            int32_t guestEntryTime = peep->GetParkEntryTime();
+            int32_t guestEntryTime = peep->getParkEntryTime();
             if (guestEntryTime != -1)
             {
                 int32_t timeInPark = (getGameState().currentTicks - guestEntryTime) >> 11;
@@ -1176,11 +1180,11 @@ namespace OpenRCT2::Ui::Windows
             // Intensity
             {
                 auto ft = Formatter();
-                auto maxIntensity = peep->Intensity.GetMaximum();
+                auto maxIntensity = peep->intensity.GetMaximum();
                 int32_t string_id = STR_GUEST_STAT_PREFERRED_INTESITY_BELOW;
-                if (peep->Intensity.GetMinimum() != 0)
+                if (peep->intensity.GetMinimum() != 0)
                 {
-                    ft.Add<uint16_t>(peep->Intensity.GetMinimum());
+                    ft.Add<uint16_t>(peep->intensity.GetMinimum());
                     ft.Add<uint16_t>(maxIntensity);
                     string_id = STR_GUEST_STAT_PREFERRED_INTESITY_BETWEEN;
                     if (maxIntensity == 15)
@@ -1203,7 +1207,7 @@ namespace OpenRCT2::Ui::Windows
                     STR_PEEP_STAT_NAUSEA_TOLERANCE_HIGH,
                 };
                 screenCoords.y += kListRowHeight;
-                auto nausea_tolerance = EnumValue(peep->NauseaTolerance) & 0x3;
+                auto nausea_tolerance = EnumValue(peep->nauseaTolerance) & 0x3;
                 auto ft = Formatter();
                 ft.Add<StringId>(_nauseaTolerances[nausea_tolerance]);
                 drawText(rt, screenCoords, STR_GUEST_STAT_NAUSEA_TOLERANCE, ft);
@@ -1245,7 +1249,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Every 2048 ticks do a full window_invalidate
-            int32_t numTicks = getGameState().currentTicks - guest->GetParkEntryTime();
+            int32_t numTicks = getGameState().currentTicks - guest->getParkEntryTime();
             if (!(numTicks & 0x7FF))
                 invalidate();
 
@@ -1255,7 +1259,7 @@ namespace OpenRCT2::Ui::Windows
             const auto& gameState = getGameState();
             for (const auto& r : RideManager(gameState))
             {
-                if (r.isRide() && guest->HasRidden(r))
+                if (r.isRide() && guest->hasRidden(r))
                 {
                     _riddenRides.push_back(r.id);
                 }
@@ -1346,7 +1350,7 @@ namespace OpenRCT2::Ui::Windows
             screenCoords.y = windowPos.y + widgets[WIDX_PAGE_BACKGROUND].bottom - 12;
 
             auto ft = Formatter();
-            auto* r = GetRide(peep->FavouriteRide);
+            auto* r = GetRide(peep->favouriteRide);
             if (r != nullptr)
             {
                 r->formatNameTo(ft);
@@ -1447,7 +1451,7 @@ namespace OpenRCT2::Ui::Windows
             // Cash in pocket
             {
                 auto ft = Formatter();
-                ft.Add<money64>(peep->CashInPocket);
+                ft.Add<money64>(peep->cashInPocket);
                 drawText(rt, screenCoords, STR_GUEST_STAT_CASH_IN_POCKET, ft);
                 screenCoords.y += kListRowHeight;
             }
@@ -1455,7 +1459,7 @@ namespace OpenRCT2::Ui::Windows
             // Cash spent
             {
                 auto ft = Formatter();
-                ft.Add<money64>(peep->CashSpent);
+                ft.Add<money64>(peep->cashSpent);
                 drawText(rt, screenCoords, STR_GUEST_STAT_CASH_SPENT, ft);
                 screenCoords.y += kListRowHeight * 2;
             }
@@ -1467,16 +1471,16 @@ namespace OpenRCT2::Ui::Windows
             // Paid to enter
             {
                 auto ft = Formatter();
-                ft.Add<money64>(peep->PaidToEnter);
+                ft.Add<money64>(peep->paidToEnter);
                 drawText(rt, screenCoords, STR_GUEST_EXPENSES_ENTRANCE_FEE, ft);
                 screenCoords.y += kListRowHeight;
             }
             // Paid on rides
             {
                 auto ft = Formatter();
-                ft.Add<money64>(peep->PaidOnRides);
-                ft.Add<uint16_t>(peep->GuestNumRides);
-                if (peep->GuestNumRides != 1)
+                ft.Add<money64>(peep->paidOnRides);
+                ft.Add<uint16_t>(peep->guestNumRides);
+                if (peep->guestNumRides != 1)
                 {
                     drawText(rt, screenCoords, STR_GUEST_EXPENSES_RIDE_PLURAL, ft);
                 }
@@ -1489,9 +1493,9 @@ namespace OpenRCT2::Ui::Windows
             // Paid on food
             {
                 auto ft = Formatter();
-                ft.Add<money64>(peep->PaidOnFood);
-                ft.Add<uint16_t>(peep->AmountOfFood);
-                if (peep->AmountOfFood != 1)
+                ft.Add<money64>(peep->paidOnFood);
+                ft.Add<uint16_t>(peep->amountOfFood);
+                if (peep->amountOfFood != 1)
                 {
                     drawText(rt, screenCoords, STR_GUEST_EXPENSES_FOOD_PLURAL, ft);
                 }
@@ -1505,9 +1509,9 @@ namespace OpenRCT2::Ui::Windows
             // Paid on drinks
             {
                 auto ft = Formatter();
-                ft.Add<money64>(peep->PaidOnDrink);
-                ft.Add<uint16_t>(peep->AmountOfDrinks);
-                if (peep->AmountOfDrinks != 1)
+                ft.Add<money64>(peep->paidOnDrink);
+                ft.Add<uint16_t>(peep->amountOfDrinks);
+                if (peep->amountOfDrinks != 1)
                 {
                     drawText(rt, screenCoords, STR_GUEST_EXPENSES_DRINK_PLURAL, ft);
                 }
@@ -1520,9 +1524,9 @@ namespace OpenRCT2::Ui::Windows
             // Paid on souvenirs
             {
                 auto ft = Formatter();
-                ft.Add<money64>(peep->PaidOnSouvenirs);
-                ft.Add<uint16_t>(peep->AmountOfSouvenirs);
-                if (peep->AmountOfSouvenirs != 1)
+                ft.Add<money64>(peep->paidOnSouvenirs);
+                ft.Add<uint16_t>(peep->amountOfSouvenirs);
+                if (peep->amountOfSouvenirs != 1)
                 {
                     drawText(rt, screenCoords, STR_GUEST_EXPENSES_SOUVENIR_PLURAL, ft);
                 }
@@ -1592,9 +1596,9 @@ namespace OpenRCT2::Ui::Windows
             auto screenCoords = windowPos
                 + ScreenCoordsXY{ widgets[WIDX_PAGE_BACKGROUND].left + 4, widgets[WIDX_PAGE_BACKGROUND].top + 14 };
 
-            for (const auto& thought : peep->Thoughts)
+            for (const auto& thought : peep->thoughts)
             {
-                if (thought.type == PeepThoughtType::None)
+                if (thought.type == PeepThoughtType::none)
                     return;
                 if (thought.freshness == 0)
                     continue;
@@ -1662,10 +1666,10 @@ namespace OpenRCT2::Ui::Windows
             switch (item)
             {
                 case ShopItem::balloon:
-                    itemImage = ImageId(itemDesc.Image, guest.BalloonColour);
+                    itemImage = ImageId(itemDesc.Image, guest.balloonColour);
                     break;
                 case ShopItem::photo:
-                    invRide = GetRide(guest.Photo1RideRef);
+                    invRide = GetRide(guest.photo1RideRef);
                     if (invRide != nullptr)
                     {
                         ft.Rewind();
@@ -1675,10 +1679,10 @@ namespace OpenRCT2::Ui::Windows
 
                     break;
                 case ShopItem::umbrella:
-                    itemImage = ImageId(itemDesc.Image, guest.UmbrellaColour);
+                    itemImage = ImageId(itemDesc.Image, guest.umbrellaColour);
                     break;
                 case ShopItem::voucher:
-                    switch (guest.VoucherType)
+                    switch (guest.voucherType)
                     {
                         case VOUCHER_TYPE_PARK_ENTRY_FREE:
                             ft.Rewind();
@@ -1688,7 +1692,7 @@ namespace OpenRCT2::Ui::Windows
                             ft.Add<const char*>(parkName);
                             break;
                         case VOUCHER_TYPE_RIDE_FREE:
-                            invRide = GetRide(guest.VoucherRideId);
+                            invRide = GetRide(guest.voucherRideId);
                             if (invRide != nullptr)
                             {
                                 ft.Rewind();
@@ -1708,18 +1712,18 @@ namespace OpenRCT2::Ui::Windows
                             ft.Rewind();
                             ft.Increment(2);
                             ft.Add<StringId>(STR_PEEP_INVENTORY_VOUCHER_FOOD_OR_DRINK_FREE);
-                            ft.Add<StringId>(GetShopItemDescriptor(guest.VoucherShopItem).Naming.Singular);
+                            ft.Add<StringId>(GetShopItemDescriptor(guest.voucherShopItem).Naming.Singular);
                             break;
                     }
                     break;
                 case ShopItem::hat:
-                    itemImage = ImageId(itemDesc.Image, guest.HatColour);
+                    itemImage = ImageId(itemDesc.Image, guest.hatColour);
                     break;
                 case ShopItem::tShirt:
                     itemImage = ImageId(itemDesc.Image, guest.TshirtColour);
                     break;
                 case ShopItem::photo2:
-                    invRide = GetRide(guest.Photo2RideRef);
+                    invRide = GetRide(guest.photo2RideRef);
                     if (invRide != nullptr)
                     {
                         ft.Rewind();
@@ -1728,7 +1732,7 @@ namespace OpenRCT2::Ui::Windows
                     }
                     break;
                 case ShopItem::photo3:
-                    invRide = GetRide(guest.Photo3RideRef);
+                    invRide = GetRide(guest.photo3RideRef);
                     if (invRide != nullptr)
                     {
                         ft.Rewind();
@@ -1737,7 +1741,7 @@ namespace OpenRCT2::Ui::Windows
                     }
                     break;
                 case ShopItem::photo4:
-                    invRide = GetRide(guest.Photo4RideRef);
+                    invRide = GetRide(guest.photo4RideRef);
                     if (invRide != nullptr)
                     {
                         ft.Rewind();
@@ -1781,7 +1785,7 @@ namespace OpenRCT2::Ui::Windows
             {
                 if (screenCoords.y >= maxY)
                     break;
-                if (!guest->HasItem(item))
+                if (!guest->hasItem(item))
                     continue;
 
                 auto [imageId, ft] = InventoryFormatItem(*guest, item);
@@ -1851,7 +1855,7 @@ namespace OpenRCT2::Ui::Windows
                 PathElement* element = MapGetPathElementAt(pfCoords);
                 if (element != nullptr)
                 {
-                    element->SetGhost(true);
+                    element->setGhost(true);
                     ghostElements.push_back(element);
                 }
             }
@@ -1860,7 +1864,7 @@ namespace OpenRCT2::Ui::Windows
                 + ScreenCoordsXY{ widgets[WIDX_PAGE_BACKGROUND].left + 4, widgets[WIDX_PAGE_BACKGROUND].top + 4 };
             {
                 auto ft = Formatter();
-                ft.Add<uint32_t>(peep->Id);
+                ft.Add<uint32_t>(peep->id);
                 drawText(rt, screenCoords, STR_PEEP_DEBUG_SPRITE_INDEX, ft);
             }
             screenCoords.y += kListRowHeight;
@@ -1940,13 +1944,13 @@ namespace OpenRCT2::Ui::Windows
         {
             return nullptr;
         }
-        if (peep->Is<Staff>())
+        if (peep->is<Staff>())
         {
             return StaffOpen(peep);
         }
 
         auto* windowMgr = GetWindowManager();
-        auto* window = static_cast<GuestWindow*>(windowMgr->BringToFrontByNumber(WindowClass::peep, peep->Id.ToUnderlying()));
+        auto* window = static_cast<GuestWindow*>(windowMgr->BringToFrontByNumber(WindowClass::peep, peep->id.ToUnderlying()));
         if (window == nullptr)
         {
             auto windowSize = kWindowSize;
@@ -1960,7 +1964,7 @@ namespace OpenRCT2::Ui::Windows
             }
         }
 
-        window->init(peep->Id);
+        window->init(peep->id);
 
         return window;
     }

@@ -64,7 +64,7 @@ static bool try_add_synchronised_station(const CoordsXYZ& coords)
         return false;
     }
 
-    auto rideIndex = tileElement->AsTrack()->GetRideIndex();
+    auto rideIndex = tileElement->asTrack()->GetRideIndex();
     auto ride = GetRide(rideIndex);
     if (ride == nullptr || !(ride->departFlags & RIDE_DEPART_SYNCHRONISE_WITH_ADJACENT_STATIONS))
     {
@@ -76,7 +76,7 @@ static bool try_add_synchronised_station(const CoordsXYZ& coords)
      * to sync with adjacent stations, so it will return true.
      * Still to determine if a vehicle to sync can be identified. */
 
-    auto stationIndex = tileElement->AsTrack()->GetStationIndex();
+    auto stationIndex = tileElement->asTrack()->GetStationIndex();
 
     SynchronisedVehicle* sv = _lastSynchronisedVehicle;
     sv->ride_id = rideIndex;
@@ -125,7 +125,7 @@ static bool try_add_synchronised_station(const CoordsXYZ& coords)
             continue;
         }
 
-        sv->vehicle_id = vehicle->Id;
+        sv->vehicle_id = vehicle->id;
         return true;
     }
 
@@ -165,7 +165,7 @@ static bool ride_station_can_depart_synchronised(const Ride& ride, StationIndex 
      *  is found we allow for space between that and the next.
      */
 
-    int32_t direction = tileElement->GetDirectionWithOffset(1);
+    int32_t direction = tileElement->getDirectionWithOffset(1);
     constexpr uint8_t maxCheckDistance = kRideAdjacencyCheckDistance;
     uint8_t spaceBetween = maxCheckDistance;
 
@@ -533,7 +533,7 @@ void Vehicle::UpdateWaitingForPassengers()
             return;
         }
 
-        auto trainIndex = ride_get_train_index_from_vehicle(*curRide, Id);
+        auto trainIndex = ride_get_train_index_from_vehicle(*curRide, id);
         if (!trainIndex.has_value())
         {
             return;
@@ -546,7 +546,7 @@ void Vehicle::UpdateWaitingForPassengers()
         sub_state = 1;
         time_waiting = 0;
 
-        Invalidate();
+        invalidate();
         return;
     }
     if (sub_state == 1)
@@ -566,7 +566,7 @@ void Vehicle::UpdateWaitingForPassengers()
 
         // 0xF64E31, 0xF64E32, 0xF64E33
         uint8_t num_peeps_on_train = 0, num_used_seats_on_train = 0, num_seats_on_train = 0;
-        for (const Vehicle* trainCar = getGameState().entities.GetEntity<Vehicle>(Id); trainCar != nullptr;
+        for (const Vehicle* trainCar = getGameState().entities.GetEntity<Vehicle>(id); trainCar != nullptr;
              trainCar = getGameState().entities.GetEntity<Vehicle>(trainCar->next_vehicle_on_train))
         {
             num_peeps_on_train += trainCar->num_peeps;
@@ -618,7 +618,7 @@ void Vehicle::UpdateWaitingForPassengers()
         {
             for (auto train_id : curRide->vehicles)
             {
-                if (train_id == Id)
+                if (train_id == id)
                     continue;
 
                 Vehicle* train = getGameState().entities.GetEntity<Vehicle>(train_id);
@@ -737,7 +737,7 @@ void Vehicle::UpdateWaitingToDepart()
         }
         else
         {
-            for (const Vehicle* trainCar = getGameState().entities.GetEntity<Vehicle>(Id); trainCar != nullptr;
+            for (const Vehicle* trainCar = getGameState().entities.GetEntity<Vehicle>(id); trainCar != nullptr;
                  trainCar = getGameState().entities.GetEntity<Vehicle>(trainCar->next_vehicle_on_train))
             {
                 if (trainCar->num_peeps != 0)
@@ -784,7 +784,7 @@ void Vehicle::UpdateWaitingToDepart()
         uint8_t trackDirection = GetTrackDirection();
         if (trackBlockGetNextFromZero(TrackLocation, *curRide, trackDirection, &track, &zUnused, &direction, false))
         {
-            if (track.element->AsTrack()->HasCableLift())
+            if (track.element->asTrack()->HasCableLift())
             {
                 SetState(Status::waitingForCableLift, sub_state);
             }
@@ -974,7 +974,7 @@ void Vehicle::UpdateUnloadingPassengers()
         }
 
         bool allRestraintsOpen = true;
-        for (Vehicle* train = getGameState().entities.GetEntity<Vehicle>(Id); train != nullptr;
+        for (Vehicle* train = getGameState().entities.GetEntity<Vehicle>(id); train != nullptr;
              train = getGameState().entities.GetEntity<Vehicle>(train->next_vehicle_on_train))
         {
             if (train->restraints_position != 255)
@@ -1026,7 +1026,7 @@ void Vehicle::UpdateUnloadingPassengers()
         test++;
 
     if (currentStation.TrainAtStation < OpenRCT2::Limits::kMaxTrainsPerRide)
-        for (Vehicle* train = getGameState().entities.GetEntity<Vehicle>(Id); train != nullptr;
+        for (Vehicle* train = getGameState().entities.GetEntity<Vehicle>(id); train != nullptr;
              train = getGameState().entities.GetEntity<Vehicle>(train->next_vehicle_on_train))
         {
             if (train->num_peeps != train->next_free_seat)
@@ -1080,12 +1080,12 @@ void Vehicle::UpdateDeparting()
         if (rideEntry->flags.has(RideEntryFlag::playDepartSound))
         {
             auto soundId = (rideEntry->Cars[0].soundRange == SoundRange::tramBell) ? SoundId::tram : SoundId::trainDeparting;
-            Play3D(soundId, GetLocation());
+            Play3D(soundId, getLocation());
         }
 
         if (curRide->mode == RideMode::upwardLaunch || (curRide->mode == RideMode::downwardLaunch && NumLaunches > 1))
         {
-            Play3D(SoundId::rideLaunch2, GetLocation());
+            Play3D(SoundId::rideLaunch2, getLocation());
         }
 
         if (!curRide->flags.has(RideFlag::tested))
@@ -1102,7 +1102,7 @@ void Vehicle::UpdateDeparting()
                     UpdateTestFinish();
                 }
             }
-            else if (!curRide->flags.has(RideFlag::testInProgress) && !IsGhost())
+            else if (!curRide->flags.has(RideFlag::testInProgress) && !isGhost())
             {
                 TestReset();
             }
@@ -1264,7 +1264,7 @@ void Vehicle::UpdateDeparting()
     if (!CurrentTowerElementIsTop())
     {
         if (curRide->mode == RideMode::freefallDrop)
-            Invalidate();
+            invalidate();
         return;
     }
 
@@ -1291,7 +1291,7 @@ void Vehicle::FinishDeparting()
         if (NumLaunches >= 1 && (14 << 16) > velocity)
             return;
 
-        Play3D(SoundId::rideLaunch1, GetLocation());
+        Play3D(SoundId::rideLaunch1, getLocation());
     }
 
     if (curRide->mode == RideMode::upwardLaunch)
@@ -1299,7 +1299,7 @@ void Vehicle::FinishDeparting()
         if ((curRide->launchSpeed << 16) > velocity)
             return;
 
-        Play3D(SoundId::rideLaunch1, GetLocation());
+        Play3D(SoundId::rideLaunch1, getLocation());
     }
 
     if (curRide->mode != RideMode::race && !curRide->isBlockSectioned())
@@ -1358,7 +1358,7 @@ void Vehicle::CheckIfMissing()
 
         uint8_t vehicleIndex = 0;
         for (; vehicleIndex < curRide->numTrains; ++vehicleIndex)
-            if (curRide->vehicles[vehicleIndex] == Id)
+            if (curRide->vehicles[vehicleIndex] == id)
                 break;
 
         vehicleIndex++;
@@ -1396,7 +1396,7 @@ void Vehicle::UpdateTravelling()
         animation_frame++;
         velocity = 0;
         acceleration = 0;
-        Invalidate();
+        invalidate();
         return;
     }
 
@@ -1742,7 +1742,7 @@ void Vehicle::UpdateArriving()
 
     if ((curRide->mode == RideMode::upwardLaunch || curRide->mode == RideMode::downwardLaunch) && NumLaunches < 2)
     {
-        Play3D(SoundId::rideLaunch2, GetLocation());
+        Play3D(SoundId::rideLaunch2, getLocation());
         velocity = 0;
         acceleration = 0;
         SetState(Status::departing, 1);
