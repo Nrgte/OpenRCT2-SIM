@@ -6987,7 +6987,7 @@ namespace OpenRCT2
             if (tileElement->getDirection() != edge)
                 continue;
             auto wallEntry = tileElement->asWall()->GetEntry();
-            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_OPAQUE))
+            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
                 continue;
             if (guest.NextLoc.z + (4 * kCoordsZStep) <= tileElement->getBaseZ())
                 continue;
@@ -7012,6 +7012,7 @@ namespace OpenRCT2
             return false;
         }
 
+        // TODO: Extract loop A
         do
         {
             // Ghosts are purely this-client-side and should not cause any interaction,
@@ -7026,10 +7027,9 @@ namespace OpenRCT2
             if (DirectionReverse(tileElement->getDirection()) != edge)
                 continue;
             auto wallEntry = tileElement->asWall()->GetEntry();
-            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_OPAQUE))
+            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
                 continue;
-            // TODO: Check whether this shouldn't be <=, as the other loops use. If so, also extract as loop A.
-            if (guest.NextLoc.z + (4 * kCoordsZStep) >= tileElement->getBaseZ())
+            if (guest.NextLoc.z + (4 * kCoordsZStep) <= tileElement->getBaseZ())
                 continue;
             if (guest.NextLoc.z + (1 * kCoordsZStep) >= tileElement->getClearanceZ())
                 continue;
@@ -7105,7 +7105,7 @@ namespace OpenRCT2
             if (tileElement->getType() == TileElementType::Wall)
             {
                 auto wallEntry = tileElement->asWall()->GetEntry();
-                if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_OPAQUE))
+                if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
                 {
                     continue;
                 }
@@ -7145,7 +7145,7 @@ namespace OpenRCT2
             if (DirectionReverse(tileElement->getDirection()) != edge)
                 continue;
             auto wallEntry = tileElement->asWall()->GetEntry();
-            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_OPAQUE))
+            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
                 continue;
             if (guest.NextLoc.z + (6 * kCoordsZStep) <= tileElement->getBaseZ())
                 continue;
@@ -7222,7 +7222,7 @@ namespace OpenRCT2
             if (tileElement->getType() == TileElementType::Wall)
             {
                 auto wallEntry = tileElement->asWall()->GetEntry();
-                if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_OPAQUE))
+                if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
                 {
                     continue;
                 }
@@ -7261,7 +7261,7 @@ namespace OpenRCT2
             if (DirectionReverse(tileElement->getDirection()) != edge)
                 continue;
             auto wallEntry = tileElement->asWall()->GetEntry();
-            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_OPAQUE))
+            if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
                 continue;
             if (guest.NextLoc.z + (8 * kCoordsZStep) <= tileElement->getBaseZ())
                 continue;
