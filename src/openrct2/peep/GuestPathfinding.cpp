@@ -21,6 +21,7 @@
 #include "../world/Entrance.h"
 #include "../world/Footpath.h"
 #include "../world/Map.h"
+#include "../world/TileElementsView.h"
 #include "../world/Wall.h"
 #include "../world/tile_element/BannerElement.h"
 #include "../world/tile_element/EntranceElement.h"
@@ -169,10 +170,10 @@ namespace OpenRCT2::PathFinding
         do
         {
             // Path on top, so no banners
-            if (bannerElement->getType() == TileElementType::Path)
+            if (bannerElement->getType() == TileElementType::path)
                 return nullptr;
             // Found a banner
-            if (bannerElement->getType() == TileElementType::Banner)
+            if (bannerElement->getType() == TileElementType::banner)
                 return bannerElement;
             // Last element so there can't be any other banners
             if (bannerElement->isLastForTile())
@@ -375,7 +376,7 @@ namespace OpenRCT2::PathFinding
                 break;
             if (nextTileElement->isGhost())
                 continue;
-            if (nextTileElement->getType() != TileElementType::Path)
+            if (nextTileElement->getType() != TileElementType::path)
                 continue;
             const auto* nextPathElement = nextTileElement->asPath();
             if (!FootpathIsZAndDirectionValid(*nextPathElement, loc.z, chosenDirection))
@@ -413,26 +414,20 @@ namespace OpenRCT2::PathFinding
     static PathSearchResult FootpathElementDestInDir(
         bool ignoreBanners, TileCoordsXYZ loc, Direction chosenDirection, RideId* outRideIndex, int32_t level)
     {
-        TileElement* tileElement;
         Direction direction;
 
         if (level > 25)
             return PathSearchResult::LimitReached;
 
         loc += TileDirectionDelta[chosenDirection];
-        tileElement = MapGetFirstElementAt(loc);
-        if (tileElement == nullptr)
-        {
-            return PathSearchResult::Failed;
-        }
-        do
+        for (auto* tileElement : TileElementsView(loc))
         {
             if (tileElement->isGhost())
                 continue;
 
             switch (tileElement->getType())
             {
-                case TileElementType::Track:
+                case TileElementType::track:
                 {
                     if (loc.z != tileElement->baseHeight)
                         continue;
@@ -445,7 +440,7 @@ namespace OpenRCT2::PathFinding
                     }
                 }
                 break;
-                case TileElementType::Entrance:
+                case TileElementType::entrance:
                     if (loc.z != tileElement->baseHeight)
                         continue;
                     switch (tileElement->asEntrance()->GetEntranceType())
@@ -470,7 +465,7 @@ namespace OpenRCT2::PathFinding
                             return PathSearchResult::ParkExit;
                     }
                     break;
-                case TileElementType::Path:
+                case TileElementType::path:
                 {
                     const auto* pathElement = tileElement->asPath();
                     if (!FootpathIsZAndDirectionValid(*pathElement, loc.z, chosenDirection))
@@ -505,7 +500,7 @@ namespace OpenRCT2::PathFinding
                 default:
                     break;
             }
-        } while (!(tileElement++)->isLastForTile());
+        }
 
         return PathSearchResult::Failed;
     }
@@ -804,7 +799,7 @@ namespace OpenRCT2::PathFinding
             RideId rideIndex = RideId::GetNull();
             switch (tileElement->getType())
             {
-                case TileElementType::Track:
+                case TileElementType::track:
                 {
                     if (loc.z != tileElement->baseHeight)
                         continue;
@@ -819,7 +814,7 @@ namespace OpenRCT2::PathFinding
                     searchResult = PathSearchResult::ShopEntrance;
                     break;
                 }
-                case TileElementType::Entrance:
+                case TileElementType::entrance:
                     if (loc.z != tileElement->baseHeight)
                         continue;
                     Direction direction;
@@ -864,7 +859,7 @@ namespace OpenRCT2::PathFinding
                             continue;
                     }
                     break;
-                case TileElementType::Path:
+                case TileElementType::path:
                 {
                     const auto* pathElement = tileElement->asPath();
                     /* For peeps heading for a ride with a queue, the goal is the last
@@ -1297,7 +1292,7 @@ namespace OpenRCT2::PathFinding
                 break;
             if (destTileElement->baseHeight != loc.z)
                 continue;
-            if (destTileElement->getType() != TileElementType::Path)
+            if (destTileElement->getType() != TileElementType::path)
                 continue;
             found = true;
             if (firstTileElement == nullptr)
@@ -1609,7 +1604,7 @@ namespace OpenRCT2::PathFinding
      *
      *  rct2: 0x006952C0
      */
-    int32_t GuestPathFindParkEntranceEntering(Guest& peep, uint8_t edges)
+    int32_t GuestPathFindParkEntranceEntering(Peep& peep, uint8_t edges)
     {
         // Send peeps to the nearest park entrance.
         auto chosenEntrance = GetNearestParkEntrance(peep.NextLoc);

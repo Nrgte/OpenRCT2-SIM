@@ -11,7 +11,6 @@
 
 #include "../Context.h"
 #include "../Diagnostic.h"
-#include "../Game.h"
 #include "../GameState.h"
 #include "../OpenRCT2.h"
 #include "../SpriteIds.h"
@@ -44,7 +43,6 @@
 #include "../peep/PeepAnimations.h"
 #include "../peep/PeepThoughts.h"
 #include "../peep/RideUseSystem.h"
-#include "../rct2/RCT2.h"
 #include "../ride/Ride.h"
 #include "../ride/RideData.h"
 #include "../ride/RideManager.hpp"
@@ -60,8 +58,6 @@
 #include "../world/Footpath.h"
 #include "../world/Location.hpp"
 #include "../world/Map.h"
-#include "../world/Park.h"
-#include "../world/Scenery.h"
 #include "../world/TileElementsView.h"
 #include "../world/Weather.h"
 #include "../world/tile_element/EntranceElement.h"
@@ -2038,7 +2034,7 @@ namespace OpenRCT2
                     CoordsXYZ stationPosition = station.Entrance.ToCoordsXYZ();
                     if (lookingForFacitilty)
                         stationPosition = CoordsXYZ(station.Start, station.Height);
-
+                    
                     int32_t pfScore = PathFinding::CalculateHeuristicPathingScoreWrapper(guest.getLocation(), stationPosition);
                     if (pfScore < stationPfScore || stationPfScore == 0)
                         stationPfScore = pfScore;
@@ -3333,7 +3329,7 @@ namespace OpenRCT2
 
                     switch (tileElement->getType())
                     {
-                        case TileElementType::Path:
+                        case TileElementType::path:
                         {
                             if (!tileElement->asPath()->HasAddition())
                                 break;
@@ -3358,11 +3354,11 @@ namespace OpenRCT2
                             }
                             break;
                         }
-                        case TileElementType::LargeScenery:
-                        case TileElementType::SmallScenery:
+                        case TileElementType::largeScenery:
+                        case TileElementType::smallScenery:
                             num_scenery++;
                             break;
-                        case TileElementType::Track:
+                        case TileElementType::track:
                         {
                             auto* ride = GetRide(tileElement->asTrack()->GetRideIndex());
                             if (ride == nullptr)
@@ -5487,27 +5483,24 @@ namespace OpenRCT2
         };
         maze_type mazeType = maze_type::invalid;
 
-        auto tileElement = MapGetFirstElementAt(targetLoc);
-        if (tileElement == nullptr)
-            return;
-        do
+        for (auto* tileElement : TileElementsView(targetLoc))
         {
             if (stationBaseZ != tileElement->getBaseZ())
                 continue;
 
-            if (tileElement->getType() == TileElementType::Track)
+            if (tileElement->getType() == TileElementType::track)
             {
                 mazeType = maze_type::hedge;
                 break;
             }
 
-            if (tileElement->getType() == TileElementType::Entrance
+            if (tileElement->getType() == TileElementType::entrance
                 && tileElement->asEntrance()->GetEntranceType() == ENTRANCE_TYPE_RIDE_EXIT)
             {
                 mazeType = maze_type::entrance_or_exit;
                 break;
             }
-        } while (!(tileElement++)->isLastForTile());
+        }
 
         switch (mazeType)
         {
@@ -6088,7 +6081,7 @@ namespace OpenRCT2
 
         for (;; tileElement++)
         {
-            if (tileElement->getType() == TileElementType::Path)
+            if (tileElement->getType() == TileElementType::path)
             {
                 if (NextLoc.z == tileElement->getBaseZ())
                     break;
@@ -6098,6 +6091,10 @@ namespace OpenRCT2
                 return;
             }
         }
+
+        // Only watch rides if the guest is not underground
+        if (MapIsLocationUnderground(NextLoc))
+            return;
 
         int32_t positions_free = 15;
 
@@ -6982,7 +6979,7 @@ namespace OpenRCT2
                 if (tileElement->isGhost())
                     continue;
             }
-            if (tileElement->getType() != TileElementType::Wall)
+            if (tileElement->getType() != TileElementType::wall)
                 continue;
             if (tileElement->getDirection() != edge)
                 continue;
@@ -7022,7 +7019,7 @@ namespace OpenRCT2
                 if (tileElement->isGhost())
                     continue;
             }
-            if (tileElement->getType() != TileElementType::Wall)
+            if (tileElement->getType() != TileElementType::wall)
                 continue;
             if (DirectionReverse(tileElement->getDirection()) != edge)
                 continue;
@@ -7054,7 +7051,7 @@ namespace OpenRCT2
             if (guest.NextLoc.z + (6 * kCoordsZStep) < tileElement->getBaseZ())
                 continue;
 
-            if (tileElement->getType() == TileElementType::Track)
+            if (tileElement->getType() == TileElementType::track)
             {
                 if (PeepShouldWatchRide(tileElement))
                 {
@@ -7062,7 +7059,7 @@ namespace OpenRCT2
                 }
             }
 
-            if (tileElement->getType() == TileElementType::LargeScenery)
+            if (tileElement->getType() == TileElementType::largeScenery)
             {
                 const auto* sceneryEntry = tileElement->asLargeScenery()->GetEntry();
                 if (sceneryEntry == nullptr || !sceneryEntry->flags.has(LargeSceneryFlag::isPhotogenic))
@@ -7097,12 +7094,12 @@ namespace OpenRCT2
                 continue;
             if (guest.NextLoc.z + (6 * kCoordsZStep) < tileElement->getBaseZ())
                 continue;
-            if (tileElement->getType() == TileElementType::Surface)
+            if (tileElement->getType() == TileElementType::surface)
                 continue;
-            if (tileElement->getType() == TileElementType::Path)
+            if (tileElement->getType() == TileElementType::path)
                 continue;
 
-            if (tileElement->getType() == TileElementType::Wall)
+            if (tileElement->getType() == TileElementType::wall)
             {
                 auto wallEntry = tileElement->asWall()->GetEntry();
                 if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
@@ -7140,7 +7137,7 @@ namespace OpenRCT2
                 if (tileElement->isGhost())
                     continue;
             }
-            if (tileElement->getType() != TileElementType::Wall)
+            if (tileElement->getType() != TileElementType::wall)
                 continue;
             if (DirectionReverse(tileElement->getDirection()) != edge)
                 continue;
@@ -7171,7 +7168,7 @@ namespace OpenRCT2
             if (guest.NextLoc.z + (8 * kCoordsZStep) < tileElement->getBaseZ())
                 continue;
 
-            if (tileElement->getType() == TileElementType::Track)
+            if (tileElement->getType() == TileElementType::track)
             {
                 if (PeepShouldWatchRide(tileElement))
                 {
@@ -7179,7 +7176,7 @@ namespace OpenRCT2
                 }
             }
 
-            if (tileElement->getType() == TileElementType::LargeScenery)
+            if (tileElement->getType() == TileElementType::largeScenery)
             {
                 auto* sceneryEntry = tileElement->asLargeScenery()->GetEntry();
                 if (!(sceneryEntry == nullptr || sceneryEntry->flags.has(LargeSceneryFlag::isPhotogenic)))
@@ -7214,12 +7211,12 @@ namespace OpenRCT2
                 continue;
             if (guest.NextLoc.z + (8 * kCoordsZStep) < tileElement->getBaseZ())
                 continue;
-            if (tileElement->getType() == TileElementType::Surface)
+            if (tileElement->getType() == TileElementType::surface)
                 continue;
-            if (tileElement->getType() == TileElementType::Path)
+            if (tileElement->getType() == TileElementType::path)
                 continue;
 
-            if (tileElement->getType() == TileElementType::Wall)
+            if (tileElement->getType() == TileElementType::wall)
             {
                 auto wallEntry = tileElement->asWall()->GetEntry();
                 if (wallEntry == nullptr || (wallEntry->flags2 & WALL_SCENERY_2_IS_TRANSPARENT))
@@ -7256,7 +7253,7 @@ namespace OpenRCT2
                 if (tileElement->isGhost())
                     continue;
             }
-            if (tileElement->getType() != TileElementType::Wall)
+            if (tileElement->getType() != TileElementType::wall)
                 continue;
             if (DirectionReverse(tileElement->getDirection()) != edge)
                 continue;
@@ -7287,7 +7284,7 @@ namespace OpenRCT2
             if (guest.NextLoc.z + (10 * kCoordsZStep) < tileElement->getBaseZ())
                 continue;
 
-            if (tileElement->getType() == TileElementType::Track)
+            if (tileElement->getType() == TileElementType::track)
             {
                 if (PeepShouldWatchRide(tileElement))
                 {
@@ -7295,7 +7292,7 @@ namespace OpenRCT2
                 }
             }
 
-            if (tileElement->getType() == TileElementType::LargeScenery)
+            if (tileElement->getType() == TileElementType::largeScenery)
             {
                 const auto* sceneryEntry = tileElement->asLargeScenery()->GetEntry();
                 if (sceneryEntry == nullptr || !sceneryEntry->flags.has(LargeSceneryFlag::isPhotogenic))

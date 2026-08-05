@@ -9,15 +9,14 @@
 
 #pragma once
 
-#include "../core/BitSet.hpp"
 #include "../management/Finance.h"
-#include "../ride/Ride.h"
 #include "../ride/ShopItem.h"
 #include "Peep.h"
 
 #include "map"
 
 struct CarEntry;
+struct Vehicle;
 
 namespace OpenRCT2
 {
@@ -205,9 +204,6 @@ namespace OpenRCT2
         uint8_t freshness;     // larger is less fresh
         uint8_t fresh_timeout; // updates every tick
     };
-
-    struct Guest;
-    struct Staff;
 
     struct IntensityRange
     {

@@ -665,7 +665,7 @@ enum class RideMode : uint8_t
     normal,
     continuousCircuit,
     reverseInclineLaunchedShuttle,
-    poweredLaunchPasstrough, // RCT2 style, pass through station
+    poweredLaunchPassthrough, // RCT2 style, pass through station
     shuttle,
     boatHire,
     upwardLaunch,

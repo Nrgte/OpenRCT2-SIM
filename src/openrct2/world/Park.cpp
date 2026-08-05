@@ -390,7 +390,7 @@ namespace OpenRCT2::Park
         TileElementIteratorBegin(&it);
         do
         {
-            if (it.element->getType() == TileElementType::Surface)
+            if (it.element->getType() == TileElementType::surface)
             {
                 if (it.element->asSurface()->GetOwnership() & (OWNERSHIP_CONSTRUCTION_RIGHTS_OWNED | OWNERSHIP_OWNED))
                 {
@@ -685,7 +685,7 @@ namespace OpenRCT2::Park
             // If an entrance element do not place flags around surface
             do
             {
-                if (tileElement->getType() != TileElementType::Entrance)
+                if (tileElement->getType() != TileElementType::entrance)
                     continue;
 
                 if (tileElement->asEntrance()->GetEntranceType() != ENTRANCE_TYPE_PARK_ENTRANCE)
