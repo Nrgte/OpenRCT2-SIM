@@ -13,6 +13,7 @@
 #include "../world/MapLimits.h"
 
 #include <cstdint>
+#include <functional>
 
 constexpr int16_t kLocationNull = -32768;
 constexpr int32_t kCoordsNull = 0xFFFF8000;
