@@ -126,28 +126,6 @@ jobs:
   #       uses: wagoid/commitlint-github-action@v5
   #       with:
   #         configFile: .commitlint.json
-  check-code-formatting:
-    name: Check code formatting
-    runs-on: ubuntu-24.04
-    container: ghcr.io/openrct2/openrct2-build:26-format
-    permissions:
-      pull-requests: write
-      contents: read
-    defaults:
-      run:
-        shell: sh
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - run: git config --global --add safe.directory $PWD
-      - name: Run clang-format
-        id: clang_format
-        run: scripts/check-code-formatting
-      - uses: parkerbxyz/suggest-changes@v3
-        if: github.event_name == 'pull_request' && failure()
-        with:
-          comment: 'Please commit the suggested changes from clang-format.'
-          event: 'REQUEST_CHANGES'
   check-changelog-formatting:
     name: Check changelog formatting
     runs-on: ubuntu-slim
@@ -189,7 +167,7 @@ jobs:
   windows:
     name: Windows
     runs-on: ${{ matrix.runs_on }}
-    needs: [check-code-formatting, build_variables, g2dat]
+    needs: [build_variables, g2dat]
     strategy:
       fail-fast: false
       matrix:
@@ -331,7 +309,7 @@ jobs:
   windows-mingw:
     name: Windows (${{ matrix.platform_name }}) using mingw
     runs-on: ubuntu-24.04
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     container: ghcr.io/openrct2/openrct2-build:26-mingw
     strategy:
       fail-fast: false
@@ -367,7 +345,7 @@ jobs:
   macos-cmake:
     name: macOS (${{ matrix.arch }}) using CMake
     runs-on: macos-15
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     strategy:
       fail-fast: false
       matrix:
@@ -460,7 +438,7 @@ jobs:
   linux-portable:
     name: ${{ matrix.distro }} Linux (${{ matrix.release }}, ${{ matrix.platform }}, portable)
     runs-on: ubuntu-24.04
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     container: ${{ matrix.image }}
     strategy:
       fail-fast: false
@@ -514,7 +492,7 @@ jobs:
   linux-appimage:
     name: Ubuntu Linux (AppImage, x86_64)
     runs-on: ubuntu-24.04
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     container: openrct2/openrct2-build:24-jammy
     steps:
       - name: Checkout
@@ -541,7 +519,7 @@ jobs:
           if-no-files-found: error
   linux-docker:
     name: Ubuntu Linux (Docker)
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout image
@@ -569,7 +547,7 @@ jobs:
   linux-clang:
     name: Ubuntu Linux (noble, debug, [http, network, flac, vorbis OpenGL] disabled) using clang
     runs-on: ubuntu-24.04
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     container: ghcr.io/openrct2/openrct2-build:26-noble
     steps:
       - name: Checkout
@@ -585,7 +563,7 @@ jobs:
   linux-clang-tests:
     name: Ubuntu Linux (debug) using clang, coverage enabled
     runs-on: ubuntu-24.04
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     container: ghcr.io/openrct2/openrct2-build:26-noble
     steps:
       - name: Checkout
@@ -626,7 +604,7 @@ jobs:
   android-libs:
     name: Android (${{ matrix.arch }})
     runs-on: ubuntu-24.04
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     container: ghcr.io/openrct2/openrct2-build:26-android
     strategy:
       fail-fast: false
@@ -733,7 +711,7 @@ jobs:
   emscripten:
     name: Emscripten
     runs-on: ubuntu-24.04
-    needs: [check-code-formatting, build_variables]
+    needs: [build_variables]
     container: ghcr.io/openrct2/openrct2-build:26-emscripten
     steps:
       - name: Checkout
