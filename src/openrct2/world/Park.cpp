@@ -42,9 +42,6 @@
 #include "tile_element/EntranceElement.h"
 #include "tile_element/SurfaceElement.h"
 
-//#include "Surface.h"
-#include "Windows.h"
-
 #include <limits>
 #include <type_traits>
 
@@ -169,11 +166,6 @@ namespace OpenRCT2::Park
         */
 
         suggestedMaxGuests = std::min<uint32_t>(suggestedMaxGuests, 65535);
-
-
-        // Delete Debug Output
-        std::string softGuestCapString = "Soft Guest Cap = " + std::to_string(suggestedMaxGuests) + "\n";
-        OutputDebugStringA(softGuestCapString.c_str());
 
 
 #ifdef ENABLE_SCRIPTING

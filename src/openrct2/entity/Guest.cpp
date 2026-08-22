@@ -77,7 +77,6 @@
 #include <random>
 #include <sfl/static_vector.hpp>
 #include <span>
-#include <windows.h>
 
 namespace OpenRCT2
 {

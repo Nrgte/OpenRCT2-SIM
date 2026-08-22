@@ -32,7 +32,6 @@
 #include "TrackIteration.h"
 
 #include <iterator>
-#include <windows.h>
 
 using namespace OpenRCT2;
 using namespace OpenRCT2::Scripting;

@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 
 using namespace OpenRCT2;
 
@@ -17,9 +18,6 @@ AdvancedGuestStats::AdvancedGuestStats()
 void AdvancedGuestStats::InsertRideIntensityRating(RideId id, uint8_t rating, RideRating_t rideRating)
 {
     GuestRideRating temp(id, rating, rideRating);
-    int test = 1;
-    if (this == nullptr)
-        test++;
     this->RideIntensitySatisfaction.push_back(temp);
 }
 
@@ -104,7 +102,7 @@ uint8_t AdvancedGuestStats::GetQueueTimeThreshold()
 }
 
 // Set the default QueueTimeCancelChance to 25%
-uint8_t AdvancedGuestStats::GetQueueTimeCancelChance()
+uint16_t AdvancedGuestStats::GetQueueTimeCancelChance()
 {
     return 0x4000U;
 }

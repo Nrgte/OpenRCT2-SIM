@@ -77,7 +77,7 @@ public:
     float GetMedianIntensityRating(RideId id, OpenRCT2::RideRating_t currentIntensity);
     std::string GetMedianIntensityRatingString(RideId id, OpenRCT2::RideRating_t currentIntensity);
     uint8_t GetQueueTimeThreshold();
-    uint8_t GetQueueTimeCancelChance();
+    uint16_t GetQueueTimeCancelChance();
     std::vector<GuestRideRating> FindRidesByRideId(std::vector<GuestRideRating>& ratings, RideId targetId);
     std::vector<GuestRideRating> FindRideIntensityRatingsByRideId(RideId targetId);
     void DeleteOldIntensityRatings(RideId id, OpenRCT2::RideRating_t currentIntensity);

@@ -42,7 +42,6 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
-#include <windows.h>
 
 namespace OpenRCT2::PathFinding
 {
@@ -2550,24 +2549,6 @@ namespace AdvancedPathfinding
                         if (sortedStations.empty())
                         {
                             TileCoordsXYZ peepLoc = TileCoordsXYZ{ peep.NextLoc };
-
-                            std::string searchedTiles = "Searched Tiles: ";
-                            for (TileCoordsXYZ tile : tileList)
-                            {
-                                // PathElement* element = MapGetPathElementAt(tile);
-                                //  if (element != nullptr)
-                                //      element->SetGhost(true);
-                                searchedTiles = searchedTiles + std::format("({}, {}, {})", tile.x, tile.y, tile.z) + ", ";
-                            }
-
-                            searchedTiles = searchedTiles + "\n";
-                            std::string peepLocationStr = std::format("({}, {}, {})", peepLoc.x, peepLoc.y, peepLoc.z);
-                            std::string stationLocationStr = std::format("({}, {}, {})", loc.x, loc.y, loc.z);
-                            std::string debugPF = "Pathfinding: " + peep.GetName()
-                                + " can't find entrance to: " + ride->getName() + " guest Location = " + peepLocationStr
-                                + " ; Target Location = " + stationLocationStr + "\n";
-                            OutputDebugStringA(debugPF.c_str());
-                            OutputDebugStringA(searchedTiles.c_str());
 
                             peep.insertNewThought(PeepThoughtType::cantFind, ride->id);
                             peep.happinessTarget = std::max(peep.happinessTarget - 30, 0);

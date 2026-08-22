@@ -34,7 +34,7 @@
 #include <openrct2/ui/WindowManager.h>
 #include <openrct2/world/Park.h>
 #include <vector>
-#include <windows.h>
+
 using namespace OpenRCT2::Drawing;
 using namespace OpenRCT2::Numerics;
 
@@ -902,33 +902,6 @@ namespace OpenRCT2::Ui::Windows
             
 
             //std::copy(ft.GetBuffer().begin(), ft.GetBuffer().end(), result.args);
-
-            auto ride = GetRide(peep.CurrentRide);
-            if (peep.State == PeepState::onRide || peep.State == PeepState::leavingRide
-                || peep.State == PeepState::enteringRide)
-                if (ride && peep.AGS->proxyRides.size() > 0)
-                {
-                    StringId format = STR_BLACK_STRING;
-                    utf8 buffer[512];
-                    OpenRCT2::FormatStringLegacy(buffer, sizeof(buffer), format, ft.Data());
-
-                    std::pair<Ride*, const RideStation*> proxyRide = peep.AGS->proxyRides[0];
-                    StationIndex index = proxyRide.first->getStationIndex(proxyRide.second);
-                    std::string toRideStationString = ride->getName()
-                        + " to Station: " + std::to_string(index.ToUnderlying() + 1);
-
-                    std::string_view argsView(reinterpret_cast<char*>(result.args), sizeof(result.args));
-                    std::hash<std::string_view> hasher;
-                    size_t stringHash = hasher(argsView);
-
-                    std::string argsString = "Hash: " + std::to_string(stringHash) + " ; " + toRideStationString
-                        + "; Formatter Results = ";
-                    //argsString += buffer;
-                    for (int i = 0; i < 12; ++i)
-                         argsString += std::to_string(static_cast<int>(result.args[i])) + " ";
-                    argsString += "\n";
-                    OutputDebugStringA(argsString.c_str());
-                }
 
             return result;
         }

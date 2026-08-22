@@ -1311,6 +1311,7 @@ namespace OpenRCT2
                         ft.Add<uint16_t>(index.ToUnderlying() + 1);
                     }
                 }
+                break;
             }
             case PeepState::buying:
             {
