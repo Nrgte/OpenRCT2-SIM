@@ -8,6 +8,7 @@
  *****************************************************************************/
 
 #include <openrct2-ui/interface/Widget.h>
+#include <openrct2-ui/interface/Window.h>
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/Context.h>
 #include <openrct2/GameState.h>
@@ -534,7 +535,7 @@ namespace OpenRCT2::Ui::Windows
                                 break;
                             }
 
-                            auto peep = getGameState().entities.TryGetEntity<Peep>(EntityId::FromUnderlying(newsItem.assoc));
+                            auto peep = getGameState().entities.tryGetEntity<Peep>(EntityId::FromUnderlying(newsItem.assoc));
                             if (peep == nullptr)
                             {
                                 break;
@@ -547,7 +548,7 @@ namespace OpenRCT2::Ui::Windows
                             auto spriteType = PeepAnimationGroup::normal;
                             if (auto* staff = peep->as<Staff>(); staff != nullptr)
                             {
-                                spriteType = staff->AnimationGroup;
+                                spriteType = staff->animationGroup;
                                 if (staff->isEntertainer())
                                 {
                                     clipCoords.y += 3;
@@ -555,10 +556,10 @@ namespace OpenRCT2::Ui::Windows
                             }
 
                             auto& objManager = GetContext()->GetObjectManager();
-                            auto* animObj = objManager.GetLoadedObject<PeepAnimationsObject>(peep->AnimationObjectIndex);
+                            auto* animObj = objManager.GetLoadedObject<PeepAnimationsObject>(peep->animationObjectIndex);
 
                             ImageIndex imageId = animObj->GetPeepAnimation(spriteType).baseImage + 1;
-                            auto image = ImageId(imageId, peep->TshirtColour, peep->TrousersColour);
+                            auto image = ImageId(imageId, peep->tShirtColour, peep->trousersColour);
                             GfxDrawSprite(clippedRT, image, clipCoords);
                             break;
                         }

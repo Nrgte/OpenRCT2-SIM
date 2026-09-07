@@ -461,11 +461,11 @@ namespace OpenRCT2
             stream->WriteValue(tileElement.baseHeight);
             stream->WriteValue(tileElement.clearanceHeight);
             stream->WriteValue(tileElement.owner);
-            for (auto v : tileElement.Pad05)
+            for (auto v : tileElement.pad05)
             {
                 stream->WriteValue(v);
             }
-            for (auto v : tileElement.Pad08)
+            for (auto v : tileElement.pad08)
             {
                 stream->WriteValue(v);
             }
@@ -477,11 +477,11 @@ namespace OpenRCT2
             tileElement.baseHeight = stream->ReadValue<uint8_t>();
             tileElement.clearanceHeight = stream->ReadValue<uint8_t>();
             tileElement.owner = stream->ReadValue<uint8_t>();
-            for (auto& v : tileElement.Pad05)
+            for (auto& v : tileElement.pad05)
             {
                 v = stream->ReadValue<uint8_t>();
             }
-            for (auto& v : tileElement.Pad08)
+            for (auto& v : tileElement.pad08)
             {
                 v = stream->ReadValue<uint8_t>();
             }
@@ -640,7 +640,7 @@ namespace OpenRCT2
         static void encode(IStream* stream, const ObjectEntryDescriptor& val)
         {
             stream->WriteValue<uint8_t>(static_cast<uint8_t>(val.Generation));
-            if (val.Generation == ObjectGeneration::DAT)
+            if (val.Generation == ObjectGeneration::dat)
             {
                 DataSerializerTraits<RCTObjectEntry> s;
                 s.encode(stream, val.Entry);
@@ -655,7 +655,7 @@ namespace OpenRCT2
         static void decode(IStream* stream, ObjectEntryDescriptor& val)
         {
             auto generation = static_cast<ObjectGeneration>(stream->ReadValue<uint8_t>());
-            if (generation == ObjectGeneration::DAT)
+            if (generation == ObjectGeneration::dat)
             {
                 DataSerializerTraits<RCTObjectEntry> s;
                 RCTObjectEntry entry;
@@ -881,7 +881,7 @@ namespace OpenRCT2
         static void log(IStream* stream, const IntensityRange& val)
         {
             char msg[128] = {};
-            snprintf(msg, sizeof(msg), "IntensityRange(min = %d, max = %d)", val.GetMinimum(), val.GetMaximum());
+            snprintf(msg, sizeof(msg), "IntensityRange(min = %d, max = %d)", val.getMinimum(), val.getMaximum());
             stream->Write(msg, strlen(msg));
         }
     };

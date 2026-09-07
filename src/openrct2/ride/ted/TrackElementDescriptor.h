@@ -15,6 +15,7 @@
 #include "../../paint/support/WoodenSupports.h"
 #include "../../paint/tile_element/Paint.Tunnel.h"
 #include "../../paint/tile_element/Segment.h"
+#include "../../world/Location.hpp"
 #include "../../world/QuarterTile.h"
 #include "PitchAndRoll.h"
 #include "TrackElemType.h"
@@ -257,7 +258,7 @@ namespace OpenRCT2::TrackMetadata
     struct SequenceTunnelInfo
     {
         int8_t height = 0;
-        TunnelSubType type = TunnelSubType::Flat;
+        TunnelSubType type = TunnelSubType::flat;
     };
 
     struct SequenceTunnel

@@ -10,7 +10,7 @@
 #include "QuarterTile.h"
 
 #include "../Diagnostic.h"
-#include "../world/Map.h"
+#include "Location.hpp"
 
 // Rotate both of the values amount
 const QuarterTile QuarterTile::Rotate(uint8_t amount) const

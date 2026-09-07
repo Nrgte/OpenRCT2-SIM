@@ -39,14 +39,14 @@ float AdvancedGuestStats::GetMedianIntensityRating(RideId id, RideRating_t curre
     if (n % 2 == 0)
     {
         // Even number of elements
-        int mid1 = n / 2 - 1;
-        int mid2 = n / 2;
+        size_t mid1 = n / 2 - 1;
+        size_t mid2 = n / 2;
         return roundf((matches[mid1].Rating + matches[mid2].Rating) / 2.0f * 10) / 10;
     }
     else
     {
         // Odd number of elements
-        int mid = n / 2;
+        size_t mid = n / 2;
         return matches[mid].Rating;
     }
     /*

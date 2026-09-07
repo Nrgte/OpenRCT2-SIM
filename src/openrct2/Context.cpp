@@ -47,6 +47,7 @@
 #include "drawing/IDrawingEngine.h"
 #include "drawing/Image.h"
 #include "drawing/LightFX.h"
+#include "drawing/PickupPeep.h"
 #include "entity/EntityTweener.h"
 #include "entity/PatrolArea.h"
 #include "interface/Chat.h"
@@ -128,7 +129,7 @@ namespace OpenRCT2
         Network::NetworkBase _network;
 #endif
 
-        DrawingEngine _drawingEngineType = DrawingEngine::SoftwareWithHardwareDisplay;
+        DrawingEngine _drawingEngineType = DrawingEngine::softwareWithHardwareDisplay;
         std::unique_ptr<Drawing::IDrawingEngine> _drawingEngine;
         std::unique_ptr<Paint::Painter> _painter;
 
@@ -519,7 +520,7 @@ namespace OpenRCT2
             gInputFlags.clearAll();
             InputSetState(InputState::reset);
             gPressedWidget.windowClassification = WindowClass::null;
-            gPickupPeepImage = ImageId();
+            Drawing::pickupPeepClear();
             ResetTooltipNotShown();
             gMapSelectFlags.clearAll();
             ClearPatrolAreaToRender();
@@ -606,9 +607,9 @@ namespace OpenRCT2
                 else
                 {
                     // If the drawing engine creation failed, try to create a software engine.
-                    if (drawingEngineType == DrawingEngine::OpenGL)
+                    if (drawingEngineType == DrawingEngine::openGL)
                     {
-                        drawingEngineType = DrawingEngine::SoftwareWithHardwareDisplay;
+                        drawingEngineType = DrawingEngine::softwareWithHardwareDisplay;
                         LOG_ERROR("Trying fallback back to software...");
 
                         drawingEngine = initializeEngine(drawingEngineType);
@@ -792,7 +793,7 @@ namespace OpenRCT2
                 gFirstTimeSaving = true;
                 GameFixSaveVars();
                 MapAnimations::MarkAllTiles();
-                EntityTweener::Get().Reset();
+                EntityTweener::get().reset();
                 gScreenAge = 0;
                 gLastAutoSaveUpdate = kAutosavePause;
 
@@ -1001,6 +1002,16 @@ namespace OpenRCT2
             return true;
         }
 
+        void rememberStartUpParkDirectory()
+        {
+            const bool isContinuedSaveGame = gScenarioSavePath == gOpenRCT2StartupActionPath;
+            if (!isContinuedSaveGame || gScenarioSavePath.empty())
+                return;
+
+            Config::Get().general.lastSaveGameDirectory = Path::GetDirectory(Path::GetAbsolute(gScenarioSavePath));
+            Config::Save();
+        }
+
         void SwitchToStartUpScene()
         {
             if (gOpenRCT2Headless)
@@ -1075,6 +1086,8 @@ namespace OpenRCT2
                             nextScene = _sceneManager->getTitleScene();
                             break;
                         }
+
+                        rememberStartUpParkDirectory();
                     }
 
                     // Successfully loaded a file
@@ -1253,9 +1266,9 @@ namespace OpenRCT2
 
                 // Switching from variable to fixed frame requires reseting
                 // of entity positions back to end of tick positions
-                auto& tweener = EntityTweener::Get();
-                tweener.Restore();
-                tweener.Reset();
+                auto& tweener = EntityTweener::get();
+                tweener.restore();
+                tweener.reset();
             }
 
             UpdateTimeAccumulators(deltaTime);
@@ -1325,7 +1338,7 @@ namespace OpenRCT2
             PROFILED_FUNCTION();
 
             const bool shouldDraw = ShouldDraw();
-            auto& tweener = EntityTweener::Get();
+            auto& tweener = EntityTweener::get();
 
             _uiContext->ProcessMessages();
 
@@ -1333,7 +1346,7 @@ namespace OpenRCT2
             {
                 // Get the original position of each sprite
                 if (shouldDraw)
-                    tweener.PreTick();
+                    tweener.preTick();
 
                 Tick();
 
@@ -1341,7 +1354,7 @@ namespace OpenRCT2
 
                 // Get the next position of each sprite
                 if (shouldDraw)
-                    tweener.PostTick();
+                    tweener.postTick();
             }
 
             _backgroundWorker.dispatchCompleted();
@@ -1352,7 +1365,7 @@ namespace OpenRCT2
             if (shouldDraw)
             {
                 const float alpha = std::min(_ticksAccumulator / kGameUpdateTimeMS, 1.0f);
-                tweener.Tween(alpha);
+                tweener.tween(alpha);
 
                 Draw();
             }
@@ -1489,13 +1502,13 @@ namespace OpenRCT2
             // Download park to buffer in memory
             Http::Request request;
             request.url = url;
-            request.method = Http::Method::GET;
+            request.method = Http::Method::get;
 
             Http::Response res;
             try
             {
                 res = Do(request);
-                if (res.status != Http::Status::Ok)
+                if (res.status != Http::Status::ok)
                     throw std::runtime_error("bad http status");
             }
             catch (std::exception& e)

@@ -8,6 +8,7 @@
  *****************************************************************************/
 
 #include <openrct2-ui/interface/Widget.h>
+#include <openrct2-ui/interface/Window.h>
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/Context.h>
 #include <openrct2/core/Guard.hpp>
@@ -19,7 +20,6 @@
 #include <openrct2/localisation/LocalisationService.h>
 #include <openrct2/paint/Paint.h>
 #include <openrct2/paint/tile_element/Paint.TileElement.h>
-#include <openrct2/ride/TrackPaint.h>
 #include <openrct2/ui/WindowManager.h>
 
 namespace OpenRCT2::Ui::Windows

@@ -7,9 +7,6 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#include "../../../SpriteIds.h"
-#include "../../../drawing/Drawing.h"
-#include "../../../ride/RideData.h"
 #include "../../../ride/TrackPaint.h"
 #include "../../../world/tile_element/TrackElement.h"
 #include "../../Paint.h"
@@ -21,7 +18,7 @@
 
 using namespace OpenRCT2;
 
-static constexpr TunnelGroup kTunnelGroup = TunnelGroup::Standard;
+static constexpr TunnelGroup kTunnelGroup = TunnelGroup::standard;
 
 enum
 {
@@ -141,7 +138,7 @@ static void WoodenWildMouseTrackFlat(
     PaintAddImageAsParentRotated(session, direction, imageId, { 0, 6, height }, { 32, 20, 1 });
     DrawSupportForSequenceA<TrackElemType::flat>(
         session, supportType.wooden, trackSequence, direction, height, session.SupportColours);
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetSegmentSupportHeight(
         session,
         PaintUtilRotateSegments(
@@ -195,7 +192,7 @@ static void WoodenWildMouseTrack25DegUp(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     auto imageId = session.TrackColours.WithIndex(imageIds[isChained][direction]);
     PaintAddImageAsParentRotated(session, direction, imageId, { 0, 2, height }, { { 0, 3, height }, { 32, 25, 1 } });
 
@@ -204,11 +201,11 @@ static void WoodenWildMouseTrack25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
@@ -235,7 +232,7 @@ static void WoodenWildMouseTrack60DegUp(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     auto imageId = session.TrackColours.WithIndex(imageIds[isChained][direction]);
     if (direction == 0 || direction == 3)
     {
@@ -252,11 +249,11 @@ static void WoodenWildMouseTrack60DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 56, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 56, kTunnelGroup, TunnelSubType::slopeEnd);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
@@ -283,7 +280,7 @@ static void WoodenWildMouseTrackFlatTo25DegUp(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     auto imageId = session.TrackColours.WithIndex(imageIds[isChained][direction]);
     PaintAddImageAsParentRotated(session, direction, imageId, { 0, 2, height }, { { 0, 3, height }, { 32, 25, 1 } });
 
@@ -292,11 +289,11 @@ static void WoodenWildMouseTrackFlatTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
@@ -323,7 +320,7 @@ static void WoodenWildMouseTrack25DegUpTo60DegUp(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     ImageId imageId;
     if (direction == 0 || direction == 3)
     {
@@ -344,11 +341,11 @@ static void WoodenWildMouseTrack25DegUpTo60DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
@@ -374,7 +371,7 @@ static void WoodenWildMouseTrack60DegTo25DegUp(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     ImageId imageId;
     if (direction == 0 || direction == 3)
     {
@@ -395,11 +392,11 @@ static void WoodenWildMouseTrack60DegTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
@@ -426,7 +423,7 @@ static void WoodenWildMouseTrack25DegUpToFlat(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     auto imageId = session.TrackColours.WithIndex(imageIds[isChained][direction]);
     PaintAddImageAsParentRotated(session, direction, imageId, { 0, 2, height }, { { 0, 3, height }, { 32, 25, 1 } });
 
@@ -435,11 +432,11 @@ static void WoodenWildMouseTrack25DegUpToFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
@@ -522,7 +519,7 @@ static void WoodenWildMouseTrackRightQuarterTurn3(
     };
 
     TrackPaintUtilRightQuarterTurn3TilesPaint4(session, height, direction, trackSequence, session.TrackColours, imageIds);
-    TrackPaintUtilRightQuarterTurn3TilesTunnel(session, kTunnelGroup, TunnelSubType::Flat, height, direction, trackSequence);
+    TrackPaintUtilRightQuarterTurn3TilesTunnel(session, kTunnelGroup, TunnelSubType::flat, height, direction, trackSequence);
 
     DrawSupportForSequenceA<TrackElemType::rightQuarterTurn3Tiles>(
         session, supportType.wooden, trackSequence, direction, height, session.SupportColours);
@@ -583,7 +580,7 @@ static void WoodenWildMouseTrackLeftQuarterTurn1(
     DrawSupportForSequenceA<TrackElemType::leftQuarterTurn1Tile>(
         session, supportType.wooden, trackSequence, direction, height, session.SupportColours);
     TrackPaintUtilLeftQuarterTurn1TileTunnel(
-        session, kTunnelGroup, direction, height, 0, TunnelSubType::Flat, 0, TunnelSubType::Flat);
+        session, kTunnelGroup, direction, height, 0, TunnelSubType::flat, 0, TunnelSubType::flat);
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
     PaintUtilSetGeneralSupportHeight(session, height + kDefaultGeneralSupportHeight);
 }
@@ -616,7 +613,7 @@ static void WoodenWildMouseTrackFlatTo60DegUp(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     ImageId imageId;
     if (direction == 0 || direction == 3)
     {
@@ -636,11 +633,11 @@ static void WoodenWildMouseTrackFlatTo60DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
@@ -667,7 +664,7 @@ static void WoodenWildMouseTrack60DegUpToFlat(
         },
     };
 
-    uint8_t isChained = trackElement.HasChain() ? 1 : 0;
+    uint8_t isChained = trackElement.hasChain() ? 1 : 0;
     ImageId imageId;
     if (direction == 0 || direction == 3)
     {
@@ -687,11 +684,11 @@ static void WoodenWildMouseTrack60DegUpToFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::flat);
     }
 
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);

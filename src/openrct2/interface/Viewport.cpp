@@ -120,7 +120,7 @@ namespace OpenRCT2
                     return arg;
                 else if constexpr (std::is_same_v<T, EntityFocus>)
                 {
-                    auto* centreEntity = getGameState().entities.GetEntity(arg);
+                    auto* centreEntity = getGameState().entities.getEntity(arg);
                     if (centreEntity != nullptr)
                     {
                         return CoordsXYZ{ centreEntity->x, centreEntity->y, centreEntity->z };
@@ -611,7 +611,7 @@ namespace OpenRCT2
     {
         if (!window->viewportTargetSprite.IsNull() && window->viewport != nullptr)
         {
-            auto* sprite = getGameState().entities.GetEntity(window->viewportTargetSprite);
+            auto* sprite = getGameState().entities.getEntity(window->viewportTargetSprite);
             if (sprite == nullptr)
             {
                 return;
@@ -635,7 +635,7 @@ namespace OpenRCT2
 
     void ViewportUpdateSmartFollowEntity(WindowBase* window)
     {
-        auto entity = getGameState().entities.TryGetEntity(window->viewportSmartFollowSprite);
+        auto entity = getGameState().entities.tryGetEntity(window->viewportSmartFollowSprite);
         if (entity == nullptr || entity->type == EntityType::null)
         {
             window->viewportSmartFollowSprite = EntityId::GetNull();
@@ -681,7 +681,7 @@ namespace OpenRCT2
         Focus focus = Focus(peep.id);
         window->viewportTargetSprite = peep.id;
 
-        if (peep.State == PeepState::picked)
+        if (peep.state == PeepState::picked)
         {
             window->viewportSmartFollowSprite = EntityId::GetNull();
             window->viewportTargetSprite = EntityId::GetNull();
@@ -690,16 +690,16 @@ namespace OpenRCT2
         }
 
         bool overallFocus = true;
-        if (peep.State == PeepState::onRide || peep.State == PeepState::enteringRide
-            || (peep.State == PeepState::leavingRide && peep.x == kLocationNull))
+        if (peep.state == PeepState::onRide || peep.state == PeepState::enteringRide
+            || (peep.state == PeepState::leavingRide && peep.x == kLocationNull))
         {
-            auto ride = GetRide(peep.CurrentRide);
+            auto ride = GetRide(peep.currentRide);
             if (ride != nullptr && ride->flags.has(RideFlag::onTrack))
             {
-                auto train = getGameState().entities.GetEntity<Vehicle>(ride->vehicles[peep.CurrentTrain]);
+                auto train = getGameState().entities.getEntity<Vehicle>(ride->vehicles[peep.currentTrain]);
                 if (train != nullptr)
                 {
-                    const auto car = train->GetCar(peep.CurrentCar);
+                    const auto car = train->GetCar(peep.currentCar);
                     if (car != nullptr)
                     {
                         focus = Focus(car->id);
@@ -712,7 +712,7 @@ namespace OpenRCT2
 
         if (peep.x == kLocationNull && overallFocus)
         {
-            auto ride = GetRide(peep.CurrentRide);
+            auto ride = GetRide(peep.currentRide);
             if (ride != nullptr)
             {
                 auto xy = ride->overallView.ToTileCentre();
@@ -730,7 +730,7 @@ namespace OpenRCT2
 
     void ViewportUpdateSmartFollowStaff(WindowBase* window, const Staff& peep)
     {
-        if (peep.State == PeepState::picked)
+        if (peep.state == PeepState::picked)
         {
             window->viewportSmartFollowSprite = EntityId::GetNull();
             window->viewportTargetSprite = EntityId::GetNull();
@@ -1295,8 +1295,8 @@ namespace OpenRCT2
     {
         switch (cursor)
         {
-            case CursorID::TreeDown:
-            case CursorID::FlowerDown:
+            case CursorID::treeDown:
+            case CursorID::flowerDown:
                 return true;
             default:
                 return false;
@@ -1310,7 +1310,7 @@ namespace OpenRCT2
             case TileElementType::smallScenery:
             {
                 auto sceneryItem = tileElement->asSmallScenery();
-                auto sceneryEntry = sceneryItem->GetEntry();
+                auto sceneryEntry = sceneryItem->getEntry();
                 if (sceneryEntry != nullptr
                     && (sceneryEntry->flags.has(SmallSceneryFlag::isTree) || IsCursorIdVegetation(sceneryEntry->tool_id)))
                 {
@@ -1321,7 +1321,7 @@ namespace OpenRCT2
             case TileElementType::largeScenery:
             {
                 auto sceneryItem = tileElement->asLargeScenery();
-                auto sceneryEntry = sceneryItem->GetEntry();
+                auto sceneryEntry = sceneryItem->getEntry();
                 if (sceneryEntry != nullptr && IsCursorIdVegetation(sceneryEntry->tool_id))
                 {
                     return true;
@@ -1331,7 +1331,7 @@ namespace OpenRCT2
             case TileElementType::wall:
             {
                 auto sceneryItem = tileElement->asWall();
-                auto sceneryEntry = sceneryItem->GetEntry();
+                auto sceneryEntry = sceneryItem->getEntry();
                 if (sceneryEntry != nullptr && IsCursorIdVegetation(sceneryEntry->tool_id))
                 {
                     return true;

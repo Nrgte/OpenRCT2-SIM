@@ -150,8 +150,7 @@ namespace OpenRCT2::GameActions
                 return res;
             }
             auto constructResult = MapCanConstructWithClearAt(
-                { _loc.ToTileStart(), baseHeight, clearanceHeight }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, GetFlags(),
-                kTileSlopeFlat);
+                { _loc.ToTileStart(), baseHeight, clearanceHeight }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, GetFlags());
             if (constructResult.error != Status::ok)
             {
                 constructResult.errorTitle = STR_RIDE_CONSTRUCTION_CANT_CONSTRUCT_THIS_HERE;
@@ -222,7 +221,7 @@ namespace OpenRCT2::GameActions
 
             auto canBuild = MapCanConstructWithClearAt(
                 { _loc.ToTileStart(), baseHeight, clearanceHeight }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 },
-                GetFlags().with(CommandFlag::apply), kTileSlopeFlat);
+                GetFlags().with(CommandFlag::apply));
             if (canBuild.error != Status::ok)
             {
                 canBuild.errorTitle = STR_RIDE_CONSTRUCTION_CANT_CONSTRUCT_THIS_HERE;
@@ -237,10 +236,10 @@ namespace OpenRCT2::GameActions
             Guard::Assert(trackElement != nullptr);
 
             trackElement->setClearanceZ(_loc.z + kMazeClearanceHeight);
-            trackElement->SetTrackType(TrackElemType::maze);
-            trackElement->SetRideType(ride->type);
-            trackElement->SetRideIndex(_rideIndex);
-            trackElement->SetMazeEntry(0xFFFF);
+            trackElement->setTrackType(TrackElemType::maze);
+            trackElement->setRideType(ride->type);
+            trackElement->setRideIndex(_rideIndex);
+            trackElement->setMazeEntry(0xFFFF);
             trackElement->setGhost(flags.has(CommandFlag::ghost));
 
             tileElement = trackElement->as<TileElement>();
@@ -263,12 +262,12 @@ namespace OpenRCT2::GameActions
             {
                 uint8_t segmentOffset = MazeGetSegmentBit(_loc);
 
-                tileElement->asTrack()->MazeEntrySubtract(1 << segmentOffset);
+                tileElement->asTrack()->mazeEntrySubtract(1 << segmentOffset);
 
                 if (!_initialPlacement)
                 {
                     segmentOffset = kByte993CE9[(_loc.direction + segmentOffset)];
-                    tileElement->asTrack()->MazeEntrySubtract(1 << segmentOffset);
+                    tileElement->asTrack()->mazeEntrySubtract(1 << segmentOffset);
 
                     uint8_t temp_edx = kByte993CFC[segmentOffset];
                     if (temp_edx != 0xFF)
@@ -280,11 +279,11 @@ namespace OpenRCT2::GameActions
 
                         if (previousTileElement != nullptr)
                         {
-                            previousTileElement->asTrack()->MazeEntrySubtract(1 << temp_edx);
+                            previousTileElement->asTrack()->mazeEntrySubtract(1 << temp_edx);
                         }
                         else
                         {
-                            tileElement->asTrack()->MazeEntryAdd(1 << segmentOffset);
+                            tileElement->asTrack()->mazeEntryAdd(1 << segmentOffset);
                         }
                     }
                 }
@@ -315,16 +314,16 @@ namespace OpenRCT2::GameActions
 
                     uint32_t segmentBit = MazeGetSegmentBit(previousSegment);
 
-                    tileElement->asTrack()->MazeEntryAdd(1 << segmentBit);
+                    tileElement->asTrack()->mazeEntryAdd(1 << segmentBit);
                     segmentBit--;
-                    tileElement->asTrack()->MazeEntryAdd(1 << segmentBit);
+                    tileElement->asTrack()->mazeEntryAdd(1 << segmentBit);
                     segmentBit = (segmentBit - 4) & 0x0F;
-                    tileElement->asTrack()->MazeEntryAdd(1 << segmentBit);
+                    tileElement->asTrack()->mazeEntryAdd(1 << segmentBit);
                     segmentBit = (segmentBit + 3) & 0x0F;
 
                     do
                     {
-                        tileElement->asTrack()->MazeEntryAdd(1 << segmentBit);
+                        tileElement->asTrack()->mazeEntryAdd(1 << segmentBit);
 
                         uint32_t direction1 = kByte993D0C[segmentBit];
                         auto nextElementLoc = previousSegment.ToTileStart() + CoordsDirectionDelta[direction1];
@@ -335,7 +334,7 @@ namespace OpenRCT2::GameActions
                         if (tmp_tileElement != nullptr)
                         {
                             uint8_t edx11 = kByte993CFC[segmentBit];
-                            tmp_tileElement->asTrack()->MazeEntryAdd(1 << (edx11));
+                            tmp_tileElement->asTrack()->mazeEntryAdd(1 << (edx11));
                         }
 
                         segmentBit--;
@@ -346,7 +345,7 @@ namespace OpenRCT2::GameActions
 
         MapInvalidateTile({ _loc.ToTileStart(), tileElement->getBaseZ(), tileElement->getClearanceZ() });
 
-        if ((tileElement->asTrack()->GetMazeEntry() & 0x8888) == 0x8888)
+        if ((tileElement->asTrack()->getMazeEntry() & 0x8888) == 0x8888)
         {
             TileElementRemove(tileElement);
             ride->validateStations();

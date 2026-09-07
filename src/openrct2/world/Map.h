@@ -11,9 +11,10 @@
 
 #include "../Identifiers.h"
 #include "Location.hpp"
+#include "MapOwnership.h"
+#include "tile_element/TileElement.h"
 
 #include <array>
-#include <initializer_list>
 #include <optional>
 #include <vector>
 
@@ -168,9 +169,6 @@ namespace OpenRCT2
     TileElement* MapGetTrackElementAtWithDirectionFromRide(const CoordsXYZD& trackPos, RideId rideIndex);
     TileElement* MapGetTrackElementAtBeforeSurfaceFromRide(const CoordsXYZ& trackPos, RideId rideIndex);
 
-    uint16_t CheckMaxAllowableLandRightsForTile(const CoordsXYZ& tileMapPos);
-
-    void FixLandOwnershipTilesWithOwnership(std::vector<TileCoordsXY> tiles, uint8_t ownership);
     MapRange ClampRangeWithinMap(const MapRange& range);
     void ShiftMap(const TileCoordsXY& amount);
 } // namespace OpenRCT2

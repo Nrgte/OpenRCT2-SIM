@@ -15,7 +15,8 @@
     #include "../../../object/ObjectList.h"
     #include "../../../ride/RideData.h"
     #include "../../../windows/Intent.h"
-    #include "../../ScriptEngine.h"
+    #include "ScInstalledObject.hpp"
+    #include "ScObject.hpp"
 
 using namespace OpenRCT2;
 using namespace OpenRCT2::Scripting;

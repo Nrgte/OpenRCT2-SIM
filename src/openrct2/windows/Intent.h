@@ -10,9 +10,9 @@
 #pragma once
 
 #include "../core/Identifier.hpp"
-#include "../interface/Window.h"
+#include "../interface/WindowClasses.h"
+#include "../interface/WindowTypes.h"
 
-#include <map>
 #include <sfl/static_vector.hpp>
 #include <string>
 #include <variant>

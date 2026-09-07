@@ -9,9 +9,9 @@
 
 #include <openrct2-ui/UiContext.h>
 #include <openrct2-ui/input/InputManager.h>
-#include <openrct2-ui/interface/Viewport.h>
 #include <openrct2-ui/interface/ViewportInteraction.h>
 #include <openrct2-ui/interface/Widget.h>
+#include <openrct2-ui/interface/Window.h>
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/Cheats.h>
 #include <openrct2/Context.h>
@@ -27,11 +27,12 @@
 #include <openrct2/drawing/Drawing.h>
 #include <openrct2/drawing/NewDrawing.h>
 #include <openrct2/drawing/Text.h>
+#include <openrct2/interface/Viewport.h>
+#include <openrct2/interface/WidgetIndexGlobals.h>
 #include <openrct2/localisation/Formatter.h>
 #include <openrct2/paint/VirtualFloor.h>
 #include <openrct2/ride/RideConstruction.h>
 #include <openrct2/ride/RideData.h>
-#include <openrct2/ride/Track.h>
 #include <openrct2/ride/TrackData.h>
 #include <openrct2/ride/TrackDesign.h>
 #include <openrct2/ride/TrackDesignRepository.h>
@@ -40,8 +41,6 @@
 #include <openrct2/windows/Intent.h>
 #include <openrct2/world/Map.h>
 #include <openrct2/world/MapSelection.h>
-#include <openrct2/world/Park.h>
-#include <openrct2/world/tile_element/Slope.h>
 #include <openrct2/world/tile_element/SurfaceElement.h>
 #include <vector>
 
@@ -387,7 +386,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Price
-            if (_placementCost != kMoney64Undefined && !(getGameState().park.flags & PARK_FLAGS_NO_MONEY))
+            if (_placementCost != kMoney64Undefined && !getGameState().park.flags.has(ParkFlag::noMoney))
             {
                 auto ft = Formatter();
                 ft.Add<money64>(_placementCost);
@@ -501,8 +500,8 @@ namespace OpenRCT2::Ui::Windows
                     _trackPlaceCtrlZ = floor2(surfaceElement->getBaseZ(), kCoordsZStep);
 
                     // Increase Z above water
-                    if (surfaceElement->GetWaterHeight() > 0)
-                        _trackPlaceCtrlZ = std::max(_trackPlaceCtrlZ, surfaceElement->GetWaterHeight());
+                    if (surfaceElement->getWaterHeight() > 0)
+                        _trackPlaceCtrlZ = std::max(_trackPlaceCtrlZ, surfaceElement->getWaterHeight());
                 }
                 else
                 {
@@ -552,8 +551,8 @@ namespace OpenRCT2::Ui::Windows
                 _trackPlaceZ = floor2(surfaceElement->getBaseZ(), kCoordsZStep);
 
                 // Increase Z above water
-                if (surfaceElement->GetWaterHeight() > 0)
-                    _trackPlaceZ = std::max(_trackPlaceZ, surfaceElement->GetWaterHeight());
+                if (surfaceElement->getWaterHeight() > 0)
+                    _trackPlaceZ = std::max(_trackPlaceZ, surfaceElement->getWaterHeight());
 
                 if (_trackPlaceShiftState)
                 {

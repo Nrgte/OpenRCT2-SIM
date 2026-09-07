@@ -8,11 +8,9 @@
  *****************************************************************************/
 
 #include "../../../SpriteIds.h"
-#include "../../../drawing/Drawing.h"
-#include "../../../ride/RideData.h"
 #include "../../../ride/TrackPaint.h"
+#include "../../../ride/ted/TrackElemType.h"
 #include "../../../world/tile_element/TrackElement.h"
-#include "../../Paint.h"
 #include "../../support/MetalSupports.h"
 #include "../../tile_element/Paint.TileElement.h"
 #include "../../tile_element/Segment.h"
@@ -20,7 +18,7 @@
 
 using namespace OpenRCT2;
 
-static constexpr TunnelGroup kTunnelGroup = TunnelGroup::Inverted;
+static constexpr TunnelGroup kTunnelGroup = TunnelGroup::inverted;
 static constexpr uint8_t kInvertedSpriteOffset = 29;
 static constexpr uint8_t kSupportHeight = 44;
 
@@ -41,7 +39,7 @@ static void InvertedRCTrackFlat(
     PaintSession& session, const Ride& ride, uint8_t trackSequence, uint8_t direction, int32_t height,
     const TrackElement& trackElement, SupportType supportType)
 {
-    if (trackElement.HasChain())
+    if (trackElement.hasChain())
     {
         switch (direction)
         {
@@ -85,7 +83,7 @@ static void InvertedRCTrackFlat(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -122,7 +120,7 @@ static void InvertedRCTrack25DegUp(
     PaintSession& session, const Ride& ride, uint8_t trackSequence, uint8_t direction, int32_t height,
     const TrackElement& trackElement, SupportType supportType)
 {
-    if (trackElement.HasChain())
+    if (trackElement.hasChain())
     {
         switch (direction)
         {
@@ -201,11 +199,11 @@ static void InvertedRCTrack25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 72);
 }
@@ -240,11 +238,11 @@ static void InvertedRCTrack60DegUp(
     }
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 56, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 56, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetSegmentSupportHeight(session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
     PaintUtilSetGeneralSupportHeight(session, height + 120);
@@ -255,7 +253,7 @@ static void InvertedRCTrackFlatTo25DegUp(
     PaintSession& session, const Ride& ride, uint8_t trackSequence, uint8_t direction, int32_t height,
     const TrackElement& trackElement, SupportType supportType)
 {
-    if (trackElement.HasChain())
+    if (trackElement.hasChain())
     {
         switch (direction)
         {
@@ -334,11 +332,11 @@ static void InvertedRCTrackFlatTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 64);
 }
@@ -379,11 +377,11 @@ static void InvertedRCTrack25DegUpTo60DegUp(
     }
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetSegmentSupportHeight(session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
     PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -450,11 +448,11 @@ static void InvertedRCTrack60DegUpTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 88);
 }
@@ -464,7 +462,7 @@ static void InvertedRCTrack25DegUpToFlat(
     PaintSession& session, const Ride& ride, uint8_t trackSequence, uint8_t direction, int32_t height,
     const TrackElement& trackElement, SupportType supportType)
 {
-    if (trackElement.HasChain())
+    if (trackElement.hasChain())
     {
         switch (direction)
         {
@@ -543,11 +541,11 @@ static void InvertedRCTrack25DegUpToFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 56);
 }
@@ -645,7 +643,7 @@ static void InvertedRCTrackLeftQuarterTurn5(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -789,10 +787,10 @@ static void InvertedRCTrackLeftQuarterTurn5(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -852,7 +850,7 @@ static void InvertedRCTrackFlatToLeftBank(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -899,7 +897,7 @@ static void InvertedRCTrackFlatToRightBank(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -946,7 +944,7 @@ static void InvertedRCTrackLeftBankToFlat(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -993,7 +991,7 @@ static void InvertedRCTrackRightBankToFlat(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -1042,7 +1040,7 @@ static void InvertedRCTrackBankedLeftQuarterTurn5(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -1186,10 +1184,10 @@ static void InvertedRCTrackBankedLeftQuarterTurn5(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -1268,11 +1266,11 @@ static void InvertedRCTrackLeftBankTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 64);
 }
@@ -1339,11 +1337,11 @@ static void InvertedRCTrackRightBankTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 64);
 }
@@ -1410,11 +1408,11 @@ static void InvertedRCTrack25DegUpToLeftBank(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 56);
 }
@@ -1481,11 +1479,11 @@ static void InvertedRCTrack25DegUpToRightBank(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 56);
 }
@@ -1565,7 +1563,7 @@ static void InvertedRCTrackLeftBank(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -1618,7 +1616,7 @@ static void InvertedRCTrackLeftQuarterTurn525DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -1751,10 +1749,10 @@ static void InvertedRCTrackLeftQuarterTurn525DegUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -1803,7 +1801,7 @@ static void InvertedRCTrackRightQuarterTurn525DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -1936,10 +1934,10 @@ static void InvertedRCTrackRightQuarterTurn525DegUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -2009,7 +2007,7 @@ static void InvertedRCTrackSBendLeft(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -2119,10 +2117,10 @@ static void InvertedRCTrackSBendLeft(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -2172,7 +2170,7 @@ static void InvertedRCTrackSBendRight(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -2282,10 +2280,10 @@ static void InvertedRCTrackSBendRight(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -2355,7 +2353,7 @@ static void InvertedRCTrackLeftVerticalLoop(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
@@ -2607,10 +2605,10 @@ static void InvertedRCTrackLeftVerticalLoop(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                    PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                    PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 72);
@@ -2680,7 +2678,7 @@ static void InvertedRCTrackRightVerticalLoop(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
@@ -2933,10 +2931,10 @@ static void InvertedRCTrackRightVerticalLoop(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                    PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                    PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 72);
@@ -2989,7 +2987,7 @@ static void InvertedRCTrackLeftQuarterTurn3(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -3066,10 +3064,10 @@ static void InvertedRCTrackLeftQuarterTurn3(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -3131,7 +3129,7 @@ static void InvertedRCTrackLeftQuarterTurn3Bank(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -3209,10 +3207,10 @@ static void InvertedRCTrackLeftQuarterTurn3Bank(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -3270,7 +3268,7 @@ static void InvertedRCTrackLeftQuarterTurn325DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -3315,10 +3313,10 @@ static void InvertedRCTrackLeftQuarterTurn325DegUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -3367,7 +3365,7 @@ static void InvertedRCTrackRightQuarterTurn325DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -3412,10 +3410,10 @@ static void InvertedRCTrackRightQuarterTurn325DegUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -3484,7 +3482,7 @@ static void InvertedRCTrackLeftTwistDownToUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -3542,10 +3540,10 @@ static void InvertedRCTrackLeftTwistDownToUp(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -3602,7 +3600,7 @@ static void InvertedRCTrackRightTwistDownToUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -3660,10 +3658,10 @@ static void InvertedRCTrackRightTwistDownToUp(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -3709,7 +3707,7 @@ static void InvertedRCTrackLeftTwistUpToDown(
             MetalASupportsPaintSetup(session, supportType.metal, MetalSupportPlace::centre, 0, height, session.SupportColours);
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetSegmentSupportHeight(
                 session,
@@ -3786,10 +3784,10 @@ static void InvertedRCTrackLeftTwistUpToDown(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -3827,7 +3825,7 @@ static void InvertedRCTrackRightTwistUpToDown(
             MetalASupportsPaintSetup(session, supportType.metal, MetalSupportPlace::centre, 0, height, session.SupportColours);
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetSegmentSupportHeight(
                 session,
@@ -3904,10 +3902,10 @@ static void InvertedRCTrackRightTwistUpToDown(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -3971,7 +3969,7 @@ static void InvertedRCTrackHalfLoopUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
@@ -4062,7 +4060,7 @@ static void InvertedRCTrackHalfLoopUp(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -4124,7 +4122,7 @@ static void InvertedRCTrackLeftCorkscrewUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
@@ -4184,10 +4182,10 @@ static void InvertedRCTrackLeftCorkscrewUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -4248,7 +4246,7 @@ static void InvertedRCTrackRightCorkscrewUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
@@ -4308,10 +4306,10 @@ static void InvertedRCTrackRightCorkscrewUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -4384,7 +4382,7 @@ static void InvertedRCTrackLeftQuarterTurn160DegUp(
             break;
     }
     TrackPaintUtilLeftQuarterTurn1TileTunnel(
-        session, kTunnelGroup, direction, height, -8, TunnelSubType::SlopeStart, +56, TunnelSubType::SlopeEnd);
+        session, kTunnelGroup, direction, height, -8, TunnelSubType::slopeStart, +56, TunnelSubType::slopeEnd);
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
     PaintUtilSetGeneralSupportHeight(session, height + 104);
 }
@@ -4430,7 +4428,7 @@ static void InvertedRCTrackRightQuarterTurn160DegUp(
             break;
     }
     TrackPaintUtilRightQuarterTurn1TileTunnel(
-        session, kTunnelGroup, direction, height, -8, TunnelSubType::SlopeStart, +56, TunnelSubType::SlopeEnd);
+        session, kTunnelGroup, direction, height, -8, TunnelSubType::slopeStart, +56, TunnelSubType::slopeEnd);
     PaintUtilSetSegmentSupportHeight(session, kSegmentsAll, 0xFFFF, 0);
     PaintUtilSetGeneralSupportHeight(session, height + 104);
 }
@@ -4481,7 +4479,7 @@ static void InvertedRCTrackBrakes(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -4530,7 +4528,7 @@ static void InvertedRCTrackLeftQuarterBankedHelixLargeUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -4679,10 +4677,10 @@ static void InvertedRCTrackLeftQuarterBankedHelixLargeUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -4735,7 +4733,7 @@ static void InvertedRCTrackRightQuarterBankedHelixLargeUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -4884,10 +4882,10 @@ static void InvertedRCTrackRightQuarterBankedHelixLargeUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -4940,7 +4938,7 @@ static void InvertedRCTrackLeftQuarterBankedHelixLargeDown(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 16, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -5089,10 +5087,10 @@ static void InvertedRCTrackLeftQuarterBankedHelixLargeDown(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -5145,7 +5143,7 @@ static void InvertedRCTrackRightQuarterBankedHelixLargeDown(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 16, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -5294,10 +5292,10 @@ static void InvertedRCTrackRightQuarterBankedHelixLargeDown(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -5360,11 +5358,11 @@ static void InvertedRCTrack25DegUpLeftBanked(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 72);
 }
@@ -5424,11 +5422,11 @@ static void InvertedRCTrack25DegUpRightBanked(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 72);
 }
@@ -5521,7 +5519,7 @@ static void InvertedRCTrackLeftEighthToDiag(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -5703,7 +5701,7 @@ static void InvertedRCTrackRightEighthToDiag(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -5909,7 +5907,7 @@ static void InvertedRCTrackLeftEighthBankToDiag(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -6095,7 +6093,7 @@ static void InvertedRCTrackRightEighthBankToDiag(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -6280,7 +6278,7 @@ static void InvertedRCTrackDiagFlat(
     PaintSession& session, const Ride& ride, uint8_t trackSequence, uint8_t direction, int32_t height,
     const TrackElement& trackElement, SupportType supportType)
 {
-    const auto* images = kInvertedRCDiagFlatImages[trackElement.HasChain()];
+    const auto* images = kInvertedRCDiagFlatImages[trackElement.hasChain()];
     InvertedRCTrackDiagFlatBase(session, trackSequence, images, direction, height, supportType);
 }
 
@@ -6299,7 +6297,7 @@ static void InvertedRCTrackDiag25DegUp(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6330,7 +6328,7 @@ static void InvertedRCTrackDiag25DegUp(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 1:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6361,7 +6359,7 @@ static void InvertedRCTrackDiag25DegUp(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 2:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6393,7 +6391,7 @@ static void InvertedRCTrackDiag25DegUp(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 3:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6559,7 +6557,7 @@ static void InvertedRCTrackDiagFlatTo25DegUp(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6590,7 +6588,7 @@ static void InvertedRCTrackDiagFlatTo25DegUp(
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
         case 1:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6621,7 +6619,7 @@ static void InvertedRCTrackDiagFlatTo25DegUp(
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
         case 2:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6653,7 +6651,7 @@ static void InvertedRCTrackDiagFlatTo25DegUp(
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
         case 3:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6923,7 +6921,7 @@ static void InvertedRCTrackDiag25DegUpToFlat(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6954,7 +6952,7 @@ static void InvertedRCTrackDiag25DegUpToFlat(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 1:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -6985,7 +6983,7 @@ static void InvertedRCTrackDiag25DegUpToFlat(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 2:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7017,7 +7015,7 @@ static void InvertedRCTrackDiag25DegUpToFlat(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 3:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7079,7 +7077,7 @@ static void InvertedRCTrackDiag25DegDown(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7110,7 +7108,7 @@ static void InvertedRCTrackDiag25DegDown(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 1:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7141,7 +7139,7 @@ static void InvertedRCTrackDiag25DegDown(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 2:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7173,7 +7171,7 @@ static void InvertedRCTrackDiag25DegDown(
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
         case 3:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7339,7 +7337,7 @@ static void InvertedRCTrackDiagFlatTo25DegDown(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7369,7 +7367,7 @@ static void InvertedRCTrackDiagFlatTo25DegDown(
                 0xFFFF, 0);
             break;
         case 1:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7399,7 +7397,7 @@ static void InvertedRCTrackDiagFlatTo25DegDown(
                 0xFFFF, 0);
             break;
         case 2:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7430,7 +7428,7 @@ static void InvertedRCTrackDiagFlatTo25DegDown(
                 0xFFFF, 0);
             break;
         case 3:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7700,7 +7698,7 @@ static void InvertedRCTrackDiag25DegDownToFlat(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7731,7 +7729,7 @@ static void InvertedRCTrackDiag25DegDownToFlat(
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
         case 1:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7762,7 +7760,7 @@ static void InvertedRCTrackDiag25DegDownToFlat(
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
         case 2:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -7794,7 +7792,7 @@ static void InvertedRCTrackDiag25DegDownToFlat(
             PaintUtilSetGeneralSupportHeight(session, height + 64);
             break;
         case 3:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -9311,7 +9309,7 @@ static void InvertedRCTrackLeftLargeHalfLoopUp(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -9507,7 +9505,7 @@ static void InvertedRCTrackLeftLargeHalfLoopUp(
             MetalASupportsPaintSetup(session, supportType.metal, MetalSupportPlace::centre, 30, height, session.SupportColours);
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetSegmentSupportHeight(
                 session,
@@ -9555,7 +9553,7 @@ static void InvertedRCTrackRightLargeHalfLoopUp(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -9750,7 +9748,7 @@ static void InvertedRCTrackRightLargeHalfLoopUp(
             MetalASupportsPaintSetup(session, supportType.metal, MetalSupportPlace::centre, 30, height, session.SupportColours);
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetSegmentSupportHeight(
                 session,
@@ -9809,7 +9807,7 @@ static void InvertedRCTrackBlockBrakes(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -9854,7 +9852,7 @@ static void InvertedRCTrackLeftBankedQuarterTurn325DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -9899,10 +9897,10 @@ static void InvertedRCTrackLeftBankedQuarterTurn325DegUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -9951,7 +9949,7 @@ static void InvertedRCTrackRightBankedQuarterTurn325DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -9996,10 +9994,10 @@ static void InvertedRCTrackRightBankedQuarterTurn325DegUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -10068,7 +10066,7 @@ static void InvertedRCTrackLeftBankedQuarterTurn525DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -10201,10 +10199,10 @@ static void InvertedRCTrackLeftBankedQuarterTurn525DegUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -10253,7 +10251,7 @@ static void InvertedRCTrackRightBankedQuarterTurn525DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
             break;
@@ -10386,10 +10384,10 @@ static void InvertedRCTrackRightBankedQuarterTurn525DegUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 88);
@@ -10472,11 +10470,11 @@ static void InvertedRCTrack25DegUpToLeftBanked25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 72);
 }
@@ -10536,11 +10534,11 @@ static void InvertedRCTrack25DegUpToRightBanked25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 72);
 }
@@ -10600,11 +10598,11 @@ static void InvertedRCTrackLeftBanked25DegUpTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 72);
 }
@@ -10664,11 +10662,11 @@ static void InvertedRCTrackRightBanked25DegUpTo25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 72);
 }
@@ -10764,11 +10762,11 @@ static void InvertedRCTrackLeftBankedFlatToLeftBanked25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 64);
 }
@@ -10828,11 +10826,11 @@ static void InvertedRCTrackRightBankedFlatToRightBanked25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 64);
 }
@@ -10892,11 +10890,11 @@ static void InvertedRCTrackLeftBanked25DegUpToLeftBankedFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 56);
 }
@@ -10956,11 +10954,11 @@ static void InvertedRCTrackRightBanked25DegUpToRightBankedFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 56);
 }
@@ -11056,11 +11054,11 @@ static void InvertedRCTrackFlatToLeftBanked25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 64);
 }
@@ -11120,11 +11118,11 @@ static void InvertedRCTrackFlatToRightBanked25DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeEnd);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 64);
 }
@@ -11184,11 +11182,11 @@ static void InvertedRCTrackLeftBanked25DegUpToFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 56);
 }
@@ -11248,11 +11246,11 @@ static void InvertedRCTrackRightBanked25DegUpToFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+        PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
     }
     PaintUtilSetGeneralSupportHeight(session, height + 56);
 }
@@ -11311,7 +11309,7 @@ static void InvertedRCTrackBooster(
             session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight, session.SupportColours);
     }
 
-    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+    PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     PaintUtilSetGeneralSupportHeight(session, height + 48);
 }
 
@@ -11494,7 +11492,7 @@ static void InvertedRCTrackLeftEighthDiveLoopUpToOrthogonal(
                         { { 0, 6, height + kInvertedSpriteOffset + 11 }, { 32, 20, 1 } });
                     MetalASupportsPaintSetup(
                         session, supportType.metal, MetalSupportPlace::centre, 0, height + 36, session.SupportColours);
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::tall);
                     break;
                 case 2:
                     PaintAddImageAsParentRotated(
@@ -11503,7 +11501,7 @@ static void InvertedRCTrackLeftEighthDiveLoopUpToOrthogonal(
                         { { 0, 6, height + kInvertedSpriteOffset + 11 }, { 32, 20, 1 } });
                     MetalASupportsPaintSetup(
                         session, supportType.metal, MetalSupportPlace::centre, 0, height + 36, session.SupportColours);
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::tall);
                     break;
                 case 3:
                     PaintAddImageAsParentRotated(
@@ -11686,7 +11684,7 @@ static void InvertedRCTrackRightEighthDiveLoopUpToOrthogonal(
                         { { 6, 0, height + kInvertedSpriteOffset + 11 }, { 20, 32, 1 } });
                     MetalASupportsPaintSetup(
                         session, supportType.metal, MetalSupportPlace::centre, 0, height + 36, session.SupportColours);
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::tall);
                     break;
                 case 1:
                     PaintAddImageAsParentRotated(
@@ -11695,7 +11693,7 @@ static void InvertedRCTrackRightEighthDiveLoopUpToOrthogonal(
                         { { 6, 0, height + kInvertedSpriteOffset + 11 }, { 20, 32, 1 } });
                     MetalASupportsPaintSetup(
                         session, supportType.metal, MetalSupportPlace::centre, 0, height + 36, session.SupportColours);
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::tall);
                     break;
                 case 2:
                     PaintAddImageAsParentRotated(
@@ -11770,7 +11768,7 @@ static void InvertedRCTrackLeftMediumHalfLoopUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -11914,7 +11912,7 @@ static void InvertedRCTrackLeftMediumHalfLoopUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 48, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 48, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
@@ -11954,7 +11952,7 @@ static void InvertedRCTrackRightMediumHalfLoopUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -12099,7 +12097,7 @@ static void InvertedRCTrackRightMediumHalfLoopUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 48, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 48, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 72);
             break;
@@ -12177,7 +12175,7 @@ static void InvertedRCTrackLeftZeroGRollUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 78);
@@ -12267,10 +12265,10 @@ static void InvertedRCTrackLeftZeroGRollUp(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -12338,7 +12336,7 @@ static void InvertedRCTrackRightZeroGRollUp(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 86);
             break;
@@ -12429,10 +12427,10 @@ static void InvertedRCTrackRightZeroGRollUp(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -12511,7 +12509,7 @@ static void InvertedRCTrackLeftLargeZeroGRollUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 104);
@@ -12638,10 +12636,10 @@ static void InvertedRCTrackLeftLargeZeroGRollUp(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 64);
@@ -12704,7 +12702,7 @@ static void InvertedRCTrackRightLargeZeroGRollUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 104);
@@ -12825,10 +12823,10 @@ static void InvertedRCTrackRightLargeZeroGRollUp(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 64);
@@ -12915,7 +12913,7 @@ static void InvertedRCTrackLeftBarrelRollUpToDown(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 64);
@@ -13031,10 +13029,10 @@ static void InvertedRCTrackLeftBarrelRollUpToDown(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 32, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelRight(session, height + 32, kTunnelGroup, TunnelSubType::tall);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 32, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelLeft(session, height + 32, kTunnelGroup, TunnelSubType::tall);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -13108,7 +13106,7 @@ static void InvertedRCTrackRightBarrelRollUpToDown(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 64);
@@ -13220,10 +13218,10 @@ static void InvertedRCTrackRightBarrelRollUpToDown(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 32, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelRight(session, height + 32, kTunnelGroup, TunnelSubType::tall);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 32, kTunnelGroup, TunnelSubType::Tall);
+                    PaintUtilPushTunnelLeft(session, height + 32, kTunnelGroup, TunnelSubType::tall);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -13288,7 +13286,7 @@ static void InvertedRCTrackLeftLargeCorkscrewUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 64);
@@ -13461,10 +13459,10 @@ static void InvertedRCTrackLeftLargeCorkscrewUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -13509,7 +13507,7 @@ static void InvertedRCTrackRightLargeCorkscrewUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 64);
@@ -13680,10 +13678,10 @@ static void InvertedRCTrackRightLargeCorkscrewUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 40, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetSegmentSupportHeight(
@@ -13752,11 +13750,11 @@ static void InvertedRCTrackFlatTo60DegUp(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
     }
 
     PaintUtilSetGeneralSupportHeight(session, height + 72);
@@ -13807,11 +13805,11 @@ static void InvertedRCTrack60DegUpToFlat(
 
     if (direction == 0 || direction == 3)
     {
-        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+        PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
     }
     else
     {
-        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRotated(session, direction, height + 24, kTunnelGroup, TunnelSubType::flat);
     }
 
     PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -13891,7 +13889,7 @@ static void InvertedRCTrackFlatTo60DegUpLongBase(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
 
             break;
@@ -14034,10 +14032,10 @@ static void InvertedRCTrackFlatTo60DegUpLongBase(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 24, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height + 24, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
 
@@ -14079,7 +14077,7 @@ static void InvertedRCTrack60DegUpToFlatLongBase(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -14248,10 +14246,10 @@ static void InvertedRCTrack60DegUpToFlatLongBase(
             switch (direction)
             {
                 case 1:
-                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+                    PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
                     break;
                 case 2:
-                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+                    PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
                     break;
             }
 
@@ -15229,7 +15227,7 @@ static void InvertedRCTrackLeftBankToLeftQuarterTurn3Tile25DegUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 72);
@@ -15288,10 +15286,10 @@ static void InvertedRCTrackLeftBankToLeftQuarterTurn3Tile25DegUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
 
@@ -15342,7 +15340,7 @@ static void InvertedRCTrackRightBankToRightQuarterTurn3Tile25DegUp(
                 session, supportType.metal, MetalSupportPlace::centre, 0, height + kSupportHeight + 6, session.SupportColours);
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 64);
@@ -15401,10 +15399,10 @@ static void InvertedRCTrackRightBankToRightQuarterTurn3Tile25DegUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+                    PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::slopeEnd);
                     break;
             }
 
@@ -15434,7 +15432,7 @@ static void InvertedRCTrack60DegUpTo90DegUp(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -15488,7 +15486,7 @@ static void InvertedRCTrack60DegUpTo90DegUp(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
             PaintUtilSetVerticalTunnel(session, height + 56);
             PaintUtilSetSegmentSupportHeight(
@@ -15511,7 +15509,7 @@ static void InvertedRCTrack90DegUpTo60DegUp(
     PaintSession& session, const Ride& ride, uint8_t trackSequence, uint8_t direction, int32_t height,
     const TrackElement& trackElement, SupportType supportType)
 {
-    if (trackElement.HasChain())
+    if (trackElement.hasChain())
     {
         switch (direction)
         {
@@ -15566,10 +15564,10 @@ static void InvertedRCTrack90DegUpTo60DegUp(
     switch (direction)
     {
         case 1:
-            PaintUtilPushTunnelRight(session, height + 48, kTunnelGroup, TunnelSubType::SlopeEnd);
+            PaintUtilPushTunnelRight(session, height + 48, kTunnelGroup, TunnelSubType::slopeEnd);
             break;
         case 2:
-            PaintUtilPushTunnelLeft(session, height + 48, kTunnelGroup, TunnelSubType::SlopeEnd);
+            PaintUtilPushTunnelLeft(session, height + 48, kTunnelGroup, TunnelSubType::slopeEnd);
             break;
     }
     PaintUtilSetSegmentSupportHeight(session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -15583,7 +15581,7 @@ static void InvertedRCTrack60DegDownTo90DegDown(
     switch (trackSequence)
     {
         case 0:
-            if (trackElement.HasChain())
+            if (trackElement.hasChain())
             {
                 switch (direction)
                 {
@@ -15637,7 +15635,7 @@ static void InvertedRCTrack60DegDownTo90DegDown(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 48, kTunnelGroup, TunnelSubType::SlopeEnd);
+                PaintUtilPushTunnelRotated(session, direction, height + 48, kTunnelGroup, TunnelSubType::slopeEnd);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -15912,7 +15910,7 @@ static void InvertedRCTrack90DegToInvertedFlatQuarterLoopUp(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height + 32, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetSegmentSupportHeight(
                 session, PaintUtilRotateSegments(BlockedSegments::kStraightFlat, direction), 0xFFFF, 0);
@@ -15986,7 +15984,7 @@ static void InvertedRCTrackLeftEighthToDiagUp25(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -16321,7 +16319,7 @@ static void InvertedRCTrackLeftEighthToOrthogonalUp25(
             }
             if (direction == 1 || direction == 2)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 16, kTunnelGroup, TunnelSubType::SlopeEnd);
+                PaintUtilPushTunnelRotated(session, direction, height + 16, kTunnelGroup, TunnelSubType::slopeEnd);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 80);
             break;
@@ -16379,7 +16377,7 @@ static void InvertedRCTrackRightEighthToDiagUp25(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -16712,7 +16710,7 @@ static void InvertedRCTrackRightEighthToOrthogonalUp25(
             }
             if (direction == 0 || direction == 1)
             {
-                PaintUtilPushTunnelRotated(session, direction + 1, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                PaintUtilPushTunnelRotated(session, direction + 1, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -16821,7 +16819,7 @@ static void InvertedRCTrackLeftEighthBankToDiagUp25(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -17183,7 +17181,7 @@ static void InvertedRCTrackLeftEighthBankToOrthogonalUp25(
             }
             if (direction == 1 || direction == 2)
             {
-                PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                PaintUtilPushTunnelRotated(session, direction, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -17255,7 +17253,7 @@ static void InvertedRCTrackRightEighthBankToDiagUp25(
             }
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+                PaintUtilPushTunnelRotated(session, direction, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -17625,7 +17623,7 @@ static void InvertedRCTrackRightEighthBankToOrthogonalUp25(
             }
             if (direction == 0 || direction == 1)
             {
-                PaintUtilPushTunnelRotated(session, direction + 1, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+                PaintUtilPushTunnelRotated(session, direction + 1, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
             }
 
             PaintUtilSetGeneralSupportHeight(session, height + 80);
@@ -19153,7 +19151,7 @@ static void InvertedRCTrackLeftQuarterHelixLargeUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -19302,10 +19300,10 @@ static void InvertedRCTrackLeftQuarterHelixLargeUp(
             switch (direction)
             {
                 case 2:
-                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 3:
-                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
@@ -19357,7 +19355,7 @@ static void InvertedRCTrackRightQuarterHelixLargeUp(
 
             if (direction == 0 || direction == 3)
             {
-                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::Flat);
+                PaintUtilPushTunnelRotated(session, direction, height, kTunnelGroup, TunnelSubType::flat);
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);
             break;
@@ -19506,10 +19504,10 @@ static void InvertedRCTrackRightQuarterHelixLargeUp(
             switch (direction)
             {
                 case 0:
-                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelRight(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
                 case 1:
-                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::Flat);
+                    PaintUtilPushTunnelLeft(session, height + 16, kTunnelGroup, TunnelSubType::flat);
                     break;
             }
             PaintUtilSetGeneralSupportHeight(session, height + 48);

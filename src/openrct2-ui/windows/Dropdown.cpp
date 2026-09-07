@@ -8,16 +8,15 @@
  *****************************************************************************/
 
 #include <algorithm>
-#include <bitset>
 #include <iterator>
 #include <openrct2-ui/interface/Dropdown.h>
 #include <openrct2-ui/interface/Widget.h>
+#include <openrct2-ui/interface/Window.h>
 #include <openrct2/Context.h>
 #include <openrct2/GameState.h>
 #include <openrct2/Input.h>
 #include <openrct2/SpriteIds.h>
 #include <openrct2/config/Config.h>
-#include <openrct2/core/BitSet.hpp>
 #include <openrct2/core/String.hpp>
 #include <openrct2/drawing/ColourMap.h>
 #include <openrct2/drawing/Drawing.String.h>
@@ -232,12 +231,13 @@ namespace OpenRCT2::Ui::Windows
         }
 
         void setTextItems(
-            const ScreenCoordsXY& screenPos, int32_t extraY, ColourWithFlags colour, uint8_t customItemHeight, uint8_t txtFlags,
-            size_t numItems, int32_t itemWidth, int32_t numRowsPerColumn)
+            const ScreenCoordsXY& screenPos, int32_t extraY, ColourWithFlags colour, uint8_t customItemHeight,
+            Dropdown::Flags txtFlags, size_t numItems, int32_t itemWidth, int32_t numRowsPerColumn)
         {
             // Set and calculate num items, rows and columns
-            ItemHeight = (txtFlags & Dropdown::Flag::CustomHeight) ? customItemHeight : GetDefaultRowHeight();
-            ItemPadding = (txtFlags & Dropdown::Flag::CustomHeight) ? 0 : GetAdditionalRowPadding();
+            const auto hasCustomHeight = txtFlags.has(Dropdown::Flag::customHeight);
+            ItemHeight = hasCustomHeight ? customItemHeight : GetDefaultRowHeight();
+            ItemPadding = hasCustomHeight ? 0 : GetAdditionalRowPadding();
 
             gDropdown.numItems = static_cast<int32_t>(numItems);
             if (gDropdown.numItems > 1)
@@ -376,7 +376,7 @@ namespace OpenRCT2::Ui::Windows
      * @param colour (al)
      */
     void WindowDropdownShowText(
-        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, uint8_t flags, size_t num_items,
+        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, Dropdown::Flags flags, size_t num_items,
         size_t prefRowsPerColumn)
     {
         // Calculate the longest string width
@@ -396,7 +396,7 @@ namespace OpenRCT2::Ui::Windows
     }
 
     void WindowDropdownShowText(
-        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, uint8_t flags,
+        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, Dropdown::Flags flags,
         std::span<const Dropdown::Item> items, size_t prefRowsPerColumn)
     {
         copyItemsToGlobal(items);
@@ -416,12 +416,12 @@ namespace OpenRCT2::Ui::Windows
      * @param customItemHeight (ah) requires flag set as well
      */
     void WindowDropdownShowTextCustomWidth(
-        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, uint8_t customItemHeight, uint8_t flags,
-        size_t num_items, int32_t width, size_t prefRowsPerColumn)
+        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, uint8_t customItemHeight,
+        Dropdown::Flags flags, size_t num_items, int32_t width, size_t prefRowsPerColumn)
     {
-        gInputFlags.unset(InputFlag::dropdownStayOpen, InputFlag::dropdownMouseUp);
-        if (flags & Dropdown::Flag::StayOpen || Config::Get().interface.touchEnhancements)
-            gInputFlags.set(InputFlag::dropdownStayOpen);
+        gInputFlags.unset(InputFlag::dropdownAutoclose, InputFlag::dropdownMouseUp);
+        if (flags.has(Dropdown::Flag::autoClose) && !Config::Get().interface.touchEnhancements)
+            gInputFlags.set(InputFlag::dropdownAutoclose);
 
         WindowDropdownClose();
 
@@ -439,7 +439,7 @@ namespace OpenRCT2::Ui::Windows
     }
 
     void WindowDropdownShowTextCustomWidth(
-        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, uint8_t custom_height, uint8_t flags,
+        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, uint8_t custom_height, Dropdown::Flags flags,
         std::span<const Dropdown::Item> items, int32_t width, size_t prefRowsPerColumn)
     {
         copyItemsToGlobal(items);
@@ -462,12 +462,12 @@ namespace OpenRCT2::Ui::Windows
      * @param numColumns (bl)
      */
     void WindowDropdownShowImage(
-        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, uint8_t flags, int32_t numItems,
+        const ScreenCoordsXY& screenPos, int32_t extray, ColourWithFlags colour, Dropdown::Flags flags, int32_t numItems,
         int32_t itemWidth, int32_t itemHeight, int32_t numColumns)
     {
-        gInputFlags.unset(InputFlag::dropdownStayOpen, InputFlag::dropdownMouseUp);
-        if (flags & Dropdown::Flag::StayOpen || Config::Get().interface.touchEnhancements)
-            gInputFlags.set(InputFlag::dropdownStayOpen);
+        gInputFlags.unset(InputFlag::dropdownAutoclose, InputFlag::dropdownMouseUp);
+        if (flags.has(Dropdown::Flag::autoClose) && !Config::Get().interface.touchEnhancements)
+            gInputFlags.set(InputFlag::dropdownAutoclose);
 
         // Close existing dropdown
         WindowDropdownClose();
@@ -484,7 +484,7 @@ namespace OpenRCT2::Ui::Windows
     }
 
     void WindowDropdownShowCustom(
-        const ScreenCoordsXY& screenPos, int32_t extraY, ColourWithFlags colour, uint8_t flags,
+        const ScreenCoordsXY& screenPos, int32_t extraY, ColourWithFlags colour, Dropdown::Flags flags,
         Dropdown::CellDrawFunction drawFunction, int32_t numItems, int32_t itemWidth, int32_t itemHeight, int32_t numColumns)
     {
         // Fall back to image internals
@@ -647,9 +647,8 @@ namespace OpenRCT2::Ui::Windows
         // Show dropdown
         auto squareSize = DropdownWindow::GetDefaultRowHeight();
         WindowDropdownShowImage(
-            w->windowPos + ScreenCoordsXY{ widget->left, widget->top }, widget->height(), dropdownColour,
-            Dropdown::Flag::StayOpen, numColours, squareSize, squareSize,
-            DropdownGetAppropriateImageDropdownItemsPerRow(static_cast<uint32_t>(numColours)));
+            w->windowPos + ScreenCoordsXY{ widget->left, widget->top }, widget->height(), dropdownColour, {}, numColours,
+            squareSize, squareSize, DropdownGetAppropriateImageDropdownItemsPerRow(static_cast<uint32_t>(numColours)));
 
         gDropdown.hasTooltips = true;
         gDropdown.lastTooltipHover = -1;

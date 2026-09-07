@@ -11,12 +11,12 @@
 
 #include <memory>
 #include <openrct2-ui/interface/Widget.h>
+#include <openrct2-ui/interface/Window.h>
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/Context.h>
 #include <openrct2/Diagnostic.h>
 #include <openrct2/PlatformEnvironment.h>
 #include <openrct2/SpriteIds.h>
-#include <openrct2/audio/Audio.h>
 #include <openrct2/core/File.h>
 #include <openrct2/core/Path.hpp>
 #include <openrct2/core/UnitConversion.h>
@@ -169,7 +169,7 @@ namespace OpenRCT2::Ui::Windows
 
             // Warnings
             const TrackDesign& td = *_trackDesign;
-            if (td.gameStateData.hasFlag(TrackDesignGameStateFlag::SceneryUnavailable))
+            if (td.gameStateData.hasFlag(TrackDesignGameStateFlag::sceneryUnavailable))
             {
                 if (!gTrackDesignSceneryToggle)
                 {

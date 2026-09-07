@@ -18,7 +18,6 @@
 #include "../../Paint.h"
 #include "../../support/WoodenSupports.h"
 #include "../../tile_element/Segment.h"
-#include "../../track/Segment.h"
 
 using namespace OpenRCT2;
 
@@ -39,7 +38,7 @@ static void PaintTwistStructure(
 
     if (ride.flags.has(RideFlag::onTrack) && !ride.vehicles[0].IsNull())
     {
-        vehicle = getGameState().entities.GetEntity<Vehicle>(ride.vehicles[0]);
+        vehicle = getGameState().entities.getEntity<Vehicle>(ride.vehicles[0]);
 
         session.InteractionType = ViewportInteractionItem::entity;
         session.CurrentlyDrawnEntity = vehicle;
@@ -59,7 +58,7 @@ static void PaintTwistStructure(
         imageTemplate = stationColour;
     }
 
-    auto baseImageId = rideEntry->Cars[0].base_image_id;
+    auto baseImageId = rideEntry->Cars[0].baseImageId;
     auto structureFrameNum = frameNum % 24;
     auto imageId = imageTemplate.WithIndex(baseImageId + structureFrameNum);
     const BoundBoxXYZ bb = {

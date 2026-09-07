@@ -7,9 +7,8 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#include "../../../object/StationObject.h"
-#include "../../../ride/RideData.h"
 #include "../../../ride/TrackPaint.h"
+#include "../../../ride/ted/TrackElemType.h"
 #include "../../Boundbox.h"
 #include "../../Paint.h"
 #include "../../support/MetalSupports.h"
@@ -19,7 +18,7 @@
 
 using namespace OpenRCT2;
 
-static constexpr TunnelGroup kTunnelGroup = TunnelGroup::Square;
+static constexpr TunnelGroup kTunnelGroup = TunnelGroup::square;
 
 enum
 {
@@ -424,11 +423,11 @@ static void PaintMonorailTrackFlat(
 
     if (direction == 0 || direction == 2)
     {
-        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     if (TrackPaintUtilShouldPaintSupports(session.MapPosition))
@@ -454,11 +453,11 @@ static void PaintMonorailStation(
 
     if (direction == 0 || direction == 2)
     {
-        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
     }
     else
     {
-        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     if (TrackPaintUtilDrawStation(session, ride, direction, height, trackElement, StationBaseType::b, -2))
@@ -494,16 +493,16 @@ static void PaintMonorailTrack25DegUp(
     switch (direction)
     {
         case 0:
-            PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+            PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             break;
         case 1:
-            PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+            PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
             break;
         case 2:
-            PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::SlopeEnd);
+            PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::slopeEnd);
             break;
         case 3:
-            PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::SlopeStart);
+            PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::slopeStart);
             break;
     }
 
@@ -539,16 +538,16 @@ static void PaintMonorailTrackFlatTo25DegUp(
     switch (direction)
     {
         case 0:
-            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
             break;
         case 1:
-            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::slopeEnd);
             break;
         case 2:
-            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::SlopeEnd);
+            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::slopeEnd);
             break;
         case 3:
-            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
             break;
     }
 
@@ -584,16 +583,16 @@ static void PaintMonorailTrack25DegUpToFlat(
     switch (direction)
     {
         case 0:
-            PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelLeft(session, height - 8, kTunnelGroup, TunnelSubType::flat);
             break;
         case 1:
-            PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+            PaintUtilPushTunnelRight(session, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
             break;
         case 2:
-            PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::FlatTo25Deg);
+            PaintUtilPushTunnelLeft(session, height + 8, kTunnelGroup, TunnelSubType::flatTo25Deg);
             break;
         case 3:
-            PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelRight(session, height - 8, kTunnelGroup, TunnelSubType::flat);
             break;
     }
 
@@ -653,22 +652,22 @@ static void PaintMonorailTrackRightQuarterTurn5Tiles(
 
     if (direction == 0 && trackSequence == 0)
     {
-        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     if (direction == 0 && trackSequence == 6)
     {
-        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     if (direction == 1 && trackSequence == 6)
     {
-        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     if (direction == 3 && trackSequence == 0)
     {
-        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     int32_t blockedSegments = 0;
@@ -747,14 +746,14 @@ static void PaintMonorailTrackSBendLeft(
     {
         if (trackSequence == 0)
         {
-            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
         }
     }
     else
     {
         if (trackSequence == 3)
         {
-            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
         }
     }
     DrawSBendLeftSupports(session, supportType.metal, originalTrackSequence, direction, height, 0, 0);
@@ -817,14 +816,14 @@ static void PaintMonorailTrackSBendRight(
     {
         if (trackSequence == 0)
         {
-            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
         }
     }
     else
     {
         if (trackSequence == 3)
         {
-            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+            PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
         }
     }
     DrawSBendRightSupports(session, supportType.metal, originalTrackSequence, direction, height, 0, 0);
@@ -864,7 +863,7 @@ static void PaintMonorailTrackRightQuarterTurn3Tiles(
     TrackPaintUtilRightQuarterTurn3TilesPaint(
         session, 3, height, direction, trackSequence, session.TrackColours, monorail_track_pieces_flat_quarter_turn_3_tiles,
         defaultRightQuarterTurn3TilesOffsets, defaultRightQuarterTurn3TilesBoundLengths, nullptr);
-    TrackPaintUtilRightQuarterTurn3TilesTunnel(session, kTunnelGroup, TunnelSubType::Flat, height, direction, trackSequence);
+    TrackPaintUtilRightQuarterTurn3TilesTunnel(session, kTunnelGroup, TunnelSubType::flat, height, direction, trackSequence);
 
     switch (trackSequence)
     {
@@ -947,11 +946,11 @@ static void PaintMonorailTrackLeftEighthToDiag(
 
     if (direction == 0 && trackSequence == 0)
     {
-        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
     }
     if (direction == 3 && trackSequence == 0)
     {
-        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     int32_t blockedSegments = 0;
@@ -1023,11 +1022,11 @@ static void PaintMonorailTrackRightEighthToDiag(
 
     if (direction == 0 && trackSequence == 0)
     {
-        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelLeft(session, height, kTunnelGroup, TunnelSubType::flat);
     }
     if (direction == 3 && trackSequence == 0)
     {
-        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::Flat);
+        PaintUtilPushTunnelRight(session, height, kTunnelGroup, TunnelSubType::flat);
     }
 
     int32_t blockedSegments = 0;

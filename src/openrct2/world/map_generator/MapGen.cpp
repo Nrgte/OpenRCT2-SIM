@@ -9,10 +9,7 @@
 
 #include "MapGen.h"
 
-#include "../../Context.h"
 #include "../../GameState.h"
-#include "../../object/ObjectManager.h"
-#include "../../util/Util.h"
 #include "../Map.h"
 #include "../tile_element/Slope.h"
 #include "../tile_element/SurfaceElement.h"
@@ -21,8 +18,6 @@
 #include "SimplexNoise.h"
 #include "SurfaceSelection.h"
 #include "TreePlacement.h"
-
-#include <vector>
 
 namespace OpenRCT2::World::MapGenerator
 {
@@ -72,8 +67,8 @@ namespace OpenRCT2::World::MapGenerator
                 auto surfaceElement = MapGetSurfaceElementAt(TileCoordsXY{ x, y });
                 if (surfaceElement != nullptr)
                 {
-                    surfaceElement->SetSurfaceObjectIndex(surfaceTextureId);
-                    surfaceElement->SetEdgeObjectIndex(edgeTextureId);
+                    surfaceElement->setSurfaceObjectIndex(surfaceTextureId);
+                    surfaceElement->setEdgeObjectIndex(edgeTextureId);
                     surfaceElement->baseHeight = settings->heightmapLow;
                     surfaceElement->clearanceHeight = settings->heightmapLow;
                 }
@@ -102,7 +97,7 @@ namespace OpenRCT2::World::MapGenerator
                 auto surfaceElement = MapGetSurfaceElementAt(TileCoordsXY{ x, y });
 
                 if (surfaceElement != nullptr && surfaceElement->baseHeight < settings->waterLevel + 6)
-                    surfaceElement->SetSurfaceObjectIndex(beachTextureId);
+                    surfaceElement->setSurfaceObjectIndex(beachTextureId);
             }
         }
     }
@@ -119,7 +114,7 @@ namespace OpenRCT2::World::MapGenerator
             {
                 auto surfaceElement = MapGetSurfaceElementAt(TileCoordsXY{ x, y });
                 if (surfaceElement != nullptr && surfaceElement->baseHeight < waterLevel)
-                    surfaceElement->SetWaterHeight(waterLevel * kCoordsZStep);
+                    surfaceElement->setWaterHeight(waterLevel * kCoordsZStep);
             }
         }
     }
@@ -154,7 +149,7 @@ namespace OpenRCT2::World::MapGenerator
 
                 surfaceElement->clearanceHeight = surfaceElement->baseHeight;
 
-                uint8_t currentSlope = surfaceElement->GetSlope();
+                uint8_t currentSlope = surfaceElement->getSlope();
 
                 if (q00 > baseHeight)
                     currentSlope |= kTileSlopeSCornerUp;
@@ -165,7 +160,7 @@ namespace OpenRCT2::World::MapGenerator
                 if (q11 > baseHeight)
                     currentSlope |= kTileSlopeNCornerUp;
 
-                surfaceElement->SetSlope(currentSlope);
+                surfaceElement->setSlope(currentSlope);
             }
         }
     }

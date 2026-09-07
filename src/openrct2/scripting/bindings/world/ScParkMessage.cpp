@@ -11,15 +11,7 @@
 
     #include "ScParkMessage.hpp"
 
-    #include "../../../Context.h"
     #include "../../../GameState.h"
-    #include "../../../core/String.hpp"
-    #include "../../../entity/Peep.h"
-    #include "../../../management/Finance.h"
-    #include "../../../management/NewsItem.h"
-    #include "../../../windows/Intent.h"
-    #include "../../../world/Park.h"
-    #include "../../ScriptEngine.h"
 
 namespace OpenRCT2::Scripting
 {

@@ -9,12 +9,16 @@
 
 #pragma once
 
-#include <openrct2/interface/Window.h>
+#include <openrct2/core/StringTypes.h>
+#include <openrct2/localisation/StringIdType.h>
 
 namespace OpenRCT2
 {
     struct ColourWithFlags;
-}
+    struct WindowBase;
+
+    enum class WindowClass : uint8_t;
+} // namespace OpenRCT2
 
 namespace OpenRCT2::Ui
 {

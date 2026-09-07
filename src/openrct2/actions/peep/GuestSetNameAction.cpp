@@ -60,7 +60,7 @@ namespace OpenRCT2::GameActions
             return Result(Status::invalidParameters, STR_CANT_NAME_GUEST, STR_ERR_VALUE_OUT_OF_RANGE);
         }
 
-        auto guest = gameState.entities.TryGetEntity<Guest>(_spriteIndex);
+        auto guest = gameState.entities.tryGetEntity<Guest>(_spriteIndex);
         if (guest == nullptr)
         {
             LOG_ERROR("Guest entity not found for spriteIndex %u", _spriteIndex);
@@ -72,20 +72,20 @@ namespace OpenRCT2::GameActions
 
     Result GuestSetNameAction::Execute(GameState_t& gameState, Park::ParkData& park) const
     {
-        auto guest = gameState.entities.TryGetEntity<Guest>(_spriteIndex);
+        auto guest = gameState.entities.tryGetEntity<Guest>(_spriteIndex);
         if (guest == nullptr)
         {
             LOG_ERROR("Guest entity not found for spriteIndex %u", _spriteIndex);
             return Result(Status::invalidParameters, STR_CANT_NAME_GUEST, kStringIdNone);
         }
 
-        auto curName = guest->GetName();
+        auto curName = guest->getName();
         if (curName == _name)
         {
             return Result();
         }
 
-        if (!guest->SetName(_name))
+        if (!guest->setName(_name))
         {
             return Result(Status::unknown, STR_CANT_NAME_GUEST, kStringIdNone);
         }

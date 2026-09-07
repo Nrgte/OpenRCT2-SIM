@@ -35,10 +35,10 @@ struct SynchronisedVehicle
     EntityId vehicle_id;
 };
 
-constexpr int32_t SYNCHRONISED_VEHICLE_COUNT = 16;
+static constexpr int32_t kSynchronisedVehicleCount = 16;
 
 // Synchronised vehicle info
-static SynchronisedVehicle _synchronisedVehicles[SYNCHRONISED_VEHICLE_COUNT] = {};
+static SynchronisedVehicle _synchronisedVehicles[kSynchronisedVehicleCount] = {};
 
 static SynchronisedVehicle* _lastSynchronisedVehicle = nullptr;
 
@@ -64,7 +64,7 @@ static bool try_add_synchronised_station(const CoordsXYZ& coords)
         return false;
     }
 
-    auto rideIndex = tileElement->asTrack()->GetRideIndex();
+    auto rideIndex = tileElement->asTrack()->getRideIndex();
     auto ride = GetRide(rideIndex);
     if (ride == nullptr || !(ride->departFlags & RIDE_DEPART_SYNCHRONISE_WITH_ADJACENT_STATIONS))
     {
@@ -76,7 +76,7 @@ static bool try_add_synchronised_station(const CoordsXYZ& coords)
      * to sync with adjacent stations, so it will return true.
      * Still to determine if a vehicle to sync can be identified. */
 
-    auto stationIndex = tileElement->asTrack()->GetStationIndex();
+    auto stationIndex = tileElement->asTrack()->getStationIndex();
 
     SynchronisedVehicle* sv = _lastSynchronisedVehicle;
     sv->ride_id = rideIndex;
@@ -102,7 +102,7 @@ static bool try_add_synchronised_station(const CoordsXYZ& coords)
     // Look for a vehicle on this station waiting to depart.
     for (int32_t i = 0; i < ride->numTrains; i++)
     {
-        auto* vehicle = getGameState().entities.GetEntity<Vehicle>(ride->vehicles[i]);
+        auto* vehicle = getGameState().entities.getEntity<Vehicle>(ride->vehicles[i]);
         if (vehicle == nullptr)
         {
             continue;
@@ -169,7 +169,7 @@ static bool ride_station_can_depart_synchronised(const Ride& ride, StationIndex 
     constexpr uint8_t maxCheckDistance = kRideAdjacencyCheckDistance;
     uint8_t spaceBetween = maxCheckDistance;
 
-    while (_lastSynchronisedVehicle < &_synchronisedVehicles[SYNCHRONISED_VEHICLE_COUNT - 1])
+    while (_lastSynchronisedVehicle < &_synchronisedVehicles[kSynchronisedVehicleCount - 1])
     {
         location += CoordsXYZ{ CoordsDirectionDelta[direction], 0 };
         if (try_add_synchronised_station(location))
@@ -187,7 +187,7 @@ static bool ride_station_can_depart_synchronised(const Ride& ride, StationIndex 
     location = station.GetStart();
     direction = DirectionReverse(direction) & 3;
     spaceBetween = maxCheckDistance;
-    while (_lastSynchronisedVehicle < &_synchronisedVehicles[SYNCHRONISED_VEHICLE_COUNT - 1])
+    while (_lastSynchronisedVehicle < &_synchronisedVehicles[kSynchronisedVehicleCount - 1])
     {
         location += CoordsXYZ{ CoordsDirectionDelta[direction], 0 };
         if (try_add_synchronised_station(location))
@@ -240,7 +240,7 @@ static bool ride_station_can_depart_synchronised(const Ride& ride, StationIndex 
                         {
                             for (int32_t i = 0; i < curRide->numTrains; i++)
                             {
-                                Vehicle* v = getGameState().entities.GetEntity<Vehicle>(curRide->vehicles[i]);
+                                Vehicle* v = getGameState().entities.getEntity<Vehicle>(curRide->vehicles[i]);
                                 if (v == nullptr)
                                 {
                                     continue;
@@ -278,7 +278,7 @@ static bool ride_station_can_depart_synchronised(const Ride& ride, StationIndex 
                     auto currentStation = sv->stationIndex;
                     for (int32_t i = 0; i < sv_ride->numTrains; i++)
                     {
-                        auto* otherVehicle = getGameState().entities.GetEntity<Vehicle>(sv_ride->vehicles[i]);
+                        auto* otherVehicle = getGameState().entities.getEntity<Vehicle>(sv_ride->vehicles[i]);
                         if (otherVehicle == nullptr)
                         {
                             continue;
@@ -322,7 +322,7 @@ static bool ride_station_can_depart_synchronised(const Ride& ride, StationIndex 
     // At this point all vehicles in _snychronisedVehicles can depart.
     for (SynchronisedVehicle* sv = _synchronisedVehicles; sv < _lastSynchronisedVehicle; sv++)
     {
-        auto v = getGameState().entities.GetEntity<Vehicle>(sv->vehicle_id);
+        auto v = getGameState().entities.getEntity<Vehicle>(sv->vehicle_id);
         if (v != nullptr)
         {
             v->flags.unset(VehicleFlag::waitingOnAdjacentStation);
@@ -368,7 +368,7 @@ void Vehicle::UpdateMovingToEndOfStation()
                 velocity -= velocity / 16;
                 acceleration = 0;
             }
-            curFlags = UpdateTrackMotion(&station);
+            curFlags = updateTrackMotionTrain(&station);
             if (!(curFlags & VEHICLE_UPDATE_MOTION_TRACK_FLAG_5))
                 break;
             [[fallthrough]];
@@ -417,7 +417,7 @@ void Vehicle::UpdateMovingToEndOfStation()
                 acceleration = 0;
             }
 
-            curFlags = UpdateTrackMotion(&station);
+            curFlags = updateTrackMotionTrain(&station);
 
             if (curFlags & VEHICLE_UPDATE_MOTION_TRACK_FLAG_1)
             {
@@ -566,8 +566,8 @@ void Vehicle::UpdateWaitingForPassengers()
 
         // 0xF64E31, 0xF64E32, 0xF64E33
         uint8_t num_peeps_on_train = 0, num_used_seats_on_train = 0, num_seats_on_train = 0;
-        for (const Vehicle* trainCar = getGameState().entities.GetEntity<Vehicle>(id); trainCar != nullptr;
-             trainCar = getGameState().entities.GetEntity<Vehicle>(trainCar->next_vehicle_on_train))
+        for (const Vehicle* trainCar = getGameState().entities.getEntity<Vehicle>(id); trainCar != nullptr;
+             trainCar = getGameState().entities.getEntity<Vehicle>(trainCar->next_vehicle_on_train))
         {
             num_peeps_on_train += trainCar->num_peeps;
             num_used_seats_on_train += trainCar->next_free_seat;
@@ -621,7 +621,7 @@ void Vehicle::UpdateWaitingForPassengers()
                 if (train_id == id)
                     continue;
 
-                Vehicle* train = getGameState().entities.GetEntity<Vehicle>(train_id);
+                Vehicle* train = getGameState().entities.getEntity<Vehicle>(train_id);
                 if (train == nullptr)
                     continue;
 
@@ -737,8 +737,8 @@ void Vehicle::UpdateWaitingToDepart()
         }
         else
         {
-            for (const Vehicle* trainCar = getGameState().entities.GetEntity<Vehicle>(id); trainCar != nullptr;
-                 trainCar = getGameState().entities.GetEntity<Vehicle>(trainCar->next_vehicle_on_train))
+            for (const Vehicle* trainCar = getGameState().entities.getEntity<Vehicle>(id); trainCar != nullptr;
+                 trainCar = getGameState().entities.getEntity<Vehicle>(trainCar->next_vehicle_on_train))
             {
                 if (trainCar->num_peeps != 0)
                 {
@@ -784,7 +784,7 @@ void Vehicle::UpdateWaitingToDepart()
         uint8_t trackDirection = GetTrackDirection();
         if (trackBlockGetNextFromZero(TrackLocation, *curRide, trackDirection, &track, &zUnused, &direction, false))
         {
-            if (track.element->asTrack()->HasCableLift())
+            if (track.element->asTrack()->hasCableLift())
             {
                 SetState(Status::waitingForCableLift, sub_state);
             }
@@ -938,22 +938,22 @@ void Vehicle::UpdateUnloadingPassengers()
         {
             next_free_seat -= 2;
 
-            auto firstGuest = getGameState().entities.GetEntity<Guest>(peep[seat * 2]);
+            auto firstGuest = getGameState().entities.getEntity<Guest>(peep[seat * 2]);
             peep[seat * 2] = EntityId::GetNull();
 
             if (firstGuest != nullptr)
             {
-                firstGuest->SetState(PeepState::leavingRide);
-                firstGuest->RideSubState = PeepRideSubState::leaveVehicle;
+                firstGuest->setState(PeepState::leavingRide);
+                firstGuest->rideSubState = PeepRideSubState::leaveVehicle;
             }
 
-            auto secondGuest = getGameState().entities.GetEntity<Guest>(peep[seat * 2 + 1]);
+            auto secondGuest = getGameState().entities.getEntity<Guest>(peep[seat * 2 + 1]);
             peep[seat * 2 + 1] = EntityId::GetNull();
 
             if (secondGuest != nullptr)
             {
-                secondGuest->SetState(PeepState::leavingRide);
-                secondGuest->RideSubState = PeepRideSubState::leaveVehicle;
+                secondGuest->setState(PeepState::leavingRide);
+                secondGuest->rideSubState = PeepRideSubState::leaveVehicle;
             }
         }
     }
@@ -974,8 +974,8 @@ void Vehicle::UpdateUnloadingPassengers()
         }
 
         bool allRestraintsOpen = true;
-        for (Vehicle* train = getGameState().entities.GetEntity<Vehicle>(id); train != nullptr;
-             train = getGameState().entities.GetEntity<Vehicle>(train->next_vehicle_on_train))
+        for (Vehicle* train = getGameState().entities.getEntity<Vehicle>(id); train != nullptr;
+             train = getGameState().entities.getEntity<Vehicle>(train->next_vehicle_on_train))
         {
             if (train->restraints_position != 255)
             {
@@ -997,18 +997,18 @@ void Vehicle::UpdateUnloadingPassengers()
 
             for (uint8_t peepIndex = 0; peepIndex < train->num_peeps; peepIndex++)
             {
-                Guest* curPeep = getGameState().entities.GetEntity<Guest>(train->peep[peepIndex]);
+                Guest* curPeep = getGameState().entities.getEntity<Guest>(train->peep[peepIndex]);
                 if (curPeep != nullptr)
                 {
                     test = 0;
-                    std::string peepName = curPeep->GetName();
+                    std::string peepName = curPeep->getName();
                     if (peepName == "Carlene J." || peepName == "Carmen M.")
                         test++;
 
-                    if (curPeep->RideSubState != PeepRideSubState::waitForTrain)
+                    if (curPeep->rideSubState != PeepRideSubState::waitForTrain)
                     {
-                        curPeep->SetState(PeepState::leavingRide);
-                        curPeep->RideSubState = PeepRideSubState::leaveVehicle;
+                        curPeep->setState(PeepState::leavingRide);
+                        curPeep->rideSubState = PeepRideSubState::leaveVehicle;
                     }
                 }
             }
@@ -1026,8 +1026,8 @@ void Vehicle::UpdateUnloadingPassengers()
         test++;
 
     if (currentStation.TrainAtStation < OpenRCT2::Limits::kMaxTrainsPerRide)
-        for (Vehicle* train = getGameState().entities.GetEntity<Vehicle>(id); train != nullptr;
-             train = getGameState().entities.GetEntity<Vehicle>(train->next_vehicle_on_train))
+        for (Vehicle* train = getGameState().entities.getEntity<Vehicle>(id); train != nullptr;
+             train = getGameState().entities.getEntity<Vehicle>(train->next_vehicle_on_train))
         {
             if (train->num_peeps != train->next_free_seat)
                 return;
@@ -1153,7 +1153,7 @@ void Vehicle::UpdateDeparting()
         }
     }
 
-    uint32_t curFlags = UpdateTrackMotion(nullptr);
+    uint32_t curFlags = updateTrackMotionTrain(nullptr);
 
     if (curFlags & VEHICLE_UPDATE_MOTION_TRACK_FLAG_8)
     {
@@ -1400,7 +1400,7 @@ void Vehicle::UpdateTravelling()
         return;
     }
 
-    uint32_t curFlags = UpdateTrackMotion(nullptr);
+    uint32_t curFlags = updateTrackMotionTrain(nullptr);
 
     bool skipCheck = false;
     if (curFlags & (VEHICLE_UPDATE_MOTION_TRACK_FLAG_8 | VEHICLE_UPDATE_MOTION_TRACK_FLAG_9)
@@ -1681,7 +1681,7 @@ void Vehicle::UpdateArriving()
 
     UpdateArrivingPassThroughStation(*curRide, carEntry, stationBrakesWork);
 
-    curFlags = UpdateTrackMotion(nullptr);
+    curFlags = updateTrackMotionTrain(nullptr);
     if (curFlags & VEHICLE_UPDATE_MOTION_TRACK_FLAG_VEHICLE_COLLISION && !stationBrakesWork)
     {
         UpdateCollisionSetup();
@@ -1716,7 +1716,7 @@ void Vehicle::UpdateArriving()
         return;
     }
 
-    current_station = trackElement->GetStationIndex();
+    current_station = trackElement->getStationIndex();
     NumLaps++;
 
     if (sub_state != 0)

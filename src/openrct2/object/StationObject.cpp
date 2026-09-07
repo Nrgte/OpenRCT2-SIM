@@ -10,12 +10,10 @@
 #include "StationObject.h"
 
 #include "../core/Guard.hpp"
-#include "../core/IStream.hpp"
 #include "../core/Json.hpp"
-#include "../core/String.hpp"
 #include "../drawing/Drawing.h"
 #include "../drawing/ScrollingText.h"
-#include "../world/Location.hpp"
+#include "../interface/ScreenCoords.hpp"
 
 namespace OpenRCT2
 {
@@ -74,7 +72,7 @@ namespace OpenRCT2
         exitBackIndex = entranceBackIndex + 8;
         exitFrontIndex = entranceBackIndex + 12;
 
-        if (!(Flags & StationObjectFlags::isTransparent))
+        if (!Flags.has(StationObjectFlag::isTransparent))
         {
             if (numImages > iconOffset + 16)
                 shelterIndex = entranceBackIndex + 16;
@@ -128,7 +126,7 @@ namespace OpenRCT2
         // Draw back sprite
         auto backImageId = ImageId(entranceBackIndex, colour0, colour1);
         GfxDrawSprite(rt, backImageId, screenCoords);
-        if (Flags & StationObjectFlags::isTransparent)
+        if (Flags.has(StationObjectFlag::isTransparent))
         {
             auto tImageId = ImageId(entranceBackGlassIndex).WithTransparency(tcolour0);
             GfxDrawSprite(rt, tImageId, screenCoords);
@@ -137,7 +135,7 @@ namespace OpenRCT2
         // Draw front sprite
         auto frontImageId = ImageId(entranceFrontIndex, colour0, colour1);
         GfxDrawSprite(rt, frontImageId, screenCoords);
-        if (Flags & StationObjectFlags::isTransparent)
+        if (Flags.has(StationObjectFlag::isTransparent))
         {
             auto frontGlassImageId = ImageId(entranceFrontGlassIndex).WithTransparency(tcolour0);
             GfxDrawSprite(rt, frontGlassImageId, screenCoords);
@@ -169,14 +167,14 @@ namespace OpenRCT2
         {
             Height = Json::GetNumber<int32_t>(properties["height"]);
             ScrollingMode = Json::GetNumber<uint8_t>(properties["scrollingMode"], kScrollingModeNone);
-            Flags = Json::GetFlags<uint32_t>(
+            Flags = Json::GetFlagHolder<StationObjectFlags, StationObjectFlag>(
                 properties,
                 {
-                    { "hasPrimaryColour", StationObjectFlags::hasPrimaryColour },
-                    { "hasSecondaryColour", StationObjectFlags::hasSecondaryColour },
-                    { "isTransparent", StationObjectFlags::isTransparent },
-                    { "noPlatforms", StationObjectFlags::noPlatforms },
-                    { "hasShelter", StationObjectFlags::hasShelter },
+                    { "hasPrimaryColour", StationObjectFlag::hasPrimaryColour },
+                    { "hasSecondaryColour", StationObjectFlag::hasSecondaryColour },
+                    { "isTransparent", StationObjectFlag::isTransparent },
+                    { "noPlatforms", StationObjectFlag::noPlatforms },
+                    { "hasShelter", StationObjectFlag::hasShelter },
                 });
         }
 

@@ -18,14 +18,12 @@
     #include <string>
     #include <vector>
 
-enum class CursorID : uint8_t;
-
 namespace OpenRCT2::Scripting
 {
     enum class CustomToolbarMenuItemKind
     {
-        Standard,
-        Toolbox,
+        standard,
+        toolbox,
     };
 
     class CustomToolbarMenuItem
@@ -78,7 +76,7 @@ namespace OpenRCT2::Scripting
     {
         std::shared_ptr<Plugin> Owner;
         std::string Id;
-        CursorID Cursor = CursorID::Undefined;
+        CursorID Cursor = CursorID::undefined;
         uint32_t Filter{};
         bool MouseDown{};
 

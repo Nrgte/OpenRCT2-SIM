@@ -8,12 +8,10 @@
  *****************************************************************************/
 #include "ViewportQuery.h"
 
-#include "Viewport.h"
-#include "Window.h"
-
 #include <algorithm>
-#include <openrct2/Context.h>
 #include <openrct2/core/Numerics.hpp>
+#include <openrct2/interface/Viewport.h>
+#include <openrct2/interface/WindowBase.h>
 #include <openrct2/ui/WindowManager.h>
 #include <openrct2/world/Map.h>
 #include <openrct2/world/tile_element/EntranceElement.h>
@@ -69,7 +67,7 @@ namespace OpenRCT2::Ui
         if (info.interactionType == ViewportInteractionItem::footpath)
         {
             z = myTileElement->getBaseZ();
-            if (myTileElement->asPath()->IsSloped())
+            if (myTileElement->asPath()->isSloped())
             {
                 z += 8;
             }
@@ -152,7 +150,7 @@ namespace OpenRCT2::Ui
             && viewport->flags & (VIEWPORT_FLAG_UNDERGROUND_INSIDE | VIEWPORT_FLAG_HIDE_BASE | VIEWPORT_FLAG_HIDE_VERTICAL)
             && (*tileElement)->getType() == TileElementType::entrance)
         {
-            uint32_t directions = (*tileElement)->asEntrance()->GetDirections();
+            uint32_t directions = (*tileElement)->asEntrance()->getDirections();
             if (directions & 0x0F)
             {
                 int32_t bx = Numerics::bitScanForward(directions);
@@ -169,7 +167,7 @@ namespace OpenRCT2::Ui
             EnumsToFlags(ViewportInteractionItem::terrain, ViewportInteractionItem::footpath, ViewportInteractionItem::ride));
         if (info.interactionType == ViewportInteractionItem::ride && (*tileElement)->getType() == TileElementType::entrance)
         {
-            uint32_t directions = (*tileElement)->asEntrance()->GetDirections();
+            uint32_t directions = (*tileElement)->asEntrance()->getDirections();
             if (directions & 0x0F)
             {
                 int32_t bx = (*tileElement)->getDirectionWithOffset(Numerics::bitScanForward(directions));

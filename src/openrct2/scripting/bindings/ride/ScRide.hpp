@@ -9,13 +9,9 @@
 
 #pragma once
 
-#include "../../../Context.h"
-#include "../../../ride/Ride.h"
-#include "../../ScriptEngine.h"
-#include "../object/ScObject.hpp"
-#include "ScRideStation.hpp"
-
 #ifdef ENABLE_SCRIPTING
+
+    #include "../../ScriptEngine.h"
 
 namespace OpenRCT2::Scripting
 {

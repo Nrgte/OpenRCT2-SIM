@@ -11,20 +11,15 @@
 #include "../interface/InGameConsole.h"
 #include "../scripting/CustomMenu.h"
 
-#include <iterator>
-#include <limits>
 #include <openrct2-ui/interface/Dropdown.h>
-#include <openrct2-ui/interface/LandTool.h>
-#include <openrct2-ui/interface/Viewport.h>
 #include <openrct2-ui/interface/Widget.h>
+#include <openrct2-ui/interface/Window.h>
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/Cheats.h>
 #include <openrct2/Diagnostic.h>
 #include <openrct2/Game.h>
 #include <openrct2/GameState.h>
-#include <openrct2/Input.h>
 #include <openrct2/OpenRCT2.h>
-#include <openrct2/ParkImporter.h>
 #include <openrct2/SpriteIds.h>
 #include <openrct2/Version.h>
 #include <openrct2/actions/GameActionRunner.h>
@@ -37,18 +32,15 @@
 #include <openrct2/core/String.hpp>
 #include <openrct2/drawing/Drawing.h>
 #include <openrct2/drawing/Text.h>
-#include <openrct2/entity/Staff.h>
 #include <openrct2/interface/Chat.h>
 #include <openrct2/interface/ColourWithFlags.h>
 #include <openrct2/interface/Screenshot.h>
+#include <openrct2/interface/Viewport.h>
 #include <openrct2/localisation/Formatter.h>
 #include <openrct2/network/Network.h>
 #include <openrct2/ui/UiContext.h>
 #include <openrct2/ui/WindowManager.h>
 #include <openrct2/windows/Intent.h>
-#include <openrct2/world/Footpath.h>
-#include <openrct2/world/Park.h>
-#include <openrct2/world/Scenery.h>
 #include <string>
 
 #ifdef __EMSCRIPTEN__
@@ -316,7 +308,7 @@ namespace OpenRCT2::Ui::Windows
 
             WindowDropdownShowText(
                 { windowPos.x + widget.left, windowPos.y + widget.top }, widget.height(),
-                colours[1].withFlag(ColourFlag::translucent, true), Dropdown::Flag::StayOpen, TOP_TOOLBAR_VIEW_MENU_COUNT);
+                colours[1].withFlag(ColourFlag::translucent, true), {}, TOP_TOOLBAR_VIEW_MENU_COUNT);
 
             auto mvpFlags = WindowGetMain()->viewport->flags;
             gDropdown.items[DDIDX_UNDERGROUND_INSIDE].setChecked(mvpFlags & VIEWPORT_FLAG_UNDERGROUND_INSIDE);
@@ -437,7 +429,7 @@ namespace OpenRCT2::Ui::Windows
                 gDropdown.items[i++] = Dropdown::Separator();
                 for (const auto& item : customMenuItems)
                 {
-                    if (item.Kind == Scripting::CustomToolbarMenuItemKind::Standard)
+                    if (item.Kind == Scripting::CustomToolbarMenuItemKind::standard)
                     {
                         gDropdown.items[i] = Dropdown::PlainMenuLabel(item.Text.c_str());
                         i++;
@@ -448,7 +440,7 @@ namespace OpenRCT2::Ui::Windows
 
             WindowDropdownShowText(
                 { windowPos.x + widget.left, windowPos.y + widget.top }, widget.height(),
-                colours[1].withFlag(ColourFlag::translucent, true), 0, i);
+                colours[1].withFlag(ColourFlag::translucent, true), { Dropdown::Flag::autoClose }, i);
             gDropdown.defaultIndex = DDIDX_SHOW_MAP;
         }
 
@@ -483,7 +475,7 @@ namespace OpenRCT2::Ui::Windows
                 size_t i = 0;
                 for (const auto& item : customMenuItems)
                 {
-                    if (item.Kind == Scripting::CustomToolbarMenuItemKind::Standard)
+                    if (item.Kind == Scripting::CustomToolbarMenuItemKind::standard)
                     {
                         if (i == customIndex)
                         {
@@ -515,7 +507,7 @@ namespace OpenRCT2::Ui::Windows
 
             WindowDropdownShowText(
                 { windowPos.x + widget.left, windowPos.y + widget.top }, widget.height(),
-                colours[0].withFlag(ColourFlag::translucent, true), 0, num_items);
+                colours[0].withFlag(ColourFlag::translucent, true), { Dropdown::Flag::autoClose }, num_items);
 
             // Set checkmarks
             if (gGameSpeed <= 4)
@@ -627,7 +619,7 @@ namespace OpenRCT2::Ui::Windows
 
             WindowDropdownShowText(
                 { windowPos.x + widget.left, windowPos.y + widget.top }, widget.height(),
-                colours[0].withFlag(ColourFlag::translucent, true), Dropdown::Flag::StayOpen, numItems);
+                colours[0].withFlag(ColourFlag::translucent, true), {}, numItems);
         }
 
         void initCheatsMenu(Widget& widget)
@@ -651,7 +643,7 @@ namespace OpenRCT2::Ui::Windows
 
             WindowDropdownShowText(
                 { windowPos.x + widget.left, windowPos.y + widget.top }, widget.height(),
-                colours[0].withFlag(ColourFlag::translucent, true), Dropdown::Flag::StayOpen, TOP_TOOLBAR_CHEATS_COUNT);
+                colours[0].withFlag(ColourFlag::translucent, true), {}, TOP_TOOLBAR_CHEATS_COUNT);
 
             // Disable items that are not yet available in multiplayer
             if (Network::GetMode() != Network::Mode::none)
@@ -727,7 +719,7 @@ namespace OpenRCT2::Ui::Windows
 
             WindowDropdownShowText(
                 { windowPos.x + widget.left, windowPos.y + widget.top }, widget.height(),
-                colours[0].withFlag(ColourFlag::translucent, true), Dropdown::Flag::StayOpen, TOP_TOOLBAR_DEBUG_COUNT);
+                colours[0].withFlag(ColourFlag::translucent, true), {}, TOP_TOOLBAR_DEBUG_COUNT);
 
             auto* windowMgr = GetWindowManager();
             gDropdown.items[DDIDX_CONSOLE].setChecked(windowMgr->FindByClass(WindowClass::console) != nullptr);
@@ -771,7 +763,7 @@ namespace OpenRCT2::Ui::Windows
 
             WindowDropdownShowText(
                 { windowPos.x + widget.left, windowPos.y + widget.top }, widget.height(),
-                colours[0].withFlag(ColourFlag::translucent, true), 0, TOP_TOOLBAR_NETWORK_COUNT);
+                colours[0].withFlag(ColourFlag::translucent, true), { Dropdown::Flag::autoClose }, TOP_TOOLBAR_NETWORK_COUNT);
 
             gDropdown.items[DDIDX_MULTIPLAYER_RECONNECT].setDisabled(!Network::IsDesynchronised());
 
@@ -1084,133 +1076,87 @@ namespace OpenRCT2::Ui::Windows
         }
 #endif
 
-        void ResetWidgetToDefaultState()
+        void ResetWidgetsToDefaultState()
         {
-            // Enable / disable buttons
-            widgets[WIDX_PAUSE].type = WidgetType::trnBtn;
-            widgets[WIDX_FILE_MENU].type = WidgetType::trnBtn;
-            widgets[WIDX_ZOOM_OUT].type = WidgetType::trnBtn;
-            widgets[WIDX_ZOOM_IN].type = WidgetType::trnBtn;
-            widgets[WIDX_ROTATE_CLOCKWISE].type = WidgetType::trnBtn;
-            widgets[WIDX_ROTATE_ANTI_CLOCKWISE].type = WidgetType::trnBtn;
-            widgets[WIDX_VIEW_MENU].type = WidgetType::trnBtn;
-            widgets[WIDX_MAP].type = WidgetType::trnBtn;
-            widgets[WIDX_MUTE].type = WidgetType::trnBtn;
-            widgets[WIDX_CHAT].type = WidgetType::trnBtn;
-            widgets[WIDX_LAND].type = WidgetType::trnBtn;
-            widgets[WIDX_WATER].type = WidgetType::trnBtn;
-            widgets[WIDX_SCENERY].type = WidgetType::trnBtn;
-            widgets[WIDX_PATH].type = WidgetType::trnBtn;
-            widgets[WIDX_CONSTRUCT_RIDE].type = WidgetType::trnBtn;
-            widgets[WIDX_RIDES].type = WidgetType::trnBtn;
-            widgets[WIDX_PARK].type = WidgetType::trnBtn;
-            widgets[WIDX_STAFF].type = WidgetType::trnBtn;
-            widgets[WIDX_GUESTS].type = WidgetType::trnBtn;
-            widgets[WIDX_CLEAR_SCENERY].type = WidgetType::trnBtn;
-            widgets[WIDX_FINANCES].type = WidgetType::trnBtn;
-            widgets[WIDX_RESEARCH].type = WidgetType::trnBtn;
-            widgets[WIDX_FASTFORWARD].type = WidgetType::trnBtn;
-            widgets[WIDX_CHEATS].type = WidgetType::trnBtn;
-            widgets[WIDX_DEBUG].type = Config::Get().general.debuggingTools ? WidgetType::trnBtn : WidgetType::empty;
-            widgets[WIDX_NEWS].type = WidgetType::trnBtn;
-            widgets[WIDX_NETWORK].type = WidgetType::trnBtn;
+            for (auto& widget : widgets)
+                widget.setVisible();
         }
 
         void HideDisabledButtons()
         {
-            if (!Config::Get().interface.toolbarShowMute)
-                widgets[WIDX_MUTE].type = WidgetType::empty;
+            auto& config = Config::Get().interface;
 
-            if (!Config::Get().interface.toolbarShowChat)
-                widgets[WIDX_CHAT].type = WidgetType::empty;
+            widgets[WIDX_MUTE].setVisible(config.toolbarShowMute);
+            widgets[WIDX_CHAT].setVisible(config.toolbarShowChat);
+            widgets[WIDX_RESEARCH].setVisible(config.toolbarShowResearch);
+            widgets[WIDX_CHEATS].setVisible(config.toolbarShowCheats);
+            widgets[WIDX_DEBUG].setVisible(Config::Get().general.debuggingTools);
+            widgets[WIDX_NEWS].setVisible(config.toolbarShowNews);
+            widgets[WIDX_ZOOM_IN].setVisible(config.toolbarShowZoom);
+            widgets[WIDX_ZOOM_OUT].setVisible(config.toolbarShowZoom);
+            widgets[WIDX_ROTATE_ANTI_CLOCKWISE].setVisible(config.toolbarShowRotateAnticlockwise);
 
-            if (!Config::Get().interface.toolbarShowResearch)
-                widgets[WIDX_RESEARCH].type = WidgetType::empty;
+            const bool hasPauseButton = !(
+                gLegacyScene == LegacyScene::scenarioEditor || gLegacyScene == LegacyScene::trackDesignsManager);
+            widgets[WIDX_PAUSE].setVisible(hasPauseButton);
 
-            if (!Config::Get().interface.toolbarShowCheats)
-                widgets[WIDX_CHEATS].type = WidgetType::empty;
-
-            if (!Config::Get().interface.toolbarShowNews)
-                widgets[WIDX_NEWS].type = WidgetType::empty;
-
-            if (!Config::Get().interface.toolbarShowZoom)
-            {
-                widgets[WIDX_ZOOM_IN].type = WidgetType::empty;
-                widgets[WIDX_ZOOM_OUT].type = WidgetType::empty;
-            }
-
-            if (!Config::Get().interface.toolbarShowRotateAnticlockwise)
-                widgets[WIDX_ROTATE_ANTI_CLOCKWISE].type = WidgetType::empty;
-
-            if (gLegacyScene == LegacyScene::scenarioEditor || gLegacyScene == LegacyScene::trackDesignsManager)
-            {
-                widgets[WIDX_PAUSE].type = WidgetType::empty;
-            }
-
-            if ((getGameState().park.flags & PARK_FLAGS_NO_MONEY) || !Config::Get().interface.toolbarShowFinances)
-                widgets[WIDX_FINANCES].type = WidgetType::empty;
+            const bool hasFinanceButton = !(getGameState().park.flags.has(ParkFlag::noMoney) || !config.toolbarShowFinances);
+            widgets[WIDX_FINANCES].setVisible(hasFinanceButton);
         }
 
         void ApplyEditorMode()
         {
-            if (isInEditorMode() == 0)
-            {
+            if (!isInEditorMode())
                 return;
-            }
 
-            widgets[WIDX_PARK].type = WidgetType::empty;
-            widgets[WIDX_STAFF].type = WidgetType::empty;
-            widgets[WIDX_GUESTS].type = WidgetType::empty;
-            widgets[WIDX_FINANCES].type = WidgetType::empty;
-            widgets[WIDX_RESEARCH].type = WidgetType::empty;
-            widgets[WIDX_NEWS].type = WidgetType::empty;
-            widgets[WIDX_NETWORK].type = WidgetType::empty;
+            widgets[WIDX_PARK].setHidden();
+            widgets[WIDX_STAFF].setHidden();
+            widgets[WIDX_GUESTS].setHidden();
+            widgets[WIDX_FINANCES].setHidden();
+            widgets[WIDX_RESEARCH].setHidden();
+            widgets[WIDX_NEWS].setHidden();
+            widgets[WIDX_NETWORK].setHidden();
 
             auto& gameState = getGameState();
             if (gameState.editorStep != Editor::Step::landscapeEditor)
             {
-                widgets[WIDX_LAND].type = WidgetType::empty;
-                widgets[WIDX_WATER].type = WidgetType::empty;
+                widgets[WIDX_LAND].setHidden();
+                widgets[WIDX_WATER].setHidden();
             }
 
             if (gameState.editorStep != Editor::Step::rollerCoasterDesigner)
             {
-                widgets[WIDX_RIDES].type = WidgetType::empty;
-                widgets[WIDX_CONSTRUCT_RIDE].type = WidgetType::empty;
-                widgets[WIDX_FASTFORWARD].type = WidgetType::empty;
+                widgets[WIDX_RIDES].setHidden();
+                widgets[WIDX_CONSTRUCT_RIDE].setHidden();
+                widgets[WIDX_FASTFORWARD].setHidden();
             }
 
             if (gameState.editorStep != Editor::Step::landscapeEditor
                 && gameState.editorStep != Editor::Step::rollerCoasterDesigner)
             {
-                widgets[WIDX_MAP].type = WidgetType::empty;
-                widgets[WIDX_SCENERY].type = WidgetType::empty;
-                widgets[WIDX_PATH].type = WidgetType::empty;
-                widgets[WIDX_CLEAR_SCENERY].type = WidgetType::empty;
+                widgets[WIDX_MAP].setHidden();
+                widgets[WIDX_SCENERY].setHidden();
+                widgets[WIDX_PATH].setHidden();
+                widgets[WIDX_CLEAR_SCENERY].setHidden();
 
-                widgets[WIDX_ZOOM_OUT].type = WidgetType::empty;
-                widgets[WIDX_ZOOM_IN].type = WidgetType::empty;
-                widgets[WIDX_ROTATE_ANTI_CLOCKWISE].type = WidgetType::empty;
-                widgets[WIDX_ROTATE_CLOCKWISE].type = WidgetType::empty;
-                widgets[WIDX_VIEW_MENU].type = WidgetType::empty;
+                widgets[WIDX_ZOOM_OUT].setHidden();
+                widgets[WIDX_ZOOM_IN].setHidden();
+                widgets[WIDX_ROTATE_ANTI_CLOCKWISE].setHidden();
+                widgets[WIDX_ROTATE_CLOCKWISE].setHidden();
+                widgets[WIDX_VIEW_MENU].setHidden();
             }
         }
 
         void ApplyNetworkMode()
         {
-            switch (Network::GetMode())
-            {
-                case Network::Mode::none:
-                    widgets[WIDX_NETWORK].type = WidgetType::empty;
-                    widgets[WIDX_CHAT].type = WidgetType::empty;
-                    break;
-                case Network::Mode::client:
-                    widgets[WIDX_PAUSE].type = WidgetType::empty;
-                    [[fallthrough]];
-                case Network::Mode::server:
-                    widgets[WIDX_FASTFORWARD].type = WidgetType::empty;
-                    break;
-            }
+            if (isInEditorMode())
+                return;
+
+            const auto mode = Network::GetMode();
+            widgets[WIDX_NETWORK].setHidden(mode == Network::Mode::none);
+            widgets[WIDX_CHAT].setHidden(mode == Network::Mode::none);
+            widgets[WIDX_PAUSE].setHidden(mode == Network::Mode::client);
+            widgets[WIDX_FASTFORWARD].setHidden(mode == Network::Mode::server);
         }
 
         void ApplyZoomState()
@@ -1238,7 +1184,7 @@ namespace OpenRCT2::Ui::Windows
         void ApplyMapRotation()
         {
             // Set map button to the right image.
-            if (widgets[WIDX_MAP].type != WidgetType::empty)
+            if (widgets[WIDX_MAP].isVisible())
             {
                 static constexpr uint32_t _imageIdByRotation[] = {
                     SPR_G2_MAP_NORTH,
@@ -1275,14 +1221,14 @@ namespace OpenRCT2::Ui::Windows
             auto totalWidth = 0;
             for (auto widgetIndex : toolbarItems)
             {
-                auto* widget = &widgets[widgetIndex];
-                if (widget->type == WidgetType::empty && widgetIndex != WIDX_SEPARATOR)
+                auto& widget = widgets[widgetIndex];
+                if (!widget.isVisible())
                     continue;
 
                 if (firstItem && widgetIndex == WIDX_SEPARATOR)
                     continue;
 
-                totalWidth += widget->width();
+                totalWidth += widget.width();
                 firstItem = false;
             }
             return totalWidth;
@@ -1295,17 +1241,17 @@ namespace OpenRCT2::Ui::Windows
             bool firstItem = true;
             for (auto widgetIndex : toolbarItems)
             {
-                auto* widget = &widgets[widgetIndex];
-                if (widget->type == WidgetType::empty && widgetIndex != WIDX_SEPARATOR)
+                auto& widget = widgets[widgetIndex];
+                if (!widget.isVisible())
                     continue;
 
                 if (firstItem && widgetIndex == WIDX_SEPARATOR)
                     continue;
 
-                auto widgetWidth = widget->width() - 1;
-                widget->left = xPos;
+                auto widgetWidth = widget.width() - 1;
+                widget.left = xPos;
                 xPos += widgetWidth;
-                widget->right = xPos;
+                widget.right = xPos;
                 xPos += 1;
 
                 firstItem = false;
@@ -1314,12 +1260,20 @@ namespace OpenRCT2::Ui::Windows
 
         void AlignButtonsLeftRight()
         {
+            if (windowPos.x != 0)
+            {
+                invalidate();
+                windowPos.x = 0;
+                width = ContextGetWidth();
+                invalidate();
+            }
+
             // Align left hand side toolbar buttons
             AlignButtons(kWidgetOrderLeftGroup, 0);
 
             // Align right hand side toolbar buttons
             auto totalWidth = GetToolbarWidth(kWidgetOrderRightGroup);
-            auto xPos = ContextGetWidth() - totalWidth;
+            auto xPos = width - totalWidth;
             AlignButtons(kWidgetOrderRightGroup, xPos);
         }
 
@@ -1331,13 +1285,21 @@ namespace OpenRCT2::Ui::Windows
             // We'll start from the centre of the UI...
             auto xPos = (ContextGetWidth() - totalWidth) / 2;
 
+            if (windowPos.x != xPos)
+            {
+                invalidate();
+                windowPos.x = xPos;
+                width = totalWidth;
+                invalidate();
+            }
+
             // And finally, align the buttons in the centre
-            AlignButtons(kWidgetOrderCombined, xPos);
+            AlignButtons(kWidgetOrderCombined, 0);
         }
 
         void onPrepareDraw() override
         {
-            ResetWidgetToDefaultState();
+            ResetWidgetsToDefaultState();
             HideDisabledButtons();
             ApplyEditorMode();
 
@@ -1364,7 +1326,7 @@ namespace OpenRCT2::Ui::Windows
 
             ScreenCoordsXY screenPos{};
             // Draw staff button image (setting masks to the staff colours)
-            if (widgets[WIDX_STAFF].type != WidgetType::empty)
+            if (widgets[WIDX_STAFF].isVisible())
             {
                 screenPos = { windowPos.x + widgets[WIDX_STAFF].left, windowPos.y + widgets[WIDX_STAFF].top };
                 imgId = SPR_TOOLBAR_STAFF;
@@ -1375,7 +1337,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw fast forward button
-            if (widgets[WIDX_FASTFORWARD].type != WidgetType::empty)
+            if (widgets[WIDX_FASTFORWARD].isVisible())
             {
                 screenPos = { windowPos.x + widgets[WIDX_FASTFORWARD].left + 0,
                               windowPos.y + widgets[WIDX_FASTFORWARD].top + 0 };
@@ -1394,7 +1356,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw cheats button
-            if (widgets[WIDX_CHEATS].type != WidgetType::empty)
+            if (widgets[WIDX_CHEATS].isVisible())
             {
                 screenPos = windowPos + ScreenCoordsXY{ widgets[WIDX_CHEATS].left - 1, widgets[WIDX_CHEATS].top - 1 };
                 if (widgetIsPressed(*this, WIDX_CHEATS))
@@ -1412,7 +1374,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw chat button
-            if (widgets[WIDX_CHAT].type != WidgetType::empty)
+            if (widgets[WIDX_CHAT].isVisible())
             {
                 screenPos = windowPos + ScreenCoordsXY{ widgets[WIDX_CHAT].left, widgets[WIDX_CHAT].top - 2 };
                 if (widgetIsPressed(*this, WIDX_CHAT))
@@ -1421,7 +1383,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw debug button
-            if (widgets[WIDX_DEBUG].type != WidgetType::empty)
+            if (widgets[WIDX_DEBUG].isVisible())
             {
                 screenPos = windowPos + ScreenCoordsXY{ widgets[WIDX_DEBUG].left, widgets[WIDX_DEBUG].top - 1 };
                 if (widgetIsPressed(*this, WIDX_DEBUG))
@@ -1430,7 +1392,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw research button
-            if (widgets[WIDX_RESEARCH].type != WidgetType::empty)
+            if (widgets[WIDX_RESEARCH].isVisible())
             {
                 screenPos = windowPos + ScreenCoordsXY{ widgets[WIDX_RESEARCH].left - 1, widgets[WIDX_RESEARCH].top };
                 if (widgetIsPressed(*this, WIDX_RESEARCH))
@@ -1439,7 +1401,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw finances button
-            if (widgets[WIDX_FINANCES].type != WidgetType::empty)
+            if (widgets[WIDX_FINANCES].isVisible())
             {
                 screenPos = windowPos + ScreenCoordsXY{ widgets[WIDX_FINANCES].left + 3, widgets[WIDX_FINANCES].top + 1 };
                 if (widgetIsPressed(*this, WIDX_FINANCES))
@@ -1448,7 +1410,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw news button
-            if (widgets[WIDX_NEWS].type != WidgetType::empty)
+            if (widgets[WIDX_NEWS].isVisible())
             {
                 screenPos = windowPos + ScreenCoordsXY{ widgets[WIDX_NEWS].left + 3, widgets[WIDX_NEWS].top + 0 };
                 if (widgetIsPressed(*this, WIDX_NEWS))
@@ -1457,7 +1419,7 @@ namespace OpenRCT2::Ui::Windows
             }
 
             // Draw network button
-            if (widgets[WIDX_NETWORK].type != WidgetType::empty)
+            if (widgets[WIDX_NETWORK].isVisible())
             {
                 screenPos = windowPos + ScreenCoordsXY{ widgets[WIDX_NETWORK].left + 3, widgets[WIDX_NETWORK].top + 0 };
                 if (widgetIsPressed(*this, WIDX_NETWORK))
@@ -1474,7 +1436,7 @@ namespace OpenRCT2::Ui::Windows
                 drawText(rt, screenPos + ScreenCoordsXY{ 23, 1 }, STR_COMMA16, ft, { colour, TextAlignment::right });
             }
 
-            if (widgets[WIDX_ROTATE_ANTI_CLOCKWISE].type != WidgetType::empty)
+            if (widgets[WIDX_ROTATE_ANTI_CLOCKWISE].isVisible())
             {
                 screenPos = windowPos
                     + ScreenCoordsXY{ widgets[WIDX_ROTATE_ANTI_CLOCKWISE].left + 2,

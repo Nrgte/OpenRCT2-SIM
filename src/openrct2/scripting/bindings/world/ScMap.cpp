@@ -11,22 +11,17 @@
 
     #include "ScMap.hpp"
 
-    #include "../../../GameState.h"
     #include "../../../entity/Balloon.h"
     #include "../../../entity/Duck.h"
     #include "../../../entity/EntityList.h"
-    #include "../../../entity/Guest.h"
     #include "../../../entity/JumpingFountain.h"
-    #include "../../../entity/Litter.h"
     #include "../../../entity/MoneyEffect.h"
     #include "../../../entity/Particle.h"
     #include "../../../entity/Staff.h"
-    #include "../../../ride/Ride.h"
     #include "../../../ride/RideManager.hpp"
     #include "../../../ride/TrainManager.h"
     #include "../../../ride/Vehicle.h"
     #include "../entity/ScBalloon.hpp"
-    #include "../entity/ScEntity.hpp"
     #include "../entity/ScGuest.hpp"
     #include "../entity/ScLitter.hpp"
     #include "../entity/ScMoneyEffect.hpp"
@@ -35,6 +30,8 @@
     #include "../entity/ScVehicle.hpp"
     #include "../ride/ScRide.hpp"
     #include "../ride/ScTrackIterator.h"
+    #include "../world/ScPathConnection.h"
+    #include "../world/ScPathNavigator.h"
     #include "../world/ScTile.hpp"
 
 namespace OpenRCT2::Scripting
@@ -98,7 +95,7 @@ namespace OpenRCT2::Scripting
         if (id >= 0 && id < kMaxEntities)
         {
             auto spriteId = EntityId::FromUnderlying(id);
-            auto sprite = getGameState().entities.GetEntity(spriteId);
+            auto sprite = getGameState().entities.getEntity(spriteId);
             if (sprite != nullptr && sprite->type != EntityType::null)
             {
                 return GetEntityAsDukValue(ctx, sprite);
@@ -126,7 +123,7 @@ namespace OpenRCT2::Scripting
             {
                 for (auto carId = trainHead->id; !carId.IsNull();)
                 {
-                    auto car = getGameState().entities.GetEntity<Vehicle>(carId);
+                    auto car = getGameState().entities.getEntity<Vehicle>(carId);
 
                     if (car == nullptr)
                     {
@@ -189,7 +186,7 @@ namespace OpenRCT2::Scripting
         {
             for (auto sprite : EntityList<Staff>())
             {
-                auto staff = getGameState().entities.GetEntity<Staff>(sprite->id);
+                auto staff = getGameState().entities.getEntity<Staff>(sprite->id);
                 if (staff != nullptr)
                 {
                     switch (staff->assignedStaffType)
@@ -289,7 +286,7 @@ namespace OpenRCT2::Scripting
         {
             for (auto sprite : EntityTileList<Staff>(pos))
             {
-                auto staff = getGameState().entities.GetEntity<Staff>(sprite->id);
+                auto staff = getGameState().entities.getEntity<Staff>(sprite->id);
                 if (staff != nullptr)
                 {
                     switch (staff->assignedStaffType)
@@ -335,7 +332,7 @@ namespace OpenRCT2::Scripting
     template<typename TEntityType, typename TScriptType>
     JSValue createEntityType(JSContext* ctx, JSValue initializer)
     {
-        TEntityType* entity = getGameState().entities.CreateEntity<TEntityType>();
+        TEntityType* entity = getGameState().entities.createEntity<TEntityType>();
         if (entity == nullptr)
         {
             // Probably no more space for entities for this specified entity type.
@@ -357,7 +354,7 @@ namespace OpenRCT2::Scripting
         JSValue res;
         if (type == "car")
         {
-            Vehicle* entity = getGameState().entities.CreateEntity<Vehicle>();
+            Vehicle* entity = getGameState().entities.createEntity<Vehicle>();
             if (entity == nullptr)
             {
                 // Probably no more space for entities for this specified entity type.
@@ -449,6 +446,58 @@ namespace OpenRCT2::Scripting
         return ScTrackIterator::FromElement(ctx, position, elementIndex);
     }
 
+    static PathNavigationOptions ParsePathNavigationOptions(JSContext* ctx, JSValue obj)
+    {
+        PathNavigationOptions options;
+        if (!JS_IsObject(obj))
+            return options;
+
+        options.respectBanners = AsOrDefault(ctx, obj, "respectBanners", false);
+        options.includeGhosts = AsOrDefault(ctx, obj, "includeGhosts", false);
+        options.includeQueues = AsOrDefault(ctx, obj, "includeQueues", false);
+        options.includeWidePaths = AsOrDefault(ctx, obj, "includeWidePaths", false);
+        return options;
+    }
+
+    JSValue ScMap::getPathNavigator(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    {
+        JS_UNPACK_OBJECT(pos, ctx, argv[0]);
+
+        // Overloads:
+        //   (pos: CoordsXYZ)
+        //   (pos: CoordsXY, elementIndex: number)
+        //   (pos: CoordsXYZ, options: PathNavigationOptions)
+        //   (pos: CoordsXY, elementIndex: number, options: PathNavigationOptions)
+        // The second arg is the elementIndex if it's a number; otherwise it's options.
+        bool hasElementIndex = false;
+        uint32_t elementIndex = 0;
+        JSValue optionsArg = JS_UNDEFINED;
+
+        if (argc >= 2 && JS_IsNumber(argv[1]))
+        {
+            if (JS_ToUint32(ctx, &elementIndex, argv[1]) < 0)
+                return JS_EXCEPTION;
+            hasElementIndex = true;
+            if (argc >= 3)
+                optionsArg = argv[2];
+        }
+        else if (argc >= 2)
+        {
+            optionsArg = argv[1];
+        }
+
+        const auto options = ParsePathNavigationOptions(ctx, optionsArg);
+
+        if (hasElementIndex)
+        {
+            const auto position = JSToCoordsXY(ctx, pos);
+            return ScPathNavigator::fromElement(ctx, position, elementIndex, options);
+        }
+
+        const auto position = JSToCoordsXYZ(ctx, pos);
+        return ScPathNavigator::fromPosition(ctx, position, options);
+    }
+
     void ScMap::Register(JSContext* ctx)
     {
         static constexpr JSCFunctionListEntry funcs[] = {
@@ -463,6 +512,7 @@ namespace OpenRCT2::Scripting
             JS_CFUNC_DEF("getAllEntitiesOnTile", 2, ScMap::getAllEntitiesOnTile),
             JS_CFUNC_DEF("createEntity", 2, ScMap::createEntity),
             JS_CFUNC_DEF("getTrackIterator", 2, ScMap::getTrackIterator),
+            JS_CFUNC_DEF("getPathNavigator", 3, ScMap::getPathNavigator),
         };
         RegisterBase(ctx, "Map", nullptr, funcs);
     }
@@ -481,7 +531,7 @@ namespace OpenRCT2::Scripting
                 return ScVehicle::New(ctx, spriteId);
             case EntityType::staff:
             {
-                auto staff = getGameState().entities.GetEntity<Staff>(spriteId);
+                auto staff = getGameState().entities.getEntity<Staff>(spriteId);
                 if (staff != nullptr)
                 {
                     switch (staff->assignedStaffType)

@@ -7,9 +7,9 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#include <openrct2-ui/interface/Dropdown.h>
 #include <openrct2-ui/interface/Graph.h>
 #include <openrct2-ui/interface/Widget.h>
+#include <openrct2-ui/interface/Window.h>
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/GameState.h>
 #include <openrct2/SpriteIds.h>
@@ -22,12 +22,9 @@
 #include <openrct2/drawing/Text.h>
 #include <openrct2/localisation/Formatter.h>
 #include <openrct2/localisation/Formatting.h>
-#include <openrct2/localisation/Localisation.Date.h>
 #include <openrct2/management/Finance.h>
-#include <openrct2/ride/RideData.h>
 #include <openrct2/ride/ShopItem.h>
 #include <openrct2/ui/WindowManager.h>
-#include <openrct2/world/Park.h>
 
 namespace OpenRCT2::Ui::Windows
 {
@@ -226,7 +223,7 @@ namespace OpenRCT2::Ui::Windows
 
         void SetDisabledTabs()
         {
-            setWidgetDisabled(WIDX_TAB_5, (_parkData.flags & PARK_FLAGS_FORBID_MARKETING_CAMPAIGN) != 0);
+            setWidgetDisabled(WIDX_TAB_5, _parkData.flags.has(ParkFlag::forbidMarketingCampaigns));
         }
 
     public:
@@ -615,7 +612,7 @@ namespace OpenRCT2::Ui::Windows
 
             // Loan and interest rate
             drawText(rt, windowPos + ScreenCoordsXY{ 8, titleBarBottom + 265 }, STR_FINANCES_SUMMARY_LOAN);
-            if (!(_parkData.flags & PARK_FLAGS_RCT1_INTEREST))
+            if (!_parkData.flags.has(ParkFlag::rct1Interest))
             {
                 auto ft = Formatter();
                 ft.Add<uint16_t>(_parkData.bankLoanInterestRate);
@@ -681,18 +678,18 @@ namespace OpenRCT2::Ui::Windows
             y += 3;
             for (int32_t i = 0; i < ADVERTISING_CAMPAIGN_COUNT; i++)
             {
-                auto campaignButton = &widgets[WIDX_CAMPAIGN_1 + i];
-                auto marketingCampaign = MarketingGetCampaign(i);
+                auto& campaignButton = widgets[WIDX_CAMPAIGN_1 + i];
+                auto* marketingCampaign = MarketingGetCampaign(i);
                 if (marketingCampaign == nullptr && MarketingIsCampaignTypeApplicable(i))
                 {
-                    campaignButton->type = WidgetType::button;
-                    campaignButton->top = y;
-                    campaignButton->bottom = y + kButtonFaceHeight + 1;
-                    y += kButtonFaceHeight + 2;
+                    campaignButton.setVisible();
+                    campaignButton.top = y;
+                    campaignButton.bottom = y + kButtonFaceHeight;
+                    y += kButtonFaceHeight + 1;
                 }
                 else
                 {
-                    campaignButton->type = WidgetType::empty;
+                    campaignButton.setHidden();
                 }
             }
         }
@@ -760,7 +757,7 @@ namespace OpenRCT2::Ui::Windows
             for (int32_t i = 0; i < ADVERTISING_CAMPAIGN_COUNT; i++)
             {
                 auto campaignButton = &widgets[WIDX_CAMPAIGN_1 + i];
-                if (campaignButton->type != WidgetType::empty)
+                if (campaignButton->isVisible())
                 {
                     // Draw button text
                     screenCoords = windowPos + ScreenCoordsXY{ campaignButton->left, campaignButton->textTop() };

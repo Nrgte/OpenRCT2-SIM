@@ -17,12 +17,15 @@
 #include <deque>
 
 #include <future>
+#include "../Identifiers.h"
+
+using Direction = uint8_t;
+struct TileCoordsXYZ;
 
 namespace OpenRCT2
 {
     struct Guest;
     struct Peep;
-    struct TileElement;
 } // namespace OpenRCT2
 
 namespace OpenRCT2::PathFinding
@@ -54,9 +57,9 @@ namespace AdvancedPathfinding
         const TileCoordsXYZ& start, const TileCoordsXYZ& goal, OpenRCT2::Peep& guest, bool useProxyRides = true);
     std::deque<TileCoordsXYZ> AStarSearch(
         const TileCoordsXYZ& start, const TileCoordsXYZ& target, OpenRCT2::Peep& peep, bool useProxyRides,
-        Ride* ignoreThisProxyRide);
-    std::deque<StationIndex> GetSortedStationQueue(OpenRCT2::Peep& peep, Ride* ride);
+        OpenRCT2::Ride* ignoreThisProxyRide);
+    std::deque<StationIndex> GetSortedStationQueue(OpenRCT2::Peep& peep, OpenRCT2::Ride* ride);
     void CalculatePathfinding(
-        OpenRCT2::Guest& peep, Ride* ride, TileCoordsXYZ loc, std::promise<TileCoordsXYZ> promise);
+        OpenRCT2::Guest& peep, OpenRCT2::Ride* ride, TileCoordsXYZ loc, std::promise<TileCoordsXYZ> promise);
 };
 

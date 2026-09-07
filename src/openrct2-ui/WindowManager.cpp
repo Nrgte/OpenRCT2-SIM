@@ -13,7 +13,6 @@
 #include "interface/Theme.h"
 #include "interface/Window.h"
 #include "ride/VehicleSounds.h"
-#include "windows/Windows.h"
 
 #include <openrct2-ui/ProvisionalElements.h>
 #include <openrct2-ui/UiContext.h>
@@ -23,18 +22,15 @@
 #include <openrct2-ui/windows/Windows.h>
 #include <openrct2/Context.h>
 #include <openrct2/GameState.h>
-#include <openrct2/Input.h>
 #include <openrct2/OpenRCT2.h>
+#include <openrct2/audio/Audio.h>
 #include <openrct2/config/Config.h>
 #include <openrct2/core/Console.hpp>
 #include <openrct2/core/Guard.hpp>
 #include <openrct2/drawing/Drawing.h>
-#include <openrct2/entity/EntityRegistry.h>
 #include <openrct2/interface/Viewport.h>
-#include <openrct2/rct2/T6Exporter.h>
 #include <openrct2/ride/Ride.h>
 #include <openrct2/ride/RideConstruction.h>
-#include <openrct2/ride/Vehicle.h>
 #include <openrct2/ui/UiContext.h>
 #include <openrct2/ui/WindowManager.h>
 
@@ -78,6 +74,8 @@ public:
                 return ClearSceneryOpen();
             case WindowClass::customCurrencyConfig:
                 return CustomCurrencyOpen();
+            case WindowClass::dateInfoPanel:
+                return dateInfoPanelOpen();
             case WindowClass::debugPaint:
                 return DebugPaintOpen();
             case WindowClass::editorInventionList:
@@ -108,6 +106,8 @@ public:
                 return NewRideOpen();
             case WindowClass::parkInformation:
                 return ParkEntranceOpen();
+            case WindowClass::parkInfoPanel:
+                return parkInfoPanelOpen();
             case WindowClass::recentNews:
                 return NewsOpen();
             case WindowClass::rideConstruction:
@@ -162,6 +162,10 @@ public:
                 return AssetPacksOpen();
             case WindowClass::editorParkEntrance:
                 return EditorParkEntranceOpen();
+            case WindowClass::editorStepController:
+                return editorStepControllerOpen();
+            case WindowClass::editorStatusLine:
+                return editorStatusLineOpen();
             default:
                 Console::Error::WriteLine("Unhandled window class (%d)", wc);
                 return nullptr;
@@ -192,8 +196,6 @@ public:
                 return MazeConstructionOpen();
             case WindowView::networkPassword:
                 return NetworkStatusOpenPassword();
-            case WindowView::editorBottomToolbar:
-                return EditorBottomToolbarOpen();
             case WindowView::changelog:
                 return ChangelogOpen(WindowView::changelog);
             case WindowView::newVersionInfo:
@@ -504,29 +506,29 @@ public:
             }
 
             case INTENT_ACTION_UPDATE_CLIMATE:
-                gToolbarDirtyFlags |= BTM_TB_DIRTY_FLAG_CLIMATE;
+                InvalidateByClass(WindowClass::dateInfoPanel);
                 InvalidateByClass(WindowClass::guestList);
                 break;
 
             case INTENT_ACTION_UPDATE_GUEST_COUNT:
-                gToolbarDirtyFlags |= BTM_TB_DIRTY_FLAG_PEEP_COUNT;
                 InvalidateByClass(WindowClass::guestList);
                 InvalidateByClass(WindowClass::parkInformation);
+                InvalidateByClass(WindowClass::parkInfoPanel);
                 WindowGuestListRefreshList();
                 break;
 
             case INTENT_ACTION_UPDATE_PARK_RATING:
-                gToolbarDirtyFlags |= BTM_TB_DIRTY_FLAG_PARK_RATING;
                 InvalidateByClass(WindowClass::parkInformation);
+                InvalidateByClass(WindowClass::parkInfoPanel);
                 break;
 
             case INTENT_ACTION_UPDATE_DATE:
-                gToolbarDirtyFlags |= BTM_TB_DIRTY_FLAG_DATE;
+                InvalidateByClass(WindowClass::dateInfoPanel);
                 break;
 
             case INTENT_ACTION_UPDATE_CASH:
                 InvalidateByClass(WindowClass::finances);
-                gToolbarDirtyFlags |= BTM_TB_DIRTY_FLAG_MONEY;
+                InvalidateByClass(WindowClass::parkInfoPanel);
                 break;
 
             case INTENT_ACTION_UPDATE_BANNER:

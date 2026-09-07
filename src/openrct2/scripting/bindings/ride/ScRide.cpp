@@ -12,13 +12,12 @@
     #include "ScRide.hpp"
 
     #include "../../../Context.h"
-    #include "../../../core/EnumMap.hpp"
     #include "../../../core/UnitConversion.h"
     #include "../../../ride/Ride.h"
     #include "../../../ride/RideBreakdownMap.h"
     #include "../../../ride/RideData.h"
-    #include "../../ScriptEngine.h"
     #include "../object/ScObject.hpp"
+    #include "ScRideStation.hpp"
 
 namespace OpenRCT2::Scripting
 {
@@ -102,7 +101,7 @@ namespace OpenRCT2::Scripting
     Ride* ScRide::GetRide(JSValue thisVal)
     {
         RideData* data = GetRideData(thisVal);
-        return ::GetRide(data->_rideId);
+        return OpenRCT2::GetRide(data->_rideId);
     }
 
     JSValue ScRide::id_get(JSContext* ctx, JSValue thisVal)

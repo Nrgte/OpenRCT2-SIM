@@ -7,12 +7,24 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#include "WallSceneryEntry.h"
+#pragma once
+
+#include "../core/FlagHolder.hpp"
+
+struct CoordsXYZ;
 
 namespace OpenRCT2
 {
-    Audio::DoorSoundType WallSceneryEntry::getDoorSoundType() const
+    enum class OwnershipFlag : uint8_t
     {
-        return static_cast<Audio::DoorSoundType>((flags2 & WALL_SCENERY_2_DOOR_SOUND_MASK) >> WALL_SCENERY_2_DOOR_SOUND_SHIFT);
-    }
+        constructionRightsOwned,
+        landOwned,
+        constructionRightsForSale,
+        landForSale,
+    };
+    using OwnershipFlags = FlagHolder<uint8_t, OwnershipFlag>;
+
+    constexpr OwnershipFlags kUnowned = {};
+
+    OwnershipFlags CheckMaxAllowableLandRightsForTile(const CoordsXYZ& tileMapPos);
 } // namespace OpenRCT2

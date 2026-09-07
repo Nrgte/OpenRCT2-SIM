@@ -7,24 +7,17 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#pragma warning(disable : 4706) // assignment within conditional expression
-
 #include "WaterObject.h"
 
-#include "../OpenRCT2.h"
+#include "../core/Guard.hpp"
 #include "../core/IStream.hpp"
 #include "../core/Json.hpp"
 #include "../drawing/Drawing.h"
 #include "../drawing/ImageImporter.h"
 #include "../drawing/Text.h"
-#include "../localisation/Formatter.h"
+#include "../interface/ScreenCoords.hpp"
 #include "../localisation/Language.h"
 #include "../localisation/StringIds.h"
-#include "../world/Location.hpp"
-
-#include <array>
-#include <cstring>
-#include <memory>
 
 namespace OpenRCT2
 {

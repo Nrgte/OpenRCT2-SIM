@@ -7,14 +7,13 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#pragma warning(disable : 4706) // assignment within conditional expression
-
 #include "TerrainSurfaceObject.h"
 
 #include "../Context.h"
 #include "../core/Guard.hpp"
 #include "../core/Json.hpp"
 #include "../drawing/Drawing.h"
+#include "../interface/ScreenCoords.hpp"
 #include "../world/Location.hpp"
 #include "ObjectManager.h"
 

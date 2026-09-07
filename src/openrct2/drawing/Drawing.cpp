@@ -17,10 +17,10 @@
 #include "../SpriteIds.h"
 #include "../config/Config.h"
 #include "../core/Guard.hpp"
+#include "../interface/ScreenCoords.hpp"
 #include "../object/ObjectEntryManager.h"
 #include "../object/WaterEntry.h"
 #include "../util/Util.h"
-#include "../world/Location.hpp"
 #include "../world/Weather.h"
 #include "Drawing.Sprite.h"
 #include "FilterPaletteIds.h"
@@ -47,62 +47,9 @@ static constexpr uint8_t kPaletteLengthWaterSparkles = 5;
 static constexpr auto kPaletteOffsetAnimated = PaletteIndex::waterWaves0;
 static constexpr uint8_t kPaletteLengthAnimated = 16;
 
-static auto _defaultPaletteMapping = []() {
-    std::array<PaletteIndex, 256> res;
-    for (size_t i = 0; i < std::size(res); i++)
-    {
-        res[i] = static_cast<PaletteIndex>(i);
-    }
-    return res;
-}();
-
-PaletteMap PaletteMap::GetDefault()
-{
-    return PaletteMap(_defaultPaletteMapping);
-}
-
-PaletteIndex& PaletteMap::operator[](size_t index)
-{
-    return _data[index];
-}
-
-PaletteIndex PaletteMap::operator[](size_t index) const
-{
-    return _data[index];
-}
-
-PaletteIndex PaletteMap::Blend(PaletteIndex src, PaletteIndex dst) const
-{
-    const auto srcValue = EnumValue(src);
-    const auto dstValue = EnumValue(dst);
-#ifdef _DEBUG
-    // src = 0 would be transparent so there is no blend palette for that, hence (src - 1)
-    assert(src != PaletteIndex::transparent);
-    assert(static_cast<size_t>(srcValue - 1) < _numMaps);
-    assert(static_cast<size_t>(dstValue) < _mapLength);
-#endif
-    auto idx = ((srcValue - 1) * 256) + dstValue;
-    return _data[idx];
-}
-
-void PaletteMap::Copy(PaletteIndex dstIndex, const PaletteMap& src, PaletteIndex srcIndex, size_t length)
-{
-    auto srcOffset = EnumValue(srcIndex);
-    auto dstOffset = EnumValue(dstIndex);
-    auto maxLength = std::min(_data.size() - srcOffset, _data.size() - dstOffset);
-    assert(length <= maxLength);
-    auto copyLength = std::min(length, maxLength);
-    std::copy(src._data.begin() + srcOffset, src._data.begin() + srcOffset + copyLength, _data.begin() + dstOffset);
-}
-
 GamePalette gPalette;
 GamePalette gGamePalette;
 uint32_t gPaletteEffectFrame;
-
-ImageId gPickupPeepImage;
-int32_t gPickupPeepX;
-int32_t gPickupPeepY;
-ZoomLevel gPickupPeepZoom;
 
 bool gPaintForceRedraw{ false };
 
@@ -457,25 +404,25 @@ ImageCatalogue ImageId::GetCatalogue() const
     auto index = GetIndex();
     if (index >= SPR_TEMP_BEGIN && index < SPR_TEMP_END)
     {
-        return ImageCatalogue::TEMPORARY;
+        return ImageCatalogue::temporary;
     }
     if (index < SPR_RCTC_G1_END)
     {
-        return ImageCatalogue::G1;
+        return ImageCatalogue::g1;
     }
     if (index < SPR_G2_END)
     {
-        return ImageCatalogue::G2;
+        return ImageCatalogue::g2;
     }
     if (index < SPR_CSG_END)
     {
-        return ImageCatalogue::CSG;
+        return ImageCatalogue::csg;
     }
     if (index < SPR_IMAGE_LIST_END)
     {
-        return ImageCatalogue::OBJECT;
+        return ImageCatalogue::object;
     }
-    return ImageCatalogue::UNKNOWN;
+    return ImageCatalogue::unknown;
 }
 
 void GfxFilterPixel(RenderTarget& rt, const ScreenCoordsXY& coords, FilterPaletteID palette)
@@ -618,51 +565,6 @@ bool ClipRenderTarget(RenderTarget& dst, RenderTarget& src, const ScreenCoordsXY
     }
 
     return false;
-}
-
-constexpr std::array<int8_t, 3> kPickedUpPeepYOffsets = { 0, 16, 48 };
-
-void GfxInvalidatePickedUpPeep()
-{
-    if (!gPickupPeepImage.HasValue())
-        return;
-
-    auto* g1 = GfxGetG1Element(gPickupPeepImage);
-    if (g1 == nullptr)
-        return;
-
-    auto zoom = gPickupPeepZoom;
-    auto xOffset = -int8_t(gPickupPeepZoom);
-    auto yOffset = kPickedUpPeepYOffsets[xOffset];
-
-    int32_t left = gPickupPeepX + zoom.ApplyInversedTo(g1->xOffset) + xOffset;
-    int32_t top = gPickupPeepY + zoom.ApplyInversedTo(g1->yOffset) + yOffset;
-    int32_t right = left + zoom.ApplyInversedTo(g1->width);
-    int32_t bottom = top + zoom.ApplyInversedTo(g1->height);
-
-    GfxSetDirtyBlocks({ { left, top }, { right, bottom } });
-}
-
-void GfxDrawPickedUpPeep(RenderTarget& rt)
-{
-    if (!gPickupPeepImage.HasValue())
-        return;
-
-    assert(rt.zoom_level == ZoomLevel{ 0 });
-
-    auto zoom = gPickupPeepZoom;
-    auto xOffset = -int8_t(gPickupPeepZoom);
-    auto yOffset = kPickedUpPeepYOffsets[xOffset];
-
-    auto pos = ScreenCoordsXY{ zoom.ApplyTo(gPickupPeepX + xOffset), zoom.ApplyTo(gPickupPeepY + yOffset) };
-
-    rt.zoom_level = zoom;
-    rt.pitch = zoom.ApplyTo(rt.pitch);
-
-    GfxDrawSprite(rt, gPickupPeepImage, pos);
-
-    rt.pitch = zoom.ApplyInversedTo(rt.pitch);
-    rt.zoom_level = ZoomLevel{ 0 };
 }
 
 std::optional<uint32_t> GetPaletteG1Index(FilterPaletteID paletteId)

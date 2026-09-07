@@ -38,9 +38,9 @@ public:
     {
         return this->ID;
     }
-    Ride* getRide()
+    OpenRCT2::Ride* getRide()
     {
-        return GetRide(this->ID);
+        return OpenRCT2::GetRide(this->ID);
     }
     OpenRCT2::RideRating_t getMeasuredValue()
     {
@@ -87,6 +87,6 @@ public:
 //private:
     std::vector<GuestRideRating> RideIntensitySatisfaction{};
     std::deque<TileCoordsXYZ> PathfindingQueue;
-    std::vector<std::pair<Ride*, const RideStation*>> proxyRides;
+    std::vector<std::pair<OpenRCT2::Ride*, const OpenRCT2::RideStation*>> proxyRides;
 
 };

@@ -119,7 +119,7 @@ namespace OpenRCT2::GameActions
         }
         auto clear_z = z + (_isExit ? RideExitHeight : RideEntranceHeight);
         auto canBuild = MapCanConstructWithClearAt(
-            { _loc, z, clear_z }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, GetFlags(), kTileSlopeFlat);
+            { _loc, z, clear_z }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, GetFlags());
         if (canBuild.error != Status::ok)
         {
             canBuild.errorTitle = errorTitle;
@@ -188,8 +188,7 @@ namespace OpenRCT2::GameActions
 
         auto clear_z = z + (_isExit ? RideExitHeight : RideEntranceHeight);
         auto canBuild = MapCanConstructWithClearAt(
-            { _loc, z, clear_z }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, GetFlags().with(CommandFlag::apply),
-            kTileSlopeFlat);
+            { _loc, z, clear_z }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, GetFlags().with(CommandFlag::apply));
         if (canBuild.error != Status::ok)
         {
             canBuild.errorTitle = errorTitle;
@@ -206,9 +205,9 @@ namespace OpenRCT2::GameActions
 
         entranceElement->setDirection(_direction);
         entranceElement->setClearanceZ(clear_z);
-        entranceElement->SetEntranceType(_isExit ? ENTRANCE_TYPE_RIDE_EXIT : ENTRANCE_TYPE_RIDE_ENTRANCE);
-        entranceElement->SetStationIndex(_stationNum);
-        entranceElement->SetRideIndex(_rideIndex);
+        entranceElement->setEntranceType(_isExit ? EntranceType::rideExit : EntranceType::rideEntrance);
+        entranceElement->setStationIndex(_stationNum);
+        entranceElement->setRideIndex(_rideIndex);
         entranceElement->setGhost(GetFlags().has(CommandFlag::ghost));
 
         if (_isExit)
@@ -255,8 +254,7 @@ namespace OpenRCT2::GameActions
         }
         int16_t baseZ = loc.z;
         int16_t clearZ = baseZ + (isExit ? RideExitHeight : RideEntranceHeight);
-        auto canBuild = MapCanConstructWithClearAt(
-            { loc, baseZ, clearZ }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, {}, kTileSlopeFlat);
+        auto canBuild = MapCanConstructWithClearAt({ loc, baseZ, clearZ }, MapPlaceNonSceneryClearFunc, { 0b1111, 0 }, {});
         if (canBuild.error != Status::ok)
         {
             canBuild.errorTitle = errorTitle;

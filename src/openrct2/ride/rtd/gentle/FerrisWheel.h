@@ -11,12 +11,13 @@
 
 #include "../../../SpriteIds.h"
 #include "../../RideData.h"
+#include "../../RideStringIds.h"
 #include "../../ShopItem.h"
 
 // clang-format off
 namespace OpenRCT2
 {
-constexpr RideTypeDescriptor FerrisWheelRTD =
+constexpr RideTypeDescriptor kFerrisWheelRTD =
 {
     .Category = RideCategory::gentle,
     .StartTrackPiece = TrackElemType::flatTrack1x4C,
@@ -35,7 +36,7 @@ constexpr RideTypeDescriptor FerrisWheelRTD =
     .DefaultMode = RideMode::forwardRotation,
     .OperatingSettings = { 1, 3 },
     .Naming = { STR_RIDE_NAME_FERRIS_WHEEL, STR_RIDE_DESCRIPTION_FERRIS_WHEEL },
-    .NameConvention = { RideComponentType::Wheel, RideComponentType::Structure, RideComponentType::Station },
+    .NameConvention = { RideComponentType::wheel, RideComponentType::structure, RideComponentType::station },
     .availableBreakdowns = { Breakdown::safetyCutOut },
     .Heights = { 16, 176, 3, 2, },
     .MaxMass = 255,
@@ -52,18 +53,18 @@ constexpr RideTypeDescriptor FerrisWheelRTD =
         { Drawing::Colour::grey, Drawing::Colour::grey, Drawing::Colour::grey },
     ),
     .ColourPreview = { SPR_RIDE_DESIGN_PREVIEW_FERRIS_WHEEL_TRACK, 0 },
-    .ColourKey = RideColourKey::Ride,
+    .ColourKey = RideColourKey::ride,
     .Name = "ferris_wheel",
-    .RatingsData = 
+    .RatingsData =
     {
-        RatingsCalculationType::FlatRide,
+        RatingsCalculationType::flatRide,
         { RideRating::make(0, 60), RideRating::make(0, 25), RideRating::make(0, 30) },
         16,
         0,
         false,
         {
-            { RatingsModifierType::BonusRotations,        0,                25, 25, 25 },
-            { RatingsModifierType::BonusScenery,          0,                41831, 0, 0 },
+            { RatingsModifierType::bonusRotations,        0,                25, 25, 25 },
+            { RatingsModifierType::bonusScenery,          0,                41831, 0, 0 },
         },
     },
 };
