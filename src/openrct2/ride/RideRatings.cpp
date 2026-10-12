@@ -103,7 +103,7 @@ namespace OpenRCT2
     static void ride_ratings_begin_proximity_loop(RideRating::UpdateState& state);
     static void RideRatingsCalculate(RideRating::UpdateState& state, Ride& ride);
     static void RideRatingsCalculateValue(Ride& ride);
-    static void RideRatingsCalculateValueOriginal(Ride& ride);
+    static void RideRatingsCalculateValueSIM(Ride& ride);
     static void ride_ratings_score_close_proximity(RideRating::UpdateState& state, TileElement* inputTileElement);
     static void RideRatingsAdd(RideRating::Tuple& ratings, int32_t excitement, int32_t intensity, int32_t nausea);
 
@@ -442,7 +442,7 @@ namespace OpenRCT2
         }
 
         RideRatingsCalculate(state, *ride);
-        RideRatingsCalculateValueOriginal(*ride);
+        RideRatingsCalculateValueSIM(*ride);
 
         state.State = RIDE_RATINGS_STATE_FIND_NEXT_RIDE;
     }
@@ -1103,6 +1103,7 @@ namespace OpenRCT2
 #endif
     }
 
+    /*
     static void RideRatingsCalculateValue(Ride& ride)
     {
         struct Row
@@ -1138,15 +1139,7 @@ namespace OpenRCT2
             + (((ride.ratings.nausea * ratingsMultipliers.nausea) * 32) >> 15);
 
         newValue /= 2;
-        /*
-        std::string ratMult = "Ride: " + ride.GetName() + ": " + ride.GetRideTypeDescriptor().EnumName + " ; ratingsMultiplier:
-        ("
-            + std::to_string(ratingsMultipliers.Excitement) + "," + std::to_string(ratingsMultipliers.Intensity) + ","
-            + std::to_string(ratingsMultipliers.Nausea) + ") ; Values = (" + std::to_string(value) + ";" +
-        std::to_string(newValue)
-            + ")\n";
-        OutputDebugStringA(ratMult.c_str());
-        */
+
         if (!ride.getRideTypeDescriptor().flags.has(RtdFlag::isFlatRide))
             value = newValue;
 
@@ -1187,7 +1180,7 @@ namespace OpenRCT2
             value -= value / 4;
 
         ride.value = std::max(0.00_GBP, value);
-    }
+    }*/
 
     /**
      * I think this function computes ride upkeep? Though it is weird that the
@@ -2320,7 +2313,7 @@ namespace OpenRCT2
         excitement = kUndefined;
     }
 
-    static void RideRatingsCalculateValueOriginal(Ride& ride)
+    static void RideRatingsCalculateValueSIM(Ride& ride)
     {
         struct Row
         {
