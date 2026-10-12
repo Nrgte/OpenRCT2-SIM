@@ -457,7 +457,7 @@ namespace OpenRCT2
             return;
 
         const auto& currentStation = curRide->getStation(curRide->currentTestStation);
-        if (!currentStation.Entrance.IsNull())
+        if (!currentStation.entrance.isNull())
         {
             uint8_t test_segment = curRide->currentTestSegment;
             StationIndex stationIndex = StationIndex::FromUnderlying(test_segment);
@@ -476,13 +476,13 @@ namespace OpenRCT2
             if (curRide->averageSpeedTestTimeout == 0 && absVelocity > 0)
             {
                 curRide->averageSpeed = AddClamp<int32_t>(curRide->averageSpeed, absVelocity);
-                stationForTestSegment.SegmentTime++;
+                stationForTestSegment.segmentTime++;
             }
 
             int32_t distance = abs(((velocity + acceleration) >> 10) * 42);
             if (NumLaps == 0)
             {
-                stationForTestSegment.SegmentLength = AddClamp<int32_t>(stationForTestSegment.SegmentLength, distance);
+                stationForTestSegment.segmentLength = AddClamp<int32_t>(stationForTestSegment.segmentLength, distance);
             }
 
             if (curRide->getRideTypeDescriptor().flags.has(RtdFlag::hasGForces))
@@ -517,7 +517,7 @@ namespace OpenRCT2
         {
             curRide->curTestTrackLocation = curTrackLoc;
 
-            if (currentStation.Entrance.IsNull())
+            if (currentStation.entrance.isNull())
                 return;
 
             auto trackElemType = GetTrackType();
@@ -705,7 +705,7 @@ namespace OpenRCT2
             }
         }
 
-        if (currentStation.Entrance.IsNull())
+        if (currentStation.entrance.isNull())
             return;
 
         if (x == kLocationNull)
@@ -917,309 +917,6 @@ namespace OpenRCT2
         }
     }
 
-    struct SynchronisedVehicle
-    {
-        RideId ride_id;
-        StationIndex stationIndex;
-        EntityId vehicle_id;
-    };
-
-    constexpr int32_t SYNCHRONISED_VEHICLE_COUNT = 16;
-
-    // Synchronised vehicle info
-    static SynchronisedVehicle _synchronisedVehicles[SYNCHRONISED_VEHICLE_COUNT] = {};
-
-    static SynchronisedVehicle* _lastSynchronisedVehicle = nullptr;
-
-    /**
-     * Checks if a map position contains a synchronised ride station and adds the vehicle
-     * to synchronise to the vehicle synchronisation list.
-     *  rct2: 0x006DE1A4
-     */
-    static bool try_add_synchronised_station(const CoordsXYZ& coords)
-    {
-        // make sure we are in map bounds
-        if (!MapIsLocationValid(coords))
-        {
-            return false;
-        }
-
-        TileElement* tileElement = GetStationPlatform({ coords, coords.z + 2 * kCoordsZStep });
-        if (tileElement == nullptr)
-        {
-            /* No station platform element found,
-             * so no station to synchronise */
-            return false;
-        }
-
-        auto rideIndex = tileElement->asTrack()->getRideIndex();
-        auto ride = GetRide(rideIndex);
-        if (ride == nullptr || !(ride->departFlags & RIDE_DEPART_SYNCHRONISE_WITH_ADJACENT_STATIONS))
-        {
-            /* Ride is not set to synchronise with adjacent stations. */
-            return false;
-        }
-
-        /* From this point on, the ride of the map element is one that is set
-         * to sync with adjacent stations, so it will return true.
-         * Still to determine if a vehicle to sync can be identified. */
-
-        auto stationIndex = tileElement->asTrack()->getStationIndex();
-
-        SynchronisedVehicle* sv = _lastSynchronisedVehicle;
-        sv->ride_id = rideIndex;
-        sv->stationIndex = stationIndex;
-        sv->vehicle_id = EntityId::GetNull();
-        _lastSynchronisedVehicle++;
-
-        /* Ride vehicles are not on the track (e.g. ride is/was under
-         * construction), so just return; vehicle_id for this station
-         * is SPRITE_INDEX_NULL. */
-        if (!(ride->flags.has(RideFlag::onTrack)))
-        {
-            return true;
-        }
-
-        /* Station is not ready to depart, so just return;
-         * vehicle_id for this station is SPRITE_INDEX_NULL. */
-        if (!(ride->getStation(stationIndex).Depart & kStationDepartFlag))
-        {
-            return true;
-        }
-
-        // Look for a vehicle on this station waiting to depart.
-        for (int32_t i = 0; i < ride->numTrains; i++)
-        {
-            auto* vehicle = getGameState().entities.getEntity<Vehicle>(ride->vehicles[i]);
-            if (vehicle == nullptr)
-            {
-                continue;
-            }
-
-            if (vehicle->status != Vehicle::Status::waitingToDepart)
-            {
-                continue;
-            }
-            if (vehicle->sub_state != 0)
-            {
-                continue;
-            }
-            if (!vehicle->flags.has(VehicleFlag::waitingOnAdjacentStation))
-            {
-                continue;
-            }
-            if (vehicle->current_station != stationIndex)
-            {
-                continue;
-            }
-
-            sv->vehicle_id = vehicle->id;
-            return true;
-        }
-
-        /* No vehicle found waiting to depart (with sync adjacent) at the
-         * station, so just return; vehicle_id for this station is
-         * SPRITE_INDEX_NULL. */
-        return true;
-    }
-
-    /**
-     * Checks whether a vehicle can depart a station when set to synchronise with adjacent stations.
-     *  rct2: 0x006DE287
-     * @param vehicle The vehicle waiting to depart.
-     * @returns true if the vehicle can depart (all adjacent trains are ready or broken down), otherwise false.
-     *
-     * Permits vehicles to depart in two ways:
-     *  Returns true, permitting the vehicle in the param to depart immediately;
-     *  The vehicle flag VehicleFlags::WaitingOnAdjacentStation is cleared for those
-     *  vehicles that depart in sync with the vehicle in the param.
-     */
-    static bool ride_station_can_depart_synchronised(const Ride& ride, StationIndex stationIndex)
-    {
-        const auto& station = ride.getStation(stationIndex);
-        auto location = station.GetStart();
-
-        auto tileElement = MapGetTrackElementAt(location);
-        if (tileElement == nullptr)
-        {
-            return false;
-        }
-
-        // Reset the list of synchronised vehicles to empty.
-        _lastSynchronisedVehicle = _synchronisedVehicles;
-
-        /* Search for stations to sync in both directions from the current tile.
-         * We allow for some space between stations, and every time a station
-         *  is found we allow for space between that and the next.
-         */
-
-        int32_t direction = tileElement->getDirectionWithOffset(1);
-        constexpr uint8_t maxCheckDistance = kRideAdjacencyCheckDistance;
-        uint8_t spaceBetween = maxCheckDistance;
-
-        while (_lastSynchronisedVehicle < &_synchronisedVehicles[SYNCHRONISED_VEHICLE_COUNT - 1])
-        {
-            location += CoordsXYZ{ CoordsDirectionDelta[direction], 0 };
-            if (try_add_synchronised_station(location))
-            {
-                spaceBetween = maxCheckDistance;
-                continue;
-            }
-            if (spaceBetween-- == 0)
-            {
-                break;
-            }
-        }
-
-        // Other search direction.
-        location = station.GetStart();
-        direction = DirectionReverse(direction) & 3;
-        spaceBetween = maxCheckDistance;
-        while (_lastSynchronisedVehicle < &_synchronisedVehicles[SYNCHRONISED_VEHICLE_COUNT - 1])
-        {
-            location += CoordsXYZ{ CoordsDirectionDelta[direction], 0 };
-            if (try_add_synchronised_station(location))
-            {
-                spaceBetween = maxCheckDistance;
-                continue;
-            }
-            if (spaceBetween-- == 0)
-            {
-                break;
-            }
-        }
-
-        if (_lastSynchronisedVehicle == _synchronisedVehicles)
-        {
-            // No adjacent stations, allow depart
-            return true;
-        }
-
-        for (SynchronisedVehicle* sv = _synchronisedVehicles; sv < _lastSynchronisedVehicle; sv++)
-        {
-            Ride* sv_ride = GetRide(sv->ride_id);
-
-            if (!(sv_ride->flags.has(RideFlag::brokenDown)))
-            {
-                if (sv_ride->status != RideStatus::closed)
-                {
-                    if (sv_ride->isBlockSectioned())
-                    {
-                        if (!(sv_ride->getStation(sv->stationIndex).Depart & kStationDepartFlag))
-                        {
-                            sv = _synchronisedVehicles;
-                            RideId rideId = RideId::GetNull();
-                            for (; sv < _lastSynchronisedVehicle; sv++)
-                            {
-                                if (rideId.IsNull())
-                                {
-                                    rideId = sv->ride_id;
-                                }
-                                if (rideId != sv->ride_id)
-                                {
-                                    // Here the sync-ed stations are not all from the same ride.
-                                    return false;
-                                }
-                            }
-
-                            /* Here all the of sync-ed stations are from the same ride */
-                            auto curRide = GetRide(rideId);
-                            if (curRide != nullptr)
-                            {
-                                for (int32_t i = 0; i < curRide->numTrains; i++)
-                                {
-                                    Vehicle* v = getGameState().entities.getEntity<Vehicle>(curRide->vehicles[i]);
-                                    if (v == nullptr)
-                                    {
-                                        continue;
-                                    }
-                                    if (v->status != Vehicle::Status::waitingToDepart && v->velocity != 0)
-                                    {
-                                        // Here at least one vehicle on the ride is moving.
-                                        return false;
-                                    }
-                                }
-                            }
-
-                            // UNCERTAIN: is the return desired here, or rather continue on with the general checks?
-                            return true;
-                        }
-                    }
-                    // There is no vehicle waiting at this station to sync with.
-                    if (sv->vehicle_id.IsNull())
-                    {
-                        // Check conditions for departing without all stations being in sync.
-                        if (_lastSynchronisedVehicle > &_synchronisedVehicles[1])
-                        {
-                            // Sync condition: there are at least 3 stations to sync
-                            return false;
-                        }
-                        RideId someRideIndex = _synchronisedVehicles[0].ride_id;
-                        if (someRideIndex != ride.id)
-                        {
-                            // Sync condition: the first station to sync is a different ride
-                            return false;
-                        }
-
-                        int32_t numTrainsAtStation = 0;
-                        int32_t numTravelingTrains = 0;
-                        auto currentStation = sv->stationIndex;
-                        for (int32_t i = 0; i < sv_ride->numTrains; i++)
-                        {
-                            auto* otherVehicle = getGameState().entities.getEntity<Vehicle>(sv_ride->vehicles[i]);
-                            if (otherVehicle == nullptr)
-                            {
-                                continue;
-                            }
-                            if (otherVehicle->status != Vehicle::Status::travelling)
-                            {
-                                if (currentStation == otherVehicle->current_station)
-                                {
-                                    if (otherVehicle->status == Vehicle::Status::waitingToDepart
-                                        || otherVehicle->status == Vehicle::Status::movingToEndOfStation)
-                                    {
-                                        numTrainsAtStation++;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                numTravelingTrains++;
-                            }
-                        }
-
-                        int32_t totalTrains = numTrainsAtStation + numTravelingTrains;
-                        if (totalTrains != sv_ride->numTrains || numTravelingTrains >= sv_ride->numTrains / 2)
-                        {
-                            // if (numArrivingTrains > 0 || numTravelingTrains >= sv_ride->numTrains / 2) {
-                            /* Sync condition: If there are trains arriving at the
-                             * station or half or more of the ride trains are
-                             * travelling, this station must be sync-ed before the
-                             * trains can depart! */
-                            return false;
-                        }
-
-                        /* Sync exception - train is not arriving at the station
-                         * and there are less than half the trains for the ride
-                         * travelling. */
-                    }
-                }
-            }
-        }
-
-        // At this point all vehicles in _snychronisedVehicles can depart.
-        for (SynchronisedVehicle* sv = _synchronisedVehicles; sv < _lastSynchronisedVehicle; sv++)
-        {
-            auto v = getGameState().entities.getEntity<Vehicle>(sv->vehicle_id);
-            if (v != nullptr)
-            {
-                v->flags.unset(VehicleFlag::waitingOnAdjacentStation);
-            }
-        }
-
-        return true;
-    }
-
     /**
      * Performed when vehicle has completed a full circuit
      *  rct2: 0x006D7338
@@ -1233,22 +930,22 @@ namespace OpenRCT2
         auto rideStations = ride.getStations();
         for (int32_t i = ride.numStations - 1; i >= 1; i--)
         {
-            if (rideStations[i - 1].SegmentTime != 0)
+            if (rideStations[i - 1].segmentTime != 0)
                 continue;
 
-            uint16_t oldTime = rideStations[i - 1].SegmentTime;
-            rideStations[i - 1].SegmentTime = rideStations[i].SegmentTime;
-            rideStations[i].SegmentTime = oldTime;
+            uint16_t oldTime = rideStations[i - 1].segmentTime;
+            rideStations[i - 1].segmentTime = rideStations[i].segmentTime;
+            rideStations[i].segmentTime = oldTime;
 
-            int32_t oldLength = rideStations[i - 1].SegmentLength;
-            rideStations[i - 1].SegmentLength = rideStations[i].SegmentLength;
-            rideStations[i].SegmentLength = oldLength;
+            int32_t oldLength = rideStations[i - 1].segmentLength;
+            rideStations[i - 1].segmentLength = rideStations[i].segmentLength;
+            rideStations[i].segmentLength = oldLength;
         }
 
         uint32_t totalTime = 0;
         for (uint8_t i = 0; i < ride.numStations; ++i)
         {
-            totalTime += rideStations[i].SegmentTime;
+            totalTime += rideStations[i].segmentTime;
         }
 
         totalTime = std::max(totalTime, 1u);
@@ -1285,7 +982,7 @@ namespace OpenRCT2
         ride.previousVerticalG = MakeFixed16_2dp(1, 0);
         ride.previousLateralG = 0;
         ride.testingFlags.clearAll();
-        ride.curTestTrackLocation.SetNull();
+        ride.curTestTrackLocation.setNull();
         ride.turnCountDefault = 0;
         ride.turnCountBanked = 0;
         ride.turnCountSloped = 0;
@@ -1302,8 +999,8 @@ namespace OpenRCT2
         ride.specialTrackElements.clearAll();
         for (auto& station : ride.getStations())
         {
-            station.SegmentLength = 0;
-            station.SegmentTime = 0;
+            station.segmentLength = 0;
+            station.segmentTime = 0;
         }
         ride.totalAirTime = 0;
         ride.currentTestStation = curStation;
@@ -1451,7 +1148,7 @@ namespace OpenRCT2
 
         // This is slightly different to the vanilla function
         auto& currentStation = curRide->getStation(current_station);
-        currentStation.Depart &= kStationDepartFlag;
+        currentStation.depart &= kStationDepartFlag;
         uint8_t waitingTime = 3;
         if (curRide->departFlags & RIDE_DEPART_WAIT_FOR_MINIMUM_LENGTH)
         {
@@ -1459,7 +1156,7 @@ namespace OpenRCT2
             waitingTime = std::min(waitingTime, static_cast<uint8_t>(127));
         }
 
-        currentStation.Depart |= waitingTime;
+        currentStation.depart |= waitingTime;
     }
 
     /**
@@ -1710,8 +1407,11 @@ namespace OpenRCT2
                     {
                         break;
                     }
-                    xyElement.x = output.begin_x;
-                    xyElement.y = output.begin_y;
+
+                    // Working backwards, begin_element is the section at the end of a piece of track, whereas begin_x and
+                    // begin_y are the coordinates at its start, so the element has to be paired with end_x and end_y
+                    xyElement.x = output.end_x;
+                    xyElement.y = output.end_y;
                     xyElement.element = output.begin_element;
                 }
 
@@ -1740,8 +1440,10 @@ namespace OpenRCT2
             {
                 if (trackBlockGetPrevious(xyElement, &output))
                 {
-                    xyElement.x = output.begin_x;
-                    xyElement.y = output.begin_y;
+                    // Working backwards, begin_element is the section at the end of a piece of track, whereas begin_x and
+                    // begin_y are the coordinates at its start, so the element has to be paired with end_x and end_y
+                    xyElement.x = output.end_x;
+                    xyElement.y = output.end_y;
                     xyElement.element = output.begin_element;
                 }
             }

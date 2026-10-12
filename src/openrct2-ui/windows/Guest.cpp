@@ -39,6 +39,7 @@
 #include <openrct2/network/Network.h>
 #include <openrct2/object/ObjectManager.h>
 #include <openrct2/object/PeepAnimationsObject.h>
+#include <openrct2/peep/PeepActionFormat.h>
 #include <openrct2/peep/PeepSpriteIds.h>
 #include <openrct2/ride/RideManager.hpp>
 #include <openrct2/ride/ShopItem.h>
@@ -522,8 +523,8 @@ namespace OpenRCT2::Ui::Windows
             bool listen = false;
             if (newPage == WINDOW_GUEST_OVERVIEW && page == WINDOW_GUEST_OVERVIEW && viewport != nullptr)
             {
-                viewport->flags ^= VIEWPORT_FLAG_SOUND_ON;
-                listen = (viewport->flags & VIEWPORT_FLAG_SOUND_ON) != 0;
+                viewport->flags.flip(ViewportFlag::soundOn);
+                listen = viewport->flags.has(ViewportFlag::soundOn);
             }
 
             // Skip setting page if we're already on this page, unless we're initialising the window
@@ -546,7 +547,7 @@ namespace OpenRCT2::Ui::Windows
             invalidate();
 
             if (listen && viewport != nullptr)
-                viewport->flags |= VIEWPORT_FLAG_SOUND_ON;
+                viewport->flags.set(ViewportFlag::soundOn);
         }
 
 #pragma region Overview
@@ -662,7 +663,7 @@ namespace OpenRCT2::Ui::Windows
                     }
                     _pickedPeepX = peep->x;
                     CoordsXYZ nullLoc{};
-                    nullLoc.SetNull();
+                    nullLoc.setNull();
                     GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::pickup,
                                                                 EntityId::FromUnderlying(number), nullLoc,
                                                                 Network::GetCurrentPlayerId() };
@@ -757,7 +758,7 @@ namespace OpenRCT2::Ui::Windows
 
             ViewportUpdateSmartFollowGuest(this, *peep);
             bool reCreateViewport = false;
-            uint16_t origViewportFlags{};
+            ViewportFlags origViewportFlags{};
             if (viewport != nullptr)
             {
                 if (focus.has_value())
@@ -804,7 +805,7 @@ namespace OpenRCT2::Ui::Windows
             if (viewport != nullptr)
             {
                 WindowDrawViewport(rt, *this);
-                if (viewport->flags & VIEWPORT_FLAG_SOUND_ON)
+                if (viewport->flags.has(ViewportFlag::soundOn))
                 {
                     GfxDrawSprite(rt, ImageId(SPR_HEARING_VIEWPORT), WindowGetViewportSoundIconPos(*this));
                 }
@@ -822,7 +823,7 @@ namespace OpenRCT2::Ui::Windows
 
             {
                 auto ft = Formatter();
-                peep->formatActionTo(ft, true);
+                formatPeepActionTo(*peep, ft);
                 int32_t textWidth = actionLabelWidget.width();
                 drawTextEllipsised(rt, screenPos, textWidth, STR_BLACK_STRING, ft, { TextAlignment::centre });
             }
@@ -994,7 +995,7 @@ namespace OpenRCT2::Ui::Windows
             gMapSelectFlags.unset(MapSelectFlag::enable);
 
             auto mapCoords = FootpathGetCoordinatesFromPos({ screenCoords.x, screenCoords.y + 16 }, nullptr, nullptr);
-            if (!mapCoords.IsNull())
+            if (!mapCoords.isNull())
             {
                 gMapSelectFlags.set(MapSelectFlag::enable);
                 gMapSelectType = MapSelectType::full;
@@ -1032,7 +1033,7 @@ namespace OpenRCT2::Ui::Windows
             TileElement* tileElement;
             auto destCoords = FootpathGetCoordinatesFromPos({ screenCoords.x, screenCoords.y + 16 }, nullptr, &tileElement);
 
-            if (destCoords.IsNull())
+            if (destCoords.isNull())
                 return;
 
             GameActions::PeepPickupAction pickupAction{ GameActions::PeepPickupType::place,

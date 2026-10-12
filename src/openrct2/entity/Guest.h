@@ -351,14 +351,14 @@ namespace OpenRCT2
         Drawing::Colour hatColour;
         RideId favouriteRide;
         uint8_t favouriteRideRating;
-        uint64_t itemFlags;
+        ShopItems itemFlags;
 
         uint8_t FailedGoOnRideChecks;
 
         void update();
         void tick128UpdateGuest(uint32_t index);
-        uint64_t getFoodOrDrinkFlags() const;
-        uint64_t getEmptyContainerFlags() const;
+        ShopItems getFoodOrDrinkFlags() const;
+        ShopItems getEmptyContainerFlags() const;
         bool hasDrink() const;
         bool hasFoodOrDrink() const;
         bool hasEmptyContainer() const;
@@ -388,7 +388,7 @@ namespace OpenRCT2
         bool updateQueuePosition(PeepActionType previous_action);
         void removeFromQueue();
 
-        uint64_t getItemFlags() const;
+        ShopItems getItemFlags() const;
         void setItemFlags(uint64_t value);
         void removeAllItems();
         void removeItem(ShopItem item);
@@ -406,8 +406,8 @@ namespace OpenRCT2
         void throwUp();
 
         void initAGS(std::vector<RideId> rides);
-        Ride* getNextProxyRide();
-        const RideStation* getNextProxyRideStation();
+        Ride* getNextProxyRide() const;
+        const RideStation* getNextProxyRideStation() const;
         bool shouldExitOnRideStation(const Ride& ride, const RideStation& station);
         void sendGuestToRide(Ride& ride);
         Ride* getNearestRideByType(ride_type_t ride_type);

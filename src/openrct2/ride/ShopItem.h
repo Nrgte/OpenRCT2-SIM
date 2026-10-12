@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "../core/FlagHolder.hpp"
 #include "../core/Money.hpp"
 #include "../entity/Litter.h"
 
@@ -76,6 +77,7 @@ enum class ShopItem : uint8_t
     count = 56,
     none = 255
 };
+using ShopItems = FlagHolder<uint64_t, ShopItem>;
 
 ShopItem& operator++(ShopItem& d, int);
 
@@ -118,9 +120,9 @@ struct ShopItemDescriptor
     bool IsRecolourable() const;
 };
 
-uint64_t ShopItemsGetAllFoods();
-uint64_t ShopItemsGetAllDrinks();
-uint64_t ShopItemsGetAllContainers();
+ShopItems ShopItemsGetAllFoods();
+ShopItems ShopItemsGetAllDrinks();
+ShopItems ShopItemsGetAllContainers();
 
 enum
 {

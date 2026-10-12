@@ -89,6 +89,7 @@ namespace OpenRCT2::RCT2
         bool _isSV7 = false;
         bool _isScenario = false;
         OpenRCT2::BitSet<Limits::kMaxRidesInPark> _isFlatRide{};
+        ObjectEntryIndex _terrainSurfaceTypeToEntryMap[32]{};
         ObjectEntryIndex _pathToSurfaceMap[16];
         ObjectEntryIndex _pathToQueueSurfaceMap[16];
         ObjectEntryIndex _pathToRailingMap[16];
@@ -524,7 +525,7 @@ namespace OpenRCT2::RCT2
             park.samePriceThroughoutPark = _s6.SamePriceThroughout
                 | (static_cast<uint64_t>(_s6.SamePriceThroughoutExtended) << 32);
             park.suggestedGuestMaximum = _s6.SuggestedMaxGuests;
-            gameState.scenarioParkRatingWarningDays = _s6.ParkRatingWarningDays;
+            park.scenarioParkRatingWarningDays = _s6.ParkRatingWarningDays;
             gameState.lastEntranceStyle = _s6.LastEntranceStyle;
             // rct1_water_colour
             // Pad01358842
@@ -566,7 +567,7 @@ namespace OpenRCT2::RCT2
 
             ImportMapAnimations();
 
-            ImportRideRatingsCalcData();
+            ImportRideRatingsCalcData(gameState);
             ImportRideMeasurements();
             gameState.nextGuestNumber = _s6.NextGuestIndex;
             gameState.grassSceneryTileLoopPosition = _s6.GrassAndSceneryTilepos;
@@ -596,7 +597,7 @@ namespace OpenRCT2::RCT2
             // News items
             auto recentMessages = convertNewsQueue(_s6.recentMessages);
             auto archivedMessages = convertNewsQueue(_s6.archivedMessages);
-            News::importNewsItems(gameState, recentMessages, archivedMessages);
+            News::importNewsItems(park.newsItems, recentMessages, archivedMessages);
 
             // Pad13CE730
             // rct1_scenario_flags
@@ -632,7 +633,10 @@ namespace OpenRCT2::RCT2
         void AddDefaultEntries()
         {
             // Add default surfaces
-            _terrainSurfaceEntries.AddRange(DefaultTerrainSurfaces);
+            for (size_t i = 0; i < std::size(kDefaultTerrainSurfaces); i++)
+            {
+                _terrainSurfaceTypeToEntryMap[i] = _terrainSurfaceEntries.GetOrAddEntry(kDefaultTerrainSurfaces[i]);
+            }
 
             // Add default edges
             _terrainEdgeEntries.AddRange(DefaultTerrainEdges);
@@ -758,12 +762,12 @@ namespace OpenRCT2::RCT2
 
             if (src->overallView.IsNull())
             {
-                dst->overallView.SetNull();
+                dst->overallView.setNull();
             }
             else
             {
                 auto tileLoc = TileCoordsXY(src->overallView.x, src->overallView.y);
-                dst->overallView = tileLoc.ToCoordsXY();
+                dst->overallView = tileLoc.toCoordsXY();
             }
 
             for (StationIndex::UnderlyingType i = 0; i < Limits::kMaxStationsPerRide; i++)
@@ -773,37 +777,37 @@ namespace OpenRCT2::RCT2
 
                 if (src->stationStarts[i].IsNull())
                 {
-                    destStation.Start.SetNull();
+                    destStation.start.setNull();
                 }
                 else
                 {
                     auto tileStartLoc = TileCoordsXY(src->stationStarts[i].x, src->stationStarts[i].y);
-                    destStation.Start = tileStartLoc.ToCoordsXY();
+                    destStation.start = tileStartLoc.toCoordsXY();
                 }
-                destStation.Height = src->stationHeights[i];
-                destStation.Length = src->stationLength[i];
-                destStation.Depart = src->stationDepart[i];
-                destStation.TrainAtStation = src->trainAtStation[i];
+                destStation.height = src->stationHeights[i];
+                destStation.length = src->stationLength[i];
+                destStation.depart = src->stationDepart[i];
+                destStation.trainAtStation = src->trainAtStation[i];
                 // Direction is fixed later.
 
                 if (src->entrances[i].IsNull())
-                    destStation.Entrance.SetNull();
+                    destStation.entrance.setNull();
                 else
-                    destStation.Entrance = { src->entrances[i].x, src->entrances[i].y, src->stationHeights[i], 0 };
+                    destStation.entrance = { src->entrances[i].x, src->entrances[i].y, src->stationHeights[i], 0 };
 
                 if (src->exits[i].IsNull())
-                    destStation.Exit.SetNull();
+                    destStation.exit.setNull();
                 else
-                    destStation.Exit = { src->exits[i].x, src->exits[i].y, src->stationHeights[i], 0 };
+                    destStation.exit = { src->exits[i].x, src->exits[i].y, src->stationHeights[i], 0 };
 
-                destStation.LastPeepInQueue = EntityId::FromUnderlying(src->lastPeepInQueue[i]);
+                destStation.lastPeepInQueue = EntityId::FromUnderlying(src->lastPeepInQueue[i]);
 
-                destStation.SegmentLength = src->length[i];
-                destStation.SegmentTime = src->time[i];
+                destStation.segmentLength = src->length[i];
+                destStation.segmentTime = src->time[i];
 
-                destStation.QueueTime = src->queueTime[i];
+                destStation.queueTime = src->queueTime[i];
 
-                destStation.QueueLength = src->queueLength[i];
+                destStation.queueLength = src->queueLength[i];
             }
             // All other values take 0 as their default. Since they're already memset to that, no need to do it again.
             for (int32_t i = Limits::kMaxStationsPerRide; i < OpenRCT2::Limits::kMaxStationsPerRide; i++)
@@ -811,11 +815,11 @@ namespace OpenRCT2::RCT2
                 StationIndex stationIndex = StationIndex::FromUnderlying(i);
                 auto& destStation = dst->getStation(stationIndex);
 
-                destStation.Start.SetNull();
-                destStation.TrainAtStation = RideStation::kNoTrain;
-                destStation.Entrance.SetNull();
-                destStation.Exit.SetNull();
-                destStation.LastPeepInQueue = EntityId::GetNull();
+                destStation.start.setNull();
+                destStation.trainAtStation = RideStation::kNoTrain;
+                destStation.entrance.setNull();
+                destStation.exit.setNull();
+                destStation.lastPeepInQueue = EntityId::GetNull();
             }
 
             for (int32_t i = 0; i < Limits::kMaxTrainsPerRide; i++)
@@ -867,7 +871,7 @@ namespace OpenRCT2::RCT2
 
             if (src->curTestTrackLocation.IsNull())
             {
-                dst->curTestTrackLocation.SetNull();
+                dst->curTestTrackLocation.setNull();
             }
             else
             {
@@ -1059,12 +1063,12 @@ namespace OpenRCT2::RCT2
             }
         }
 
-        void ImportRideRatingsCalcData()
+        void ImportRideRatingsCalcData(GameState_t& gameState)
         {
             const auto& src = _s6.RideRatingsCalcData;
             // S6 has only one state, ensure we reset all states before reading the first one.
             RideRating::ResetUpdateStates();
-            auto& rideRatingStates = getGameState().rideRatingUpdateStates;
+            auto& rideRatingStates = gameState.rideRatingUpdateStates;
             auto& dst = rideRatingStates[0];
             dst = {};
             dst.Proximity = { src.ProximityX, src.ProximityY, src.ProximityZ };
@@ -1343,7 +1347,7 @@ namespace OpenRCT2::RCT2
 
                     dst2->setSlope(src2->GetSlope());
 
-                    dst2->setSurfaceObjectIndex(src2->GetSurfaceStyle());
+                    dst2->setSurfaceObjectIndex(_terrainSurfaceTypeToEntryMap[src2->GetSurfaceStyle()]);
                     dst2->setEdgeObjectIndex(src2->GetEdgeStyle());
 
                     dst2->setGrassLength(src2->GetGrassLength());
@@ -1351,6 +1355,8 @@ namespace OpenRCT2::RCT2
                     dst2->setParkFences(src2->GetParkFences());
                     dst2->setWaterHeight(src2->GetWaterHeight());
                     dst2->setHasTrackThatNeedsWater(src2->HasTrackThatNeedsWater());
+                    dst2->setPrimarySurfaceColour(kTerrainSurfaceColours[src2->GetSurfaceStyle()]);
+                    dst2->setPrimaryEdgeColour(kTerrainEdgeColours[src2->GetEdgeStyle()]);
 
                     break;
                 }
@@ -1733,7 +1739,7 @@ namespace OpenRCT2::RCT2
             dst->peepFlags.holder = src->PeepFlags;
             if (isNullLocation(src->PathfindGoal))
             {
-                dst->pathfindGoal.SetNull();
+                dst->pathfindGoal.setNull();
                 dst->pathfindGoal.direction = kInvalidDirection;
             }
             else
@@ -1745,7 +1751,7 @@ namespace OpenRCT2::RCT2
             {
                 if (isNullLocation(src->PathfindHistory[i]))
                 {
-                    dst->pathfindHistory[i].SetNull();
+                    dst->pathfindHistory[i].setNull();
                     dst->pathfindHistory[i].direction = kInvalidDirection;
                 }
                 else
@@ -1924,7 +1930,7 @@ namespace OpenRCT2::RCT2
                     {
                         return false;
                     }
-                    if (surface->GetSurfaceStyle() >= std::size(DefaultTerrainSurfaces))
+                    if (surface->GetSurfaceStyle() >= std::size(kDefaultTerrainSurfaces))
                     {
                         return true;
                     }
@@ -1938,7 +1944,13 @@ namespace OpenRCT2::RCT2
             // If an rct1 surface or edge then load all the Hybrid surfaces and edges
             if (hasRCT1Terrain)
             {
-                _terrainSurfaceEntries.AddRange(OpenRCT2HybridTerrainSurfaces);
+                const auto numRegularEntries = std::size(kDefaultTerrainSurfaces);
+                for (size_t i = 0; i < std::size(kOpenRCT2HybridTerrainSurfaces); i++)
+                {
+                    _terrainSurfaceTypeToEntryMap[numRegularEntries + i] = _terrainSurfaceEntries.GetOrAddEntry(
+                        kOpenRCT2HybridTerrainSurfaces[i]);
+                }
+
                 _terrainEdgeEntries.AddRange(OpenRCT2HybridTerrainEdges);
             }
 
@@ -1987,7 +1999,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::Vehicle>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::Vehicle>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::Vehicle>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const Vehicle*>(&baseSrc);
         const auto& ride = _s6.Rides[src->Ride];
 
@@ -2008,7 +2020,7 @@ namespace OpenRCT2::RCT2
         if (src->BoatLocation.IsNull() || static_cast<RideMode>(ride.mode) != RideMode::boatHire
             || src->Status != static_cast<uint8_t>(::Vehicle::Status::travellingBoat))
         {
-            dst->BoatLocation.SetNull();
+            dst->BoatLocation.setNull();
             dst->SetTrackDirection(src->GetTrackDirection());
             // Skipping OriginalRideClass::wildMouse - this is handled specifically.
             auto originalClass = IsFlatRide(src->Ride) ? OriginalRideClass::flatRide : OriginalRideClass::regular;
@@ -2035,7 +2047,7 @@ namespace OpenRCT2::RCT2
         }
         else
         {
-            dst->BoatLocation = TileCoordsXY{ src->BoatLocation.x, src->BoatLocation.y }.ToCoordsXY();
+            dst->BoatLocation = TileCoordsXY{ src->BoatLocation.x, src->BoatLocation.y }.toCoordsXY();
             dst->SetTrackDirection(0);
             dst->SetTrackType(TrackElemType::flat);
         }
@@ -2113,7 +2125,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::Guest>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::Guest>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::Guest>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const Peep*>(&baseSrc);
         ImportEntityPeep(dst, src);
 
@@ -2189,7 +2201,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::Staff>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::Staff>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::Staff>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const Peep*>(&baseSrc);
         ImportEntityPeep(dst, src);
 
@@ -2210,7 +2222,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::SteamParticle>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::SteamParticle>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::SteamParticle>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntitySteamParticle*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->timeToMove = src->TimeToMove;
@@ -2220,7 +2232,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::MoneyEffect>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::MoneyEffect>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::MoneyEffect>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityMoneyEffect*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->moveDelay = src->MoveDelay;
@@ -2234,8 +2246,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::VehicleCrashParticle>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::VehicleCrashParticle>(
-            EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::VehicleCrashParticle>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityCrashedVehicleParticle*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->frame = src->Frame;
@@ -2255,7 +2266,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::ExplosionCloud>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::ExplosionCloud>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::ExplosionCloud>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityParticle*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->frame = src->Frame;
@@ -2264,7 +2275,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::ExplosionFlare>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::ExplosionFlare>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::ExplosionFlare>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityParticle*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->frame = src->Frame;
@@ -2273,7 +2284,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::CrashSplashParticle>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::CrashSplashParticle>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::CrashSplashParticle>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityParticle*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->frame = src->Frame;
@@ -2282,7 +2293,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::JumpingFountain>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::JumpingFountain>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::JumpingFountain>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityJumpingFountain*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->numTicksAlive = src->NumTicksAlive;
@@ -2299,7 +2310,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::Balloon>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::Balloon>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::Balloon>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityBalloon*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->popped = src->Popped;
@@ -2311,7 +2322,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::Duck>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::Duck>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::Duck>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityDuck*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->frame = src->Frame;
@@ -2323,7 +2334,7 @@ namespace OpenRCT2::RCT2
     template<>
     void S6Importer::ImportEntity<::Litter>(GameState_t& gameState, const RCT12EntityBase& baseSrc)
     {
-        auto dst = getGameState().entities.createEntityAt<::Litter>(EntityId::FromUnderlying(baseSrc.EntityIndex));
+        auto dst = gameState.entities.createEntityAt<::Litter>(EntityId::FromUnderlying(baseSrc.EntityIndex));
         auto src = static_cast<const RCT12EntityLitter*>(&baseSrc);
         ImportEntityCommonProperties(dst, src);
         dst->subType = ::Litter::Type(src->Type);

@@ -750,7 +750,7 @@ namespace OpenRCT2
 
             if (timeToConsume == 0)
             {
-                int32_t chosen_food = Numerics::bitScanForward(getFoodOrDrinkFlags());
+                int32_t chosen_food = Numerics::bitScanForward(getFoodOrDrinkFlags().holder);
                 if (chosen_food != -1)
                 {
                     ShopItem food = ShopItem(chosen_food);
@@ -1139,7 +1139,7 @@ namespace OpenRCT2
                         if (pathElement->hasAddition() && !pathElement->additionIsGhost())
                         {
                             auto* pathAddEntry = pathElement->getAdditionEntry();
-                            if (pathAddEntry != nullptr && (pathAddEntry->flags & PATH_ADDITION_FLAG_IS_QUEUE_SCREEN))
+                            if (pathAddEntry != nullptr && pathAddEntry->flags.has(PathAdditionFlag::isQueueScreen))
                             {
                                 found = true;
                             }
@@ -1202,7 +1202,7 @@ namespace OpenRCT2
         guest.setState(PeepState::walking);
 
         // Set destination to the centre of the tile.
-        const auto destination = guest.getLocation().ToTileCentre();
+        const auto destination = guest.getLocation().toTileCentre();
         guest.setDestination(destination, 5);
         guest.updateCurrentAnimationType();
     }
@@ -1223,7 +1223,7 @@ namespace OpenRCT2
             if (!(pathingResult & PATHING_DESTINATION_REACHED))
                 return;
 
-            auto loc = getLocation().ToTileStart() + CoordsXYZ{ BenchUseOffsets[var37 & 0x7], 0 };
+            auto loc = getLocation().toTileStart() + CoordsXYZ{ BenchUseOffsets[var37 & 0x7], 0 };
 
             moveTo(loc);
 
@@ -1255,7 +1255,7 @@ namespace OpenRCT2
                 setState(PeepState::walking);
 
                 // Set destination to the centre of the tile
-                auto destination = getLocation().ToTileCentre();
+                auto destination = getLocation().toTileCentre();
                 setDestination(destination, 5);
                 updateCurrentAnimationType();
                 return;
@@ -1313,19 +1313,19 @@ namespace OpenRCT2
      * To simplify check of 0x36BA3E0 and 0x11FF78
      * returns false on no food.
      */
-    uint64_t Guest::getFoodOrDrinkFlags() const
+    ShopItems Guest::getFoodOrDrinkFlags() const
     {
-        return getItemFlags() & (ShopItemsGetAllFoods() | ShopItemsGetAllDrinks());
+        return getItemFlags().intersect(ShopItemsGetAllFoods() | ShopItemsGetAllDrinks());
     }
 
-    uint64_t Guest::getEmptyContainerFlags() const
+    ShopItems Guest::getEmptyContainerFlags() const
     {
-        return getItemFlags() & ShopItemsGetAllContainers();
+        return getItemFlags().intersect(ShopItemsGetAllContainers());
     }
 
     bool Guest::hasFoodOrDrink() const
     {
-        return getFoodOrDrinkFlags() != 0;
+        return !getFoodOrDrinkFlags().isEmpty();
     }
 
     /**
@@ -1334,12 +1334,12 @@ namespace OpenRCT2
      */
     bool Guest::hasDrink() const
     {
-        return getItemFlags() & ShopItemsGetAllDrinks();
+        return getItemFlags().hasAny(ShopItemsGetAllDrinks());
     }
 
     bool Guest::hasEmptyContainer() const
     {
-        return getEmptyContainerFlags() != 0;
+        return !getEmptyContainerFlags().isEmpty();
     }
 
     /**
@@ -1475,7 +1475,7 @@ namespace OpenRCT2
         const auto& shopItemDescriptor = GetShopItemDescriptor(shopItem);
         if (shopItemDescriptor.IsFoodOrDrink())
         {
-            int32_t food = Numerics::bitScanForward(guest.getFoodOrDrinkFlags());
+            int32_t food = Numerics::bitScanForward(guest.getFoodOrDrinkFlags().holder);
             if (food != -1)
             {
                 guest.insertNewThought(PeepThoughtType::haventFinished, static_cast<ShopItem>(food));
@@ -1638,7 +1638,9 @@ namespace OpenRCT2
             ft.Add<StringId>(shopItemDescriptor.Naming.Indefinite);
             if (Config::Get().notifications.guestBoughtItem)
             {
-                News::AddItemToQueue(News::ItemType::peepOnRide, STR_PEEP_TRACKING_NOTIFICATION_BOUGHT_X, guest.id, ft);
+                News::AddItemToQueue(
+                    getGameState().park.newsItems, News::ItemType::peepOnRide, STR_PEEP_TRACKING_NOTIFICATION_BOUGHT_X,
+                    guest.id, ft);
             }
         }
 
@@ -1935,12 +1937,12 @@ namespace OpenRCT2
 
                 for (RideStation& station : stations)
                 {
-                    if (station.Start.IsNull())
+                    if (station.start.isNull())
                         continue;
 
-                    CoordsXYZ stationPosition = station.Entrance.ToCoordsXYZ();
+                    CoordsXYZ stationPosition = station.entrance.toCoordsXYZ();
                     if (lookingForFacitilty)
-                        stationPosition = CoordsXYZ(station.Start, station.Height);
+                        stationPosition = CoordsXYZ(station.start, station.height);
                     
                     int32_t pfScore = PathFinding::CalculateHeuristicPathingScoreWrapper(guest.getLocation(), stationPosition);
                     if (pfScore < stationPfScore || stationPfScore == 0)
@@ -2131,7 +2133,7 @@ namespace OpenRCT2
                 // Rides without queues can only have one peep waiting at a time.
                 if (!atQueue)
                 {
-                    if (!station.LastPeepInQueue.IsNull())
+                    if (!station.lastPeepInQueue.IsNull())
                     {
                         GuestTriedToEnterFullQueue(*this, ride);
                         return false;
@@ -2140,7 +2142,7 @@ namespace OpenRCT2
                 else
                 {
                     // Check if there's room in the queue for the peep to enter.
-                    Guest* lastPeepInQueue = getGameState().entities.getEntity<Guest>(station.LastPeepInQueue);
+                    Guest* lastPeepInQueue = getGameState().entities.getEntity<Guest>(station.lastPeepInQueue);
                     if (lastPeepInQueue != nullptr && (abs(lastPeepInQueue->z - z) <= 6))
                     {
                         int32_t dx = abs(lastPeepInQueue->x - x);
@@ -2769,13 +2771,13 @@ namespace OpenRCT2
     void Guest::goToRideEntrance(const Ride& ride)
     {
         const auto& station = ride.getStation(currentRideStation);
-        if (station.Entrance.IsNull())
+        if (station.entrance.isNull())
         {
             removeFromQueue();
             return;
         }
 
-        auto location = station.Entrance.ToCoordsXYZD().ToTileCentre();
+        auto location = station.entrance.toCoordsXYZD().toTileCentre();
         int16_t x_shift = DirectionOffsets[location.direction].x;
         int16_t y_shift = DirectionOffsets[location.direction].y;
 
@@ -2836,7 +2838,7 @@ namespace OpenRCT2
             if (guest.rideSubState == PeepRideSubState::waitForTrain)
                 chosen_train = guest.currentTrain;
             else
-                chosen_train = ride.getStation(guest.currentRideStation).TrainAtStation;
+                chosen_train = ride.getStation(guest.currentRideStation).trainAtStation;
         }
         if (chosen_train >= Limits::kMaxTrainsPerRide)
         {
@@ -3246,8 +3248,8 @@ namespace OpenRCT2
                             if (tileElement->asPath()->additionIsGhost())
                                 break;
 
-                            if (pathAddEntry->flags
-                                & (PATH_ADDITION_FLAG_JUMPING_FOUNTAIN_WATER | PATH_ADDITION_FLAG_JUMPING_FOUNTAIN_SNOW))
+                            if (pathAddEntry->flags.hasAny(
+                                    PathAdditionFlag::jumpingFountainWater, PathAdditionFlag::jumpingFountainSnow))
                             {
                                 num_fountains++;
                                 break;
@@ -3513,7 +3515,7 @@ namespace OpenRCT2
             auto ride = GetRide(potentialRides[i]);
             if (ride != nullptr)
             {
-                auto rideLocation = ride->getStation().Start;
+                auto rideLocation = ride->getStation().start;
                 int32_t distance = abs(rideLocation.x - guest.x) + abs(rideLocation.y - guest.y);
                 if (distance < closestRideDistance)
                 {
@@ -3773,7 +3775,7 @@ namespace OpenRCT2
                 if (xy_distance < 16)
                 {
                     const auto& station = ride->getStation(currentRideStation);
-                    auto entrance = station.Entrance.ToCoordsXYZ();
+                    auto entrance = station.entrance.toCoordsXYZ();
                     actionZ = entrance.z + 2;
                 }
                 moveTo({ loc.value(), actionZ });
@@ -3862,7 +3864,7 @@ namespace OpenRCT2
 
     void PeepUpdateRideLeaveEntranceSpiralSlide(Guest& guest, Ride& ride, CoordsXYZD& entrance_loc)
     {
-        entrance_loc = { ride.getStation(guest.currentRideStation).GetStart(), entrance_loc.direction };
+        entrance_loc = { ride.getStation(guest.currentRideStation).getStart(), entrance_loc.direction };
 
         TileElement* tile_element = RideGetStationStartTrackElement(ride, guest.currentRideStation);
 
@@ -3896,7 +3898,8 @@ namespace OpenRCT2
             if (Config::Get().notifications.rideWarnings)
             {
                 News::AddItemToQueue(
-                    News::ItemType::ride, STR_GUESTS_GETTING_STUCK_ON_RIDE, guest.currentRide.ToUnderlying(), ft);
+                    getGameState().park.newsItems, News::ItemType::ride, STR_GUESTS_GETTING_STUCK_ON_RIDE,
+                    guest.currentRide.ToUnderlying(), ft);
             }
         }
     }
@@ -3929,11 +3932,11 @@ namespace OpenRCT2
     void Guest::updateRideLeaveEntranceWaypoints(const Ride& ride)
     {
         const auto& station = ride.getStation(currentRideStation);
-        if (station.Entrance.IsNull())
+        if (station.entrance.isNull())
         {
             return;
         }
-        uint8_t direction_entrance = station.Entrance.direction;
+        uint8_t direction_entrance = station.entrance.direction;
 
         TileElement* tile_element = RideGetStationStartTrackElement(ride, currentRideStation);
 
@@ -3997,7 +4000,7 @@ namespace OpenRCT2
                 rideSubState = PeepRideSubState::freeVehicleCheck;
             }
 
-            actionZ = ride->getStation(currentRideStation).GetBaseZ();
+            actionZ = ride->getStation(currentRideStation).getBaseZ();
 
             distanceThreshold += 4;
             if (xy_distance < distanceThreshold)
@@ -4021,8 +4024,8 @@ namespace OpenRCT2
         if (ride->getRideTypeDescriptor().flags.has(RtdFlag::noVehicles))
         {
             const auto& station = ride->getStation(currentRideStation);
-            auto entranceLocation = station.Entrance.ToCoordsXYZD();
-            if (entranceLocation.IsNull())
+            auto entranceLocation = station.entrance.toCoordsXYZD();
+            if (entranceLocation.isNull())
             {
                 return;
             }
@@ -4111,7 +4114,7 @@ namespace OpenRCT2
         guest.moveTo({ x, y, z });
 
         Guard::Assert(guest.currentRideStation.ToUnderlying() < Limits::kMaxStationsPerRide);
-        auto exit = ride.getStation(guest.currentRideStation).Exit;
+        auto exit = ride.getStation(guest.currentRideStation).exit;
         x = exit.x;
         y = exit.y;
         x *= 32;
@@ -4183,7 +4186,7 @@ namespace OpenRCT2
     {
         const auto& station = ride.getStation(currentRideStation);
 
-        auto location = station.Entrance.ToCoordsXYZD().ToTileCentre();
+        auto location = station.entrance.toCoordsXYZD().toTileCentre();
         int16_t x_shift = DirectionOffsets[location.direction].x;
         int16_t y_shift = DirectionOffsets[location.direction].y;
 
@@ -4227,9 +4230,9 @@ namespace OpenRCT2
 
         queueTime /= 2;
         auto& station = ride.getStation(currentRideStation);
-        if (queueTime != station.QueueTime)
+        if (queueTime != station.queueTime)
         {
-            station.QueueTime = queueTime;
+            station.queueTime = queueTime;
             auto* windowMgr = Ui::GetWindowManager();
             windowMgr->InvalidateByNumber(WindowClass::ride, currentRide.ToUnderlying());
         }
@@ -4248,7 +4251,7 @@ namespace OpenRCT2
 
             if (Config::Get().notifications.guestOnRide)
             {
-                News::AddItemToQueue(News::ItemType::peepOnRide, msg_string, id, ft);
+                News::AddItemToQueue(getGameState().park.newsItems, News::ItemType::peepOnRide, msg_string, id, ft);
             }
         }
 
@@ -4267,7 +4270,7 @@ namespace OpenRCT2
      */
     static void PeepUpdateRideNoFreeVehicleRejoinQueue(Guest& guest, Ride& ride)
     {
-        TileCoordsXYZD entranceLocation = ride.getStation(guest.currentRideStation).Entrance;
+        TileCoordsXYZD entranceLocation = ride.getStation(guest.currentRideStation).entrance;
 
         int32_t x = entranceLocation.x * 32;
         int32_t y = entranceLocation.y * 32;
@@ -4422,7 +4425,7 @@ namespace OpenRCT2
         if (currentSeat == OpenRCT2::Limits::kMaxSeatsPerTrain)
             this->currentTrain = OpenRCT2::Limits::kMaxTrainsPerRide;
 
-        uint8_t trainAtStation = ride->getStation(this->currentRideStation).TrainAtStation;
+        uint8_t trainAtStation = ride->getStation(this->currentRideStation).trainAtStation;
 
         if (this->currentTrain == OpenRCT2::Limits::kMaxTrainsPerRide && trainAtStation != this->currentTrain)
         {
@@ -4583,9 +4586,9 @@ namespace OpenRCT2
 
         if (!carEntry->flags.has(CarEntryFlag::loadingWaypoints))
         {
-            TileCoordsXYZD exitLocation = station.Exit;
+            TileCoordsXYZD exitLocation = station.exit;
             CoordsXYZD platformLocation;
-            platformLocation.z = station.GetBaseZ();
+            platformLocation.z = station.getBaseZ();
 
             platformLocation.direction = DirectionReverse(exitLocation.direction);
 
@@ -4700,15 +4703,15 @@ namespace OpenRCT2
                     carEntry->guestLoadingPositions.size());
             }
 
-            platformLocation.z = station.GetBaseZ();
+            platformLocation.z = station.getBaseZ();
 
             PeepGoToRideExit(
                 *this, *ride, platformLocation.x, platformLocation.y, platformLocation.z, platformLocation.direction);
             return;
         }
 
-        auto exitLocation = station.Exit.ToCoordsXYZD();
-        if (exitLocation.IsNull())
+        auto exitLocation = station.exit.toCoordsXYZD();
+        if (exitLocation.isNull())
         {
             return;
         }
@@ -4769,8 +4772,8 @@ namespace OpenRCT2
         if (ride == nullptr || currentRideStation.ToUnderlying() >= std::size(ride->getStations()))
             return;
 
-        auto exit = ride->getStation(currentRideStation).Exit;
-        auto newDestination = exit.ToCoordsXY().ToTileCentre();
+        auto exit = ride->getStation(currentRideStation).exit;
+        auto newDestination = exit.toCoordsXY().toTileCentre();
 
         auto [xShift, yShift] = [exit]() {
             if (exit.direction < DirectionOffsets.size())
@@ -4836,7 +4839,7 @@ namespace OpenRCT2
         {
             if (xy_distance >= 16)
             {
-                int16_t actionZ = ride->getStation(currentRideStation).GetBaseZ();
+                int16_t actionZ = ride->getStation(currentRideStation).getBaseZ();
 
                 actionZ += ride->getRideTypeDescriptor().Heights.PlatformHeight;
                 moveTo({ loc.value(), actionZ });
@@ -4861,7 +4864,7 @@ namespace OpenRCT2
 
     CoordsXY GetGuestWaypointLocationDefault(const Vehicle& vehicle, const Ride& ride, const StationIndex& CurrentRideStation)
     {
-        return ride.getStation(CurrentRideStation).Start.ToTileCentre();
+        return ride.getStation(CurrentRideStation).start.toTileCentre();
     }
 
     CoordsXY GetGuestWaypointLocationEnterprise(
@@ -4930,7 +4933,7 @@ namespace OpenRCT2
     {
         auto ride = GetRide(guest.currentRide);
         // Motion simulators have steps. This moves the peeps up the steps.
-        int16_t actionZ = ride->getStation(guest.currentRideStation).GetBaseZ() + 2;
+        int16_t actionZ = ride->getStation(guest.currentRideStation).getBaseZ() + 2;
 
         uint8_t waypoint = guest.var37 & 3;
         if (waypoint == 2)
@@ -4970,7 +4973,7 @@ namespace OpenRCT2
 
             if (ride->getRideTypeDescriptor().specialType == RtdSpecialType::motionSimulator)
             {
-                actionZ = ride->getStation(currentRideStation).GetBaseZ() + 2;
+                actionZ = ride->getStation(currentRideStation).getBaseZ() + 2;
 
                 if ((var37 & 3) == 1)
                 {
@@ -5029,7 +5032,7 @@ namespace OpenRCT2
 
         var37 |= 3;
 
-        auto targetLoc = ride->getStation(currentRideStation).Exit.ToCoordsXYZD().ToTileCentre();
+        auto targetLoc = ride->getStation(currentRideStation).exit.toCoordsXYZD().toTileCentre();
         uint8_t exit_direction = DirectionReverse(targetLoc.direction);
 
         int16_t x_shift = DirectionOffsets[exit_direction].x;
@@ -5105,7 +5108,7 @@ namespace OpenRCT2
 
             if (lastRide)
             {
-                auto exit = ride->getStation(currentRideStation).Exit;
+                auto exit = ride->getStation(currentRideStation).exit;
                 waypoint = 1;
                 auto directionTemp = exit.direction;
                 if (exit.direction == kInvalidDirection)
@@ -5113,7 +5116,7 @@ namespace OpenRCT2
                     directionTemp = 0;
                 }
                 var37 = (directionTemp * 4) | (var37 & 0x30) | waypoint;
-                CoordsXY targetLoc = ride->getStation(currentRideStation).Start;
+                CoordsXY targetLoc = ride->getStation(currentRideStation).start;
 
                 assert(rtd.specialType == RtdSpecialType::spiralSlide);
                 targetLoc += kSpiralSlideWalkingPath[var37];
@@ -5128,7 +5131,7 @@ namespace OpenRCT2
         // Actually increment the real peep waypoint
         var37++;
 
-        CoordsXY targetLoc = ride->getStation(currentRideStation).Start;
+        CoordsXY targetLoc = ride->getStation(currentRideStation).start;
 
         assert(rtd.specialType == RtdSpecialType::spiralSlide);
         targetLoc += kSpiralSlideWalkingPath[var37];
@@ -5190,7 +5193,7 @@ namespace OpenRCT2
                     return;
                 case PeepSpiralSlideSubState::finishedSliding:
                 {
-                    auto newLocation = ride->getStation(currentRideStation).Start;
+                    auto newLocation = ride->getStation(currentRideStation).start;
                     uint8_t dir = (var37 / 4) & 3;
 
                     // Set the location that the guest walks to go on slide again
@@ -5223,7 +5226,7 @@ namespace OpenRCT2
         uint8_t waypoint = 2;
         var37 = (var37 * 4 & 0x30) + waypoint;
 
-        CoordsXY targetLoc = ride->getStation(currentRideStation).Start;
+        CoordsXY targetLoc = ride->getStation(currentRideStation).start;
 
         targetLoc += kSpiralSlideWalkingPath[var37];
 
@@ -5262,7 +5265,7 @@ namespace OpenRCT2
             waypoint--;
             // Actually decrement the peep waypoint
             var37--;
-            CoordsXY targetLoc = ride->getStation(currentRideStation).Start;
+            CoordsXY targetLoc = ride->getStation(currentRideStation).start;
 
             [[maybe_unused]] const auto& rtd = ride->getRideTypeDescriptor();
             assert(rtd.specialType == RtdSpecialType::spiralSlide);
@@ -5275,7 +5278,7 @@ namespace OpenRCT2
         // Actually force the final waypoint
         var37 |= 3;
 
-        auto targetLoc = ride->getStation(currentRideStation).Exit.ToCoordsXYZD().ToTileCentre();
+        auto targetLoc = ride->getStation(currentRideStation).exit.toCoordsXYZD().toTileCentre();
 
         int16_t xShift = DirectionOffsets[DirectionReverse(targetLoc.direction)].x;
         int16_t yShift = DirectionOffsets[DirectionReverse(targetLoc.direction)].y;
@@ -5341,9 +5344,9 @@ namespace OpenRCT2
             }
         }
 
-        auto targetLoc = getDestination().ToTileStart();
+        auto targetLoc = getDestination().toTileStart();
 
-        auto stationBaseZ = ride->getStation().GetBaseZ();
+        auto stationBaseZ = ride->getStation().getBaseZ();
 
         // Find the station track element
         auto trackElement = MapGetTrackElementAt({ targetLoc, stationBaseZ });
@@ -5421,11 +5424,11 @@ namespace OpenRCT2
                 targetLoc = getDestination();
                 if (chosenEdge & 1)
                 {
-                    targetLoc.x = targetLoc.ToTileCentre().x;
+                    targetLoc.x = targetLoc.toTileCentre().x;
                 }
                 else
                 {
-                    targetLoc.y = targetLoc.ToTileCentre().y;
+                    targetLoc.y = targetLoc.toTileCentre().y;
                 }
                 setDestination(targetLoc);
                 var37 = 16;
@@ -5451,7 +5454,7 @@ namespace OpenRCT2
         {
             if (ride != nullptr)
             {
-                moveTo({ loc.value(), ride->getStation(currentRideStation).GetBaseZ() });
+                moveTo({ loc.value(), ride->getStation(currentRideStation).getBaseZ() });
             }
             return;
         }
@@ -5468,7 +5471,8 @@ namespace OpenRCT2
 
                 if (Config::Get().notifications.guestLeftRide)
                 {
-                    News::AddItemToQueue(News::ItemType::peepOnRide, STR_PEEP_TRACKING_LEFT_RIDE_X, id, ft);
+                    News::AddItemToQueue(
+                        getGameState().park.newsItems, News::ItemType::peepOnRide, STR_PEEP_TRACKING_LEFT_RIDE_X, id, ft);
                 }
             }
         }
@@ -5572,7 +5576,7 @@ namespace OpenRCT2
             const auto curLoc = getLocation();
             moveTo({ loc.value(), curLoc.z });
 
-            const auto newLoc = getLocation().ToTileStart();
+            const auto newLoc = getLocation().toTileStart();
             if (newLoc.x != nextLoc.x)
                 return;
             if (newLoc.y != nextLoc.y)
@@ -5894,7 +5898,7 @@ namespace OpenRCT2
             if ((!getNextIsSurface()) && (static_cast<uint32_t>(id.ToUnderlying() & 0x1FF) == (currentTicks & 0x1FF))
                 && ((0xFFFF & ScenarioRand()) <= 4096))
             {
-                int32_t container = Numerics::bitScanForward(getEmptyContainerFlags());
+                int32_t container = Numerics::bitScanForward(getEmptyContainerFlags().holder);
                 auto litterType = Litter::Type::vomit;
 
                 if (container != -1)
@@ -6012,7 +6016,7 @@ namespace OpenRCT2
                     return;
                 }
 
-                if ((pathAddEntry->flags & PATH_ADDITION_FLAG_IS_BENCH))
+                if (pathAddEntry->flags.has(PathAdditionFlag::isBench))
                     positions_free = 9;
             }
         }
@@ -6350,7 +6354,7 @@ namespace OpenRCT2
             updateAnimationGroup();
             // Send peep to the centre of current tile.
 
-            auto destination = getLocation().ToTileCentre();
+            auto destination = getLocation().toTileCentre();
             setDestination(destination, 5);
             updateCurrentAnimationType();
         }
@@ -6395,7 +6399,7 @@ namespace OpenRCT2
                         break;
 
                     auto* pathAddEntry = pathElement->getAdditionEntry();
-                    if (!(pathAddEntry->flags & PATH_ADDITION_FLAG_IS_BIN))
+                    if (pathAddEntry == nullptr || !pathAddEntry->flags.has(PathAdditionFlag::isBin))
                         break;
 
                     if (pathElement->isBroken())
@@ -6419,14 +6423,14 @@ namespace OpenRCT2
 
                 // This counts down 2 = No rubbish, 0 = full
                 uint8_t spaceLeftInBin = 0x3 & (foundElement->getAdditionStatus() >> selectedBin);
-                uint64_t emptyContainers = getEmptyContainerFlags();
+                const auto emptyContainers = getEmptyContainerFlags();
 
                 for (uint8_t curContainer = 0; curContainer < 64; curContainer++)
                 {
-                    if (!(emptyContainers & (1uLL << curContainer)))
+                    auto item = ShopItem(curContainer);
+                    if (!emptyContainers.has(item))
                         continue;
 
-                    auto item = ShopItem(curContainer);
                     if (spaceLeftInBin != 0)
                     {
                         // OpenRCT2 modification: This previously used
@@ -6507,7 +6511,7 @@ namespace OpenRCT2
                 continue;
 
             auto* pathAddEntry = pathElement->getAdditionEntry();
-            if (pathAddEntry == nullptr || !(pathAddEntry->flags & PATH_ADDITION_FLAG_IS_BENCH))
+            if (pathAddEntry == nullptr || !pathAddEntry->flags.has(PathAdditionFlag::isBench))
                 continue;
 
             if (pathElement->isBroken())
@@ -6596,7 +6600,7 @@ namespace OpenRCT2
                 continue;
 
             auto* pathAddEntry = pathElement->getAdditionEntry();
-            if (pathAddEntry == nullptr || !(pathAddEntry->flags & PATH_ADDITION_FLAG_IS_BIN))
+            if (pathAddEntry == nullptr || !pathAddEntry->flags.has(PathAdditionFlag::isBin))
                 continue;
 
             if (pathElement->isBroken())
@@ -6674,7 +6678,7 @@ namespace OpenRCT2
                 continue;
 
             auto* pathAddEntry = pathElement->getAdditionEntry();
-            if (pathAddEntry == nullptr || !(pathAddEntry->flags & PATH_ADDITION_FLAG_BREAKABLE))
+            if (pathAddEntry == nullptr || !pathAddEntry->flags.has(PathAdditionFlag::breakable))
                 continue;
 
             if (pathElement->isBroken())
@@ -7325,7 +7329,7 @@ namespace OpenRCT2
         if (Weather::isPrecipitating() && (hasItem(ShopItem::umbrella)) && x != kLocationNull)
         {
             CoordsXY loc = { x, y };
-            if (MapIsLocationValid(loc.ToTileStart()))
+            if (MapIsLocationValid(loc.toTileStart()))
             {
                 TileElement* tileElement = MapGetFirstElementAt(loc);
                 while (true)
@@ -8024,9 +8028,9 @@ namespace OpenRCT2
         auto& station = ride->getStation(currentRideStation);
         // Make sure we don't underflow, building while paused might reset it to 0 where peeps have
         // not yet left the queue.
-        if (station.QueueLength > 0)
+        if (station.queueLength > 0)
         {
-            station.QueueLength--;
+            station.queueLength--;
         }
 
         int test = 0;
@@ -8035,14 +8039,14 @@ namespace OpenRCT2
 
         this->guestNextInQueue = EntityId::GetNull();
 
-        if (id == station.LastPeepInQueue)
+        if (id == station.lastPeepInQueue)
         {
-            station.LastPeepInQueue = guestNextInQueue;
+            station.lastPeepInQueue = guestNextInQueue;
             return;
         }
 
         auto& gameState = getGameState();
-        auto* otherGuest = gameState.entities.getEntity<Guest>(station.LastPeepInQueue);
+        auto* otherGuest = gameState.entities.getEntity<Guest>(station.lastPeepInQueue);
         if (otherGuest == nullptr)
         {
             LOG_ERROR("Invalid Guest Queue list!");
@@ -8058,31 +8062,31 @@ namespace OpenRCT2
         }
     }
 
-    uint64_t Guest::getItemFlags() const
+    ShopItems Guest::getItemFlags() const
     {
         return itemFlags;
     }
 
     void Guest::setItemFlags(uint64_t value)
     {
-        itemFlags = value;
+        itemFlags = ShopItems(value);
     }
 
     void Guest::removeAllItems()
     {
-        itemFlags = 0;
+        itemFlags.clearAll();
         timeToConsume = 0;
     }
 
     void Guest::removeItem(ShopItem item)
     {
-        itemFlags &= ~EnumToFlag(item);
+        itemFlags.unset(item);
         timeToConsume = 0;
     }
 
     void Guest::giveItem(ShopItem item)
     {
-        itemFlags |= EnumToFlag(item);
+        itemFlags.set(item);
 
         const auto& shopItemDescriptor = GetShopItemDescriptor(item);
         uint16_t consumptionTime = shopItemDescriptor.ConsumptionTime;
@@ -8091,7 +8095,7 @@ namespace OpenRCT2
 
     bool Guest::hasItem(ShopItem peepItem) const
     {
-        return getItemFlags() & EnumToFlag(peepItem);
+        return getItemFlags().has(peepItem);
     }
 
     static bool IsThoughtShopItemRelated(const PeepThoughtType type)
@@ -8276,7 +8280,7 @@ namespace OpenRCT2
         stream << hatColour;
         stream << favouriteRide;
         stream << favouriteRideRating;
-        stream << itemFlags;
+        stream << itemFlags.holder;
     }
 
     void Guest::PeepResetRideHeadingWrapper()
@@ -8392,7 +8396,7 @@ namespace OpenRCT2
                 PathFinding::InitializePathFinding(*this);
     }
 
-    Ride* Guest::getNextProxyRide()
+    Ride* Guest::getNextProxyRide() const
     {
         if (this->AGS->proxyRides.size() > 0)
             return this->AGS->proxyRides[0].first;
@@ -8400,7 +8404,7 @@ namespace OpenRCT2
         return nullptr;
     }
 
-    const RideStation* Guest::getNextProxyRideStation()
+    const RideStation* Guest::getNextProxyRideStation() const
     {
         if (this->AGS->proxyRides.size() > 0)
             return this->AGS->proxyRides[0].second;
@@ -8440,11 +8444,11 @@ namespace OpenRCT2
             if (ride.type == ride_type) // RIDE_TYPE_INFORMATION_KIOSK)
             {
                 for (RideStation& station : ride.getStations())
-                    if (!station.Start.IsNull())
+                    if (!station.start.isNull())
                     {
-                        CoordsXYZ entranceLocation = station.Entrance.ToCoordsXYZ();
-                        if (station.Entrance.IsNull())
-                            entranceLocation = CoordsXYZ{ station.Start, station.Height };
+                        CoordsXYZ entranceLocation = station.entrance.toCoordsXYZ();
+                        if (station.entrance.isNull())
+                            entranceLocation = CoordsXYZ{ station.start, station.height };
 
                         int32_t pfScore = PathFinding::CalculateHeuristicPathingScoreWrapper(
                             this->getLocation(), entranceLocation);
