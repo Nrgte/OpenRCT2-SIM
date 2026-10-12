@@ -95,8 +95,9 @@
       <Name            Required="true"  ParameterType="System.String" />
       <Url             Required="true"  ParameterType="System.String" />
       <Sha256          Required="true"  ParameterType="System.String" />
-      <CheckFile       Required="false" ParameterType="System.String" />
-      <OutputDirectory Required="true"  ParameterType="System.String" />
+       <CheckFile       Required="false" ParameterType="System.String" />
+       <SkipFile        Required="false" ParameterType="System.String" />
+       <OutputDirectory Required="true"  ParameterType="System.String" />
     </ParameterGroup>
     <Task>
       <Using Namespace="System"/>
@@ -110,15 +111,15 @@
         <![CDATA[
           public override bool Execute()
           {
-              if (!String.IsNullOrEmpty(CheckFile))
-              {
-                  string checkSha256 = GetSha256FromCheckFile(CheckFile, Name);
-                  if (String.Equals(checkSha256, Sha256, StringComparison.OrdinalIgnoreCase) && Directory.Exists(OutputDirectory))
-                  {
-                      Log.LogMessage(MessageImportance.Normal, String.Format("{0} up to date", Name));
-                      return true;
-                  }
-              }
+               if (!String.IsNullOrEmpty(CheckFile))
+               {
+                   string checkSha256 = GetSha256FromCheckFile(CheckFile, Name);
+                   if (String.Equals(checkSha256, Sha256, StringComparison.OrdinalIgnoreCase) && IsOutputUpToDate(OutputDirectory, SkipFile))
+                   {
+                       Log.LogMessage(MessageImportance.Normal, String.Format("{0} up to date", Name));
+                       return true;
+                   }
+               }
 
               string tempFile = Path.GetTempFileName();
               try
@@ -146,11 +147,12 @@
 
                   SetSha256InCheckFile(CheckFile, Name, Sha256);
               }
-              catch (Exception ex)
-              {
-                  Log.LogErrorFromException(ex, showStackTrace: false);
-              }
-              finally
+               catch (Exception ex)
+               {
+                   Log.LogErrorFromException(ex, showStackTrace: false);
+                   return false;
+               }
+               finally
               {
                   try
                   {
@@ -162,6 +164,19 @@
               }
 
               return true;
+          }
+
+          private bool IsOutputUpToDate(string outputDirectory, string skipFile)
+          {
+              if (String.IsNullOrEmpty(outputDirectory) || !Directory.Exists(outputDirectory))
+              {
+                  return false;
+              }
+              if (String.IsNullOrEmpty(skipFile))
+              {
+                  return true;
+              }
+              return File.Exists(skipFile);
           }
 
           private string GetSha256FromCheckFile(string checkFile, string name)
@@ -365,6 +380,7 @@
                         Url="$(OpenSFXUrl)"
                         Sha256="$(OpenSFXSha256)"
                         CheckFile="$(DependenciesCheckFile)"
+                        SkipFile="$(TargetDir)data\assetpack\openrct2.sound.parkap"
                         OutputDirectory="$(TargetDir)data" />
   </Target>
 
@@ -374,6 +390,7 @@
                         Url="$(OpenMusicUrl)"
                         Sha256="$(OpenMusicSha256)"
                         CheckFile="$(DependenciesCheckFile)"
+                        SkipFile="$(TargetDir)data\assetpack\openrct2.music.alternative.parkap"
                         OutputDirectory="$(TargetDir)data" />
   </Target>
 
