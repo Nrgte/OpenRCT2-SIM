@@ -317,7 +317,7 @@ namespace OpenRCT2::RCT2
                 if (src.Type == 0)
                     break;
 
-                if (src.Type >= News::ItemTypeCount)
+                if (src.Type >= News::kItemTypeCount)
                 {
                     LOG_ERROR("Invalid news type 0x%x for news item %d, ignoring remaining news items", src.Type, index);
                     break;
@@ -596,8 +596,9 @@ namespace OpenRCT2::RCT2
 
             // News items
             auto recentMessages = convertNewsQueue(_s6.recentMessages);
+            park.newsItems.queue.importQueue(recentMessages);
             auto archivedMessages = convertNewsQueue(_s6.archivedMessages);
-            News::importNewsItems(park.newsItems, recentMessages, archivedMessages);
+            park.newsItems.archive.importQueue(archivedMessages);
 
             // Pad13CE730
             // rct1_scenario_flags
